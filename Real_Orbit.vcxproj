@@ -88,6 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -102,6 +103,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,6 +118,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,6 +133,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,7 +143,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Real_Orbit.cpp" />
+    <ClCompile Include="core\Application.cpp" />
+    <ClCompile Include="core\Layer.cpp" />
+    <ClCompile Include="core\LayerStack.cpp" />
+    <ClCompile Include="core\Log.cpp" />
+    <ClCompile Include="core\Real_Orbit_main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\Application.h" />
+    <ClInclude Include="core\Core.h" />
+    <ClInclude Include="core\events\ApplicationEvent.h" />
+    <ClInclude Include="core\Events\Event.h" />
+    <ClInclude Include="core\events\KeyEvent.h" />
+    <ClInclude Include="core\events\MouseEvent.h" />
+    <ClInclude Include="core\Layer.h" />
+    <ClInclude Include="core\LayerStack.h" />
+    <ClInclude Include="core\Log.h" />
+    <ClInclude Include="core\pch\pch.h" />
+    <ClInclude Include="core\Timestep.h" />
+    <ClInclude Include="core\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
