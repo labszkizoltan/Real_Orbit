@@ -8,6 +8,13 @@ Application* Application::s_Instance = nullptr;
 
 Application::Application(const std::string& name)
 {
+//	{
+//		if (s_Instance)
+//		{
+//			LOG_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak();
+//		}
+//	}
+
 	if (s_Instance) { std::cout << "Application already exists!\n"; __debugbreak(); }
 
 	s_Instance = this;
@@ -106,15 +113,3 @@ bool Application::OnWindowResize(WindowResizeEvent& e)
 //#################################################################
 //#################################################################
 //#################################################################
-
-
-
-
-
-
-
-
-
-
-
-

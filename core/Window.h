@@ -9,6 +9,8 @@
 #include "core/Core.h"
 #include "core/events/Event.h"
 
+#include <SFML/Window.hpp>
+#include <SFML/OpenGL.hpp>
 
 struct WindowProps
 {
@@ -28,6 +30,46 @@ class Window
 public:
 	using EventCallbackFn = std::function<void(Event&)>;
 
+	Window(const WindowProps& props);
+	~Window();
+
+	void OnUpdate();
+	
+	uint32_t GetWidth();
+	uint32_t GetHeight();
+
+	// Window attributes
+	void SetEventCallback(const EventCallbackFn& callback);
+	void SetVSync(bool enabled);
+	bool IsVSync() const;
+
+//	virtual void* GetNativeWindow() const = 0;
+
+	static Window* Create(const WindowProps& props = WindowProps());
+	//		static Scope<Window> Create(const WindowProps& props = WindowProps());
+
+private:
+	sf::Window m_Window; // heres a link on how to construct an SFML window + an opengl context https://www.sfml-dev.org/tutorials/2.5/window-opengl.php
+	bool m_Vsynced;
+	WindowProps m_Props;
+
+};
+
+
+
+
+/*
+// this is the window class from the Cherno engine, but this is overkill for what I want to do
+// this is too much abstraction for me, and couldt make it work so far, most likely I will create
+// a non abstracted window class based upon SFML
+
+// Interface representing a desktop sstem based Window
+class Window
+{
+public:
+	using EventCallbackFn = std::function<void(Event&)>;
+
+	Window(const WindowProps& props);
 	virtual ~Window() {}
 
 	virtual void OnUpdate() = 0;
@@ -42,10 +84,13 @@ public:
 
 	virtual void* GetNativeWindow() const = 0;
 
-	static Window* Create(const WindowProps& props = WindowProps());
+//	static Window* Create(const WindowProps& props = WindowProps());
 	//		static Scope<Window> Create(const WindowProps& props = WindowProps());
 
 };
+
+*/
+
 
 
 

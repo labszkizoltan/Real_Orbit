@@ -2,7 +2,7 @@
 #ifndef LOG_H
 #define LOG_H
 
-// #include "dypch.h" // at some point I might create a PCH, if I do, probably it should be as early as possible
+#include <core/pch/pch.h>
 #include <core/Core.h>
 #include <vendor/spdlog/include/spdlog/spdlog.h>
 #include <vendor/spdlog/include/spdlog/fmt/ostr.h>

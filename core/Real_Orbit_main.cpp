@@ -3,10 +3,16 @@
 
 #include <core/Core.h>
 #include <core/Application.h>
+#include <core/Log.h>
+
 
 
 int main()
 {
+	Log::Init();
+
+	LOG_CORE_INFO("Logger initiated");
+
 	Application* app = CreateApplication();
 
 	app->Run();
