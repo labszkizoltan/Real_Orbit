@@ -16,6 +16,16 @@ sf::Event::EventType Event::GetEventType()
 	return m_Event.type;
 }
 
+bool Event::IsHandled()
+{
+	return m_Handled;
+}
+
+void Event::SetHandled(bool handlingStatus)
+{
+	m_Handled = handlingStatus;
+}
+
 
 
 

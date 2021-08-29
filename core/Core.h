@@ -3,6 +3,8 @@
 #define CORE_H
 
 #include <core/Log.h>
+#include <core/Events/Event.h>
+#include <core/Timestep.h>
 
 
 

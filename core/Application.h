@@ -5,8 +5,8 @@
 #include <core/pch/pch.h>
 #include <string>
 
+//#include <core/Core.h>
 #include <core/Events/Event.h>
-//#include <core/Events/ApplicationEvent.h>
 #include <core/Layer.h>
 #include <core/LayerStack.h>
 #include <core/Window.h>
@@ -15,11 +15,10 @@
 class Application
 {
 public:
-	Application(const std::string& name = "DysonApp");
+	Application(const std::string& name = "Application");
 	~Application();
 
 	void Run();
-//	void OnEvent(Event& e);
 	void OnEvent();
 
 	void PushLayer(Layer* layer);
@@ -29,8 +28,8 @@ public:
 
 	void Close();
 
-
 	static Application& Get() { return *s_Instance; };
+
 private:
 	bool OnWindowClose(Event& e);
 	bool OnWindowResize(Event& e);
@@ -54,19 +53,12 @@ private:
 	LayerStack m_LayerStack;
 	float m_LastFrameTime = 0.0f;
 
-
 private:
 	static Application* s_Instance;
 };
 
 // To be defined in CLIENT
 Application* CreateApplication();
-
-
-
-
-
-
 
 
 #endif // APPLICATION_H

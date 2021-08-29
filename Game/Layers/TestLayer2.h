@@ -1,15 +1,15 @@
 
-#ifndef TEST_LAYER_H
-#define TEST_LAYER_H
+#ifndef TEST_LAYER_2_H
+#define TEST_LAYER_2_H
 
 #include <core/Core.h>
 #include <core/Layer.h>
 
-class TestLayer : public Layer
+class TestLayer2 : public Layer
 {
 public:
-	TestLayer();
-	virtual ~TestLayer() = default;
+	TestLayer2();
+	virtual ~TestLayer2() = default;
 
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
@@ -33,4 +33,4 @@ private:
 
 
 
-#endif // TEST_LAYER_H
+#endif // TEST_LAYER_2_H

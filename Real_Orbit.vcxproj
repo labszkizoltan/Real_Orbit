@@ -160,6 +160,7 @@
     <ClCompile Include="core\Window.cpp" />
     <ClCompile Include="Game\GameApp.cpp" />
     <ClCompile Include="Game\Layers\TestLayer.cpp" />
+    <ClCompile Include="Game\Layers\TestLayer2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\Application.h" />
@@ -172,6 +173,7 @@
     <ClInclude Include="core\Timestep.h" />
     <ClInclude Include="core\Window.h" />
     <ClInclude Include="Game\Layers\TestLayer.h" />
+    <ClInclude Include="Game\Layers\TestLayer2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

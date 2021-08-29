@@ -45,6 +45,9 @@
     <ClInclude Include="core\events\Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Layers\TestLayer2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Real_Orbit_main.cpp">
@@ -72,6 +75,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="core\events\Event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Layers\TestLayer2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

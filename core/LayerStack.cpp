@@ -40,3 +40,26 @@ void LayerStack::PopOverlay(Layer* overlay)
 	if (it != m_Layers.end())
 		m_Layers.erase(it);
 }
+
+
+void LayerStack::OnUpdate(Timestep t)
+{
+	for (int i = 0; i < m_Layers.size(); i++)
+	{
+		m_Layers[i]->OnUpdate(t);
+	}
+}
+
+void LayerStack::OnEvent(Event& e)
+{
+	for (int i = 0; i < m_Layers.size(); i++)
+	{
+		if (e.IsHandled())
+			return;
+		
+		m_Layers[i]->OnEvent(e);
+	}
+}
+
+
+

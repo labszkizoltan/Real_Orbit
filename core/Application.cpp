@@ -1,6 +1,6 @@
 
 #include "Application.h"
-
+#include <SFML/System/Time.hpp>
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
@@ -8,21 +8,11 @@ Application* Application::s_Instance = nullptr;
 
 Application::Application(const std::string& name)
 {
-//	{
-//		if (s_Instance)
-//		{
-//			LOG_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak();
-//		}
-//	}
-
 	if (s_Instance) { std::cout << "Application already exists!\n"; __debugbreak(); }
 
 	s_Instance = this;
 
 	m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
-
-//	m_Window->SetEventCallback(std::bind(&Application::OnEvent, this, std::placeholders::_1));
-//	m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
 //	Renderer::Init();
 }
@@ -34,26 +24,25 @@ Application::~Application()
 
 void Application::Run()
 {
+	sf::Clock clock;
+	sf::Time loopStart = clock.getElapsedTime();
+	sf::Time loopFinish = clock.getElapsedTime();
+
 	while (m_Running)
 	{
-//		auto now = std::chrono::high_resolution_clock::now();
+		sf::Time ts = loopFinish - loopStart;
+		Timestep timestep = 1000.0f * (float)ts.asSeconds(); // convert to mili seconds
 
-//		float time = (float)glfwGetTime(); // Platform::GetTime() so this class doesnt depend on glfw
-		float time = 0.0f; // temporarly have zero time steps
-		Timestep timestep = time - m_LastFrameTime; // timestep can be initialized like this, because its constructor takes in only one float, implicit cast is possible
-		m_LastFrameTime = time;
+		loopStart = clock.getElapsedTime();
 
 		OnEvent();
 
 		if (!m_Minimized)
-		{
-			{
-				for (Layer* layer : m_LayerStack)
-					layer->OnUpdate(timestep);
-			}
-		}
+			m_LayerStack.OnUpdate(timestep);
 
 		m_Window->OnUpdate();
+
+		loopFinish = clock.getElapsedTime();
 	}
 }
 
@@ -62,9 +51,11 @@ void Application::OnEvent()
 	Event e;
 	while (m_Window->PollEvent(e.GetEvent()))
 	{
-//		e.Dispatch<sf::Event::EventType::Closed>(std::bind(&Application::OnWindowClose, this, std::placeholders::_1));
 		e.Dispatch<sf::Event::EventType::Closed>				(BIND_EVENT_FN(OnWindowClose));
 		e.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize));
+
+//		these dispatches are only here for debugging, at application level only a few of them should be present
+/*
 		e.Dispatch<sf::Event::EventType::LostFocus>				(BIND_EVENT_FN(OnLoosingFocus));
 		e.Dispatch<sf::Event::EventType::GainedFocus>			(BIND_EVENT_FN(OnGainingFocus));
 		e.Dispatch<sf::Event::EventType::TextEntered>			(BIND_EVENT_FN(OnTextEntered));
@@ -76,6 +67,12 @@ void Application::OnEvent()
 		e.Dispatch<sf::Event::EventType::MouseMoved>			(BIND_EVENT_FN(OnMouseMoved));
 		e.Dispatch<sf::Event::EventType::MouseEntered>			(BIND_EVENT_FN(OnMouseEntered));
 		e.Dispatch<sf::Event::EventType::MouseLeft>				(BIND_EVENT_FN(OnMouseLeft));
+*/
+
+
+		if (!m_Minimized)
+			m_LayerStack.OnEvent(e);
+
 	}
 
 
@@ -144,48 +141,56 @@ bool Application::OnTextEntered(Event& e)
 
 bool Application::OnKeyPressed(Event& e)
 {
-	LOG_CORE_INFO("Key pressed");
+	sf::Event& event = e.GetEvent();
+	LOG_CORE_INFO("Key pressed {0}", event.key.code);
 	return false;
 }
 
 bool Application::OnKeyReleased(Event& e)
 {
-	LOG_CORE_INFO("Key released");
+	sf::Event& event = e.GetEvent();
+	LOG_CORE_INFO("Key released {0}", event.key.code);
 	return false;
 }
 
 bool Application::MouseWheelScrolled(Event& e)
 {
-	LOG_CORE_INFO("Mouse scrolled");
+	sf::Event& event = e.GetEvent();
+	LOG_CORE_INFO("Mouse scrolled. Delta: {0}, x: {1}, y: {2}", event.mouseWheelScroll.delta, event.mouseWheelScroll.x, event.mouseWheelScroll.y);
 	return false;
 }
 
 bool Application::OnMouseButtonPressed(Event& e)
 {
+	sf::Event& event = e.GetEvent();
 	LOG_CORE_INFO("Mouse pressed");
 	return false;
 }
 
 bool Application::OnMouseButtonReleased(Event& e)
 {
+	sf::Event& event = e.GetEvent();
 	LOG_CORE_INFO("Mouse released");
 	return false;
 }
 
 bool Application::OnMouseMoved(Event& e)
 {
+	sf::Event& event = e.GetEvent();
 	LOG_CORE_INFO("Mouse moved");
 	return false;
 }
 
 bool Application::OnMouseEntered(Event& e)
 {
+	sf::Event& event = e.GetEvent();
 	LOG_CORE_INFO("Mouse entered");
 	return false;
 }
 
 bool Application::OnMouseLeft(Event& e)
 {
+	sf::Event& event = e.GetEvent();
 	LOG_CORE_INFO("Mouse left");
 	return false;
 }

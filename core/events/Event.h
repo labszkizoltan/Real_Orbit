@@ -49,6 +49,8 @@ public:
 
     sf::Event& GetEvent();
     sf::Event::EventType GetEventType();
+    bool IsHandled();
+    void SetHandled(bool handlingStatus);
 
     template <sf::Event::EventType T>
     bool Dispatch(EventFn func)
