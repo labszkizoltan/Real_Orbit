@@ -4,88 +4,90 @@
 
 #include <core/Core.h>
 #include <core/pch/pch.h>
+#include <SFML/Window/Event.hpp>
 
-// Events are currently blocking, meaning when an event occurs it
-// immediately gets dispatched and must be dealt with right then and there.
-// For the future, a better strategy might be to buffer events in an event
-// bus and process them during the "event" part of the update stage.
-
-enum class EventType
-{
-	None = 0,
-	WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
-	AppTick, AppUpdate, AppRender,
-	KeyPressed, KeyReleased, KeyTyped,
-	MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
-};
-
-enum EventCategory
-{
-	None = 0,
-	EventCategoryApplication = BIT(0),
-	EventCategoryInput = BIT(1),
-	EventCategoryKeyboard = BIT(2),
-	EventCategoryMouse = BIT(3),
-	EventCategoryMouseButton = BIT(4),
-	EventCategoryGame = BIT(5)
-};
-
-#define EVENT_CLASS_TYPE(type)	static EventType GetStaticType() { return EventType::##type; }\
-								virtual EventType GetEventType() const override { return GetStaticType(); }\
-								virtual const char* GetName() const override { return #type; }
-
-#define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
+//
+//// copy pasted from SFML/Window/Event.hpp and made this an enum class
+//enum class EventType
+//{
+//    Closed,                 ///< The window requested to be closed (no data)
+//    Resized,                ///< The window was resized (data in event.size)
+//    LostFocus,              ///< The window lost the focus (no data)
+//    GainedFocus,            ///< The window gained the focus (no data)
+//    TextEntered,            ///< A character was entered (data in event.text)
+//    KeyPressed,             ///< A key was pressed (data in event.key)
+//    KeyReleased,            ///< A key was released (data in event.key)
+//    MouseWheelMoved,        ///< The mouse wheel was scrolled (data in event.mouseWheel) (deprecated)
+//    MouseWheelScrolled,     ///< The mouse wheel was scrolled (data in event.mouseWheelScroll)
+//    MouseButtonPressed,     ///< A mouse button was pressed (data in event.mouseButton)
+//    MouseButtonReleased,    ///< A mouse button was released (data in event.mouseButton)
+//    MouseMoved,             ///< The mouse cursor moved (data in event.mouseMove)
+//    MouseEntered,           ///< The mouse cursor entered the area of the window (no data)
+//    MouseLeft,              ///< The mouse cursor left the area of the window (no data)
+//    JoystickButtonPressed,  ///< A joystick button was pressed (data in event.joystickButton)
+//    JoystickButtonReleased, ///< A joystick button was released (data in event.joystickButton)
+//    JoystickMoved,          ///< The joystick moved along an axis (data in event.joystickMove)
+//    JoystickConnected,      ///< A joystick was connected (data in event.joystickConnect)
+//    JoystickDisconnected,   ///< A joystick was disconnected (data in event.joystickConnect)
+//    TouchBegan,             ///< A touch event began (data in event.touch)
+//    TouchMoved,             ///< A touch moved (data in event.touch)
+//    TouchEnded,             ///< A touch event ended (data in event.touch)
+//    SensorChanged,          ///< A sensor value changed (data in event.sensor)
+//
+//    Count                   ///< Keep last -- the total number of event types
+//};
+//
 
 class Event
 {
-	//		friend class EventDispatcher;
-public:
-	bool Handled = false;
-
-	virtual EventType GetEventType() const = 0;
-	virtual const char* GetName() const = 0;
-	virtual int GetCategoryFlags() const = 0;
-	virtual std::string ToString() const { return GetName(); }
-
-	// https://docs.microsoft.com/en-us/cpp/code-quality/c26812?view=msvc-160 this shouldnt cause an error, this should be just a suggestion
-	inline bool IsInCategory(EventCategory category)
-	{
-		return GetCategoryFlags() & category;
-	}
-
-};
-
-class EventDispatcher
-{
-	// template parameter shold be the EventType enum class
-	template<typename T>
-	using EventFn = std::function<bool(T&)>;
+    using EventFn = std::function<bool(Event&)>;
 
 public:
-	EventDispatcher(Event& event)
-		: m_Event(event)
-	{
-	}
+    Event() = default;
+    Event(sf::Event e);
+	~Event() = default;
 
-	template<typename T>
-	bool Dispatch(EventFn<T> func)
-	{
-		if (m_Event.GetEventType() == T::GetStaticType())
-		{
-			m_Event.Handled = func(*(T*)&m_Event);
-			return true;
-		}
-		return false;
-	}
+    sf::Event& GetEvent();
+    sf::Event::EventType GetEventType();
+
+    template <sf::Event::EventType T>
+    bool Dispatch(EventFn func)
+    {
+        if (EligibleForEventFnEvaluation<T>())
+        {
+            m_Handled = func(*this);
+            return true;
+        }
+        return false;
+    }
 
 private:
-	Event& m_Event;
+    template <sf::Event::EventType T>
+    bool EligibleForEventFnEvaluation()
+    {
+        return (!m_Handled && (GetEventType() == T));
+    }
+
+private:
+	sf::Event m_Event;
+    bool m_Handled = false;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Event& e)
+
+/*
+template <>
+bool Event::Dispatch<sf::Event::EventType::Closed>(Event::EventFn func)
 {
-	return os << e.ToString();
+    if (EligibleForEventFnEvaluation<sf::Event::EventType::Closed>())
+    {
+        m_Handled = func(*this);
+        return true;
+    }
+    return false;
 }
+*/
+
+
 
 
 #endif // EVENT_H

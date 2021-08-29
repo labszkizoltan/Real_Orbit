@@ -18,9 +18,6 @@
     <ClInclude Include="core\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\Events\Event.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="core\Core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -42,16 +39,10 @@
     <ClInclude Include="core\pch\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\events\ApplicationEvent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="core\events\KeyEvent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="core\events\MouseEvent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Game\Layers\TestLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="core\events\Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -78,6 +69,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="core\Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="core\events\Event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

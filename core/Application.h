@@ -6,7 +6,7 @@
 #include <string>
 
 #include <core/Events/Event.h>
-#include <core/Events/ApplicationEvent.h>
+//#include <core/Events/ApplicationEvent.h>
 #include <core/Layer.h>
 #include <core/LayerStack.h>
 #include <core/Window.h>
@@ -19,7 +19,8 @@ public:
 	~Application();
 
 	void Run();
-	void OnEvent(Event& e);
+//	void OnEvent(Event& e);
+	void OnEvent();
 
 	void PushLayer(Layer* layer);
 	void PushOverlay(Layer* overlay);
@@ -31,8 +32,20 @@ public:
 
 	static Application& Get() { return *s_Instance; };
 private:
-	bool OnWindowClose(WindowCloseEvent& e);
-	bool OnWindowResize(WindowResizeEvent& e);
+	bool OnWindowClose(Event& e);
+	bool OnWindowResize(Event& e);
+	bool OnLoosingFocus(Event& e);
+	bool OnGainingFocus(Event& e);
+	bool OnTextEntered(Event& e);
+	bool OnKeyPressed(Event& e);
+	bool OnKeyReleased(Event& e);
+	bool MouseWheelScrolled(Event& e);
+	bool OnMouseButtonPressed(Event& e);
+	bool OnMouseButtonReleased(Event& e);
+	bool OnMouseMoved(Event& e);
+	bool OnMouseEntered(Event& e);
+	bool OnMouseLeft(Event& e);
+
 
 private:
 	std::unique_ptr<Window> m_Window;

@@ -12,6 +12,12 @@ Window::Window(const WindowProps& props)
 
 Window::~Window()
 {
+	m_Window.close();
+}
+
+bool Window::PollEvent(sf::Event& e)
+{
+	return m_Window.pollEvent(e);
 }
 
 void Window::OnUpdate()
@@ -30,6 +36,7 @@ uint32_t Window::GetHeight()
 
 void Window::SetEventCallback(const EventCallbackFn& callback)
 {
+	m_EventFunction = callback;
 }
 
 void Window::SetVSync(bool enabled)

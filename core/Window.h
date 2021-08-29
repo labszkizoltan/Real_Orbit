@@ -33,6 +33,7 @@ public:
 	Window(const WindowProps& props);
 	~Window();
 
+	bool PollEvent(sf::Event& e); // sf::Event is at a lower level of abstraction compared to other function parameters, this is working, but not ideal
 	void OnUpdate();
 	
 	uint32_t GetWidth();
@@ -52,6 +53,7 @@ private:
 	sf::Window m_Window; // heres a link on how to construct an SFML window + an opengl context https://www.sfml-dev.org/tutorials/2.5/window-opengl.php
 	bool m_Vsynced;
 	WindowProps m_Props;
+	EventCallbackFn m_EventFunction;
 
 };
 

@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="core\Application.cpp" />
+    <ClCompile Include="core\events\Event.cpp" />
     <ClCompile Include="core\Layer.cpp" />
     <ClCompile Include="core\LayerStack.cpp" />
     <ClCompile Include="core\Log.cpp" />
@@ -163,10 +164,7 @@
   <ItemGroup>
     <ClInclude Include="core\Application.h" />
     <ClInclude Include="core\Core.h" />
-    <ClInclude Include="core\events\ApplicationEvent.h" />
-    <ClInclude Include="core\Events\Event.h" />
-    <ClInclude Include="core\events\KeyEvent.h" />
-    <ClInclude Include="core\events\MouseEvent.h" />
+    <ClInclude Include="core\events\Event.h" />
     <ClInclude Include="core\Layer.h" />
     <ClInclude Include="core\LayerStack.h" />
     <ClInclude Include="core\Log.h" />
