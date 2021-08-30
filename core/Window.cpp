@@ -34,6 +34,11 @@ uint32_t Window::GetHeight()
 	return m_Props.Height;
 }
 
+sf::Window& Window::GetNativeWindow()
+{
+	return m_Window;
+}
+
 void Window::SetEventCallback(const EventCallbackFn& callback)
 {
 	m_EventFunction = callback;

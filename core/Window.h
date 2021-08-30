@@ -38,6 +38,7 @@ public:
 	
 	uint32_t GetWidth();
 	uint32_t GetHeight();
+	sf::Window& GetNativeWindow();
 
 	// Window attributes
 	void SetEventCallback(const EventCallbackFn& callback);
