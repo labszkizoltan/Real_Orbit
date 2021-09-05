@@ -51,6 +51,12 @@
     <ClInclude Include="core\Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="core\rendering\Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="core\rendering\Buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\Real_Orbit_main.cpp">

@@ -23,6 +23,22 @@ void TestLayer2::OnDetach()
 void TestLayer2::OnUpdate(Timestep ts)
 {
 	//	LOG_INFO("TestLayer2 updated");
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Left)) { LOG_INFO("TestLayer2 OnUpdate: left arrow is pressed"); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Right)) { LOG_INFO("TestLayer2 OnUpdate: right arrow is pressed"); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Up)) { LOG_INFO("TestLayer2 OnUpdate: Up arrow is pressed"); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Down)) { LOG_INFO("TestLayer2 OnUpdate: down arrow is pressed"); }
+
+	if (Input::IsMouseButtonPressed(sf::Mouse::Button::Left)) { LOG_INFO("TestLayer2 OnUpdate: Left mouse button is pressed"); }
+	if (Input::IsMouseButtonPressed(sf::Mouse::Button::Right)) { LOG_INFO("TestLayer2 OnUpdate: Right mouse button is pressed"); }
+	if (Input::IsMouseButtonPressed(sf::Mouse::Button::Middle))
+	{
+		LOG_INFO("TestLayer2 OnUpdate: Middle mouse button is pressed");
+		sf::Vector2i mouse_pos = Input::GetMousePosition();
+		LOG_INFO("TestLayer2 OnUpdate: window mouse position: x: {0}, y: {1}", mouse_pos.x, mouse_pos.y);
+		sf::Vector2i global_mouse_pos = Input::GetGlobalMousePosition();
+		LOG_INFO("TestLayer2 OnUpdate: window mouse position: x: {0}, y: {1}", global_mouse_pos.x, global_mouse_pos.y);
+	}
+
 }
 
 void TestLayer2::OnEvent(Event& event)

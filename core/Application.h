@@ -20,6 +20,7 @@ public:
 
 	void Run();
 	void OnEvent();
+	void OnUpdate(Timestep ts);
 
 	void PushLayer(Layer* layer);
 	void PushOverlay(Layer* overlay);
@@ -52,6 +53,7 @@ private:
 	bool m_Minimized = false;
 	LayerStack m_LayerStack;
 	float m_LastFrameTime = 0.0f;
+	float m_ClearColorRed = 1.0f;
 
 private:
 	static Application* s_Instance;

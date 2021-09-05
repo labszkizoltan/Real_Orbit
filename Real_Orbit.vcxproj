@@ -172,6 +172,8 @@
     <ClInclude Include="core\LayerStack.h" />
     <ClInclude Include="core\Log.h" />
     <ClInclude Include="core\pch\pch.h" />
+    <ClInclude Include="core\rendering\Buffer.h" />
+    <ClInclude Include="core\rendering\Renderer.h" />
     <ClInclude Include="core\Timestep.h" />
     <ClInclude Include="core\Window.h" />
     <ClInclude Include="Game\Layers\TestLayer.h" />

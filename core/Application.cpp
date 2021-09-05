@@ -4,6 +4,9 @@
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
+#define GL_MAJOR_VERSION 0x821B // copied from glad.h -> but not working here, the SFML opengl header includes GL.h, but it doesnt contain these macros
+#define GL_MINOR_VERSION 0x821C // the problem was that the graphics context was not initialized, 
+
 Application* Application::s_Instance = nullptr;
 
 Application::Application(const std::string& name)
@@ -12,7 +15,30 @@ Application::Application(const std::string& name)
 
 	s_Instance = this;
 
-	m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
+	WindowProps properties;
+	properties.Title = name;
+	properties.Width = 1200;
+	properties.Height = 800;
+
+	// need to create an OpenGL context without a window to query OpenGL version, then destroy the context
+	int versionMajor, versionMinor;
+	{
+		sf::Context context;
+		glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);
+		glGetIntegerv(GL_MINOR_VERSION, &versionMinor);
+		LOG_CORE_INFO("OpenGL version queried: Major / Minor: {0} / {1}", versionMajor, versionMinor);
+	}
+
+	sf::ContextSettings settings;
+	settings.depthBits = 24;
+	settings.stencilBits = 8;
+	settings.antialiasingLevel = 4;
+	settings.majorVersion = versionMajor;
+	settings.minorVersion = versionMinor;
+
+//	m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
+	m_Window = std::unique_ptr<Window>(Window::Create(properties, settings));
+	LOG_CORE_INFO("SFML window created with OpenGL version Major / Minor: {0} / {1}", settings.majorVersion, settings.minorVersion);
 
 //	Renderer::Init();
 }
@@ -36,11 +62,9 @@ void Application::Run()
 		loopStart = clock.getElapsedTime();
 
 		OnEvent();
+		OnUpdate(timestep);
 
-		if (!m_Minimized)
-			m_LayerStack.OnUpdate(timestep);
-
-		m_Window->OnUpdate();
+		m_Window->GetNativeWindow().display();
 
 		loopFinish = clock.getElapsedTime();
 	}
@@ -53,6 +77,8 @@ void Application::OnEvent()
 	{
 		e.Dispatch<sf::Event::EventType::Closed>				(BIND_EVENT_FN(OnWindowClose));
 		e.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize));
+
+		e.Dispatch<sf::Event::EventType::MouseWheelScrolled>	(BIND_EVENT_FN(MouseWheelScrolled));
 
 //		these dispatches are only here for debugging, at application level only a few of them should be present
 /*
@@ -77,6 +103,22 @@ void Application::OnEvent()
 
 
 
+}
+
+void Application::OnUpdate(Timestep ts)
+{
+
+	// REMOVE THIS AFTER TESTING!
+	{
+		glClearColor(m_ClearColorRed, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+
+	if (!m_Minimized)
+		m_LayerStack.OnUpdate(ts);
+
+	m_Window->OnUpdate();
 }
 
 void Application::PushLayer(Layer* layer)
@@ -157,6 +199,11 @@ bool Application::MouseWheelScrolled(Event& e)
 {
 	sf::Event& event = e.GetEvent();
 	LOG_CORE_INFO("Mouse scrolled. Delta: {0}, x: {1}, y: {2}", event.mouseWheelScroll.delta, event.mouseWheelScroll.x, event.mouseWheelScroll.y);
+
+	m_ClearColorRed += 0.01 * event.mouseWheelScroll.delta;
+	m_ClearColorRed += m_ClearColorRed < 0.0f ? 1.0f : 0.0f;
+	m_ClearColorRed -= m_ClearColorRed > 1.0f ? 1.0f : 0.0f;
+
 	return false;
 }
 

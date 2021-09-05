@@ -1,8 +1,8 @@
 
 #include "Window.h"
 
-Window::Window(const WindowProps& props)
-	: m_Window(sf::VideoMode(props.Width, props.Height), "OpenGL"), m_Vsynced(true), m_Props(props)
+Window::Window(const WindowProps& props, const sf::ContextSettings& settings)
+	: m_Window(sf::VideoMode(props.Width, props.Height), "OpenGL", sf::Style::Default, settings), m_Vsynced(true), m_Props(props)
 {
 	m_Window.setVerticalSyncEnabled(m_Vsynced);
 
@@ -53,10 +53,10 @@ bool Window::IsVSync() const
 	return m_Vsynced;
 }
 
-
-Window* Window::Create(const WindowProps& props)
+// this function is called in the Application constructor
+Window* Window::Create(const WindowProps& props, const sf::ContextSettings& settings)
 {
-	return new Window(props);
+	return new Window(props, settings);
 }
 
 

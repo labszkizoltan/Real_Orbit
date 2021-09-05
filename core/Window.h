@@ -30,7 +30,7 @@ class Window
 public:
 	using EventCallbackFn = std::function<void(Event&)>;
 
-	Window(const WindowProps& props);
+	Window(const WindowProps& props, const sf::ContextSettings& settings);
 	~Window();
 
 	bool PollEvent(sf::Event& e); // sf::Event is at a lower level of abstraction compared to other function parameters, this is working, but not ideal
@@ -45,10 +45,8 @@ public:
 	void SetVSync(bool enabled);
 	bool IsVSync() const;
 
-//	virtual void* GetNativeWindow() const = 0;
+	static Window* Create(const WindowProps& props, const sf::ContextSettings& settings);
 
-	static Window* Create(const WindowProps& props = WindowProps());
-	//		static Scope<Window> Create(const WindowProps& props = WindowProps());
 
 private:
 	sf::Window m_Window; // heres a link on how to construct an SFML window + an opengl context https://www.sfml-dev.org/tutorials/2.5/window-opengl.php

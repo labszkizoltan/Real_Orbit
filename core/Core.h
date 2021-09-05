@@ -4,6 +4,7 @@
 
 #include <core/Log.h>
 #include <core/Events/Event.h>
+#include <core/Input.h>
 #include <core/Timestep.h>
 
 
