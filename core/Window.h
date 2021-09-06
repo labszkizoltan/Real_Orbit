@@ -53,7 +53,6 @@ private:
 	bool m_Vsynced;
 	WindowProps m_Props;
 	EventCallbackFn m_EventFunction;
-
 };
 
 

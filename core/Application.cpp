@@ -65,6 +65,7 @@ void Application::Run()
 		OnUpdate(timestep);
 
 		m_Window->GetNativeWindow().display();
+		m_Window->GetNativeWindow().display(); // why do I need two??? probably adding the second one solves a buffer swapping issue in under the hood, that caused flickering
 
 		loopFinish = clock.getElapsedTime();
 	}
@@ -77,8 +78,6 @@ void Application::OnEvent()
 	{
 		e.Dispatch<sf::Event::EventType::Closed>				(BIND_EVENT_FN(OnWindowClose));
 		e.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize));
-
-		e.Dispatch<sf::Event::EventType::MouseWheelScrolled>	(BIND_EVENT_FN(MouseWheelScrolled));
 
 //		these dispatches are only here for debugging, at application level only a few of them should be present
 /*
@@ -95,30 +94,19 @@ void Application::OnEvent()
 		e.Dispatch<sf::Event::EventType::MouseLeft>				(BIND_EVENT_FN(OnMouseLeft));
 */
 
-
 		if (!m_Minimized)
 			m_LayerStack.OnEvent(e);
-
 	}
-
-
-
 }
 
 void Application::OnUpdate(Timestep ts)
 {
-
-	// REMOVE THIS AFTER TESTING!
-	{
-		glClearColor(m_ClearColorRed, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
-
-
 	if (!m_Minimized)
 		m_LayerStack.OnUpdate(ts);
 
 	m_Window->OnUpdate();
+
+	m_Window->GetNativeWindow().display();
 }
 
 void Application::PushLayer(Layer* layer)
@@ -150,6 +138,9 @@ bool Application::OnWindowResize(Event& e)
 	sf::Event& event = e.GetEvent();
 
 	LOG_CORE_INFO("Window Resize event captured: width - {0}, height - {1}", event.size.width, event.size.height);
+
+	// adjust the viewport when the window is resized
+	glViewport(0, 0, event.size.width, event.size.height);
 
 	//	if (e.GetWidth() == 0 || e.GetHeight() == 0)
 	//	{
@@ -199,10 +190,6 @@ bool Application::MouseWheelScrolled(Event& e)
 {
 	sf::Event& event = e.GetEvent();
 	LOG_CORE_INFO("Mouse scrolled. Delta: {0}, x: {1}, y: {2}", event.mouseWheelScroll.delta, event.mouseWheelScroll.x, event.mouseWheelScroll.y);
-
-	m_ClearColorRed += 0.01 * event.mouseWheelScroll.delta;
-	m_ClearColorRed += m_ClearColorRed < 0.0f ? 1.0f : 0.0f;
-	m_ClearColorRed -= m_ClearColorRed > 1.0f ? 1.0f : 0.0f;
 
 	return false;
 }
