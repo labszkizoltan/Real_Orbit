@@ -17,7 +17,7 @@ Application::Application(const std::string& name)
 
 	WindowProps properties;
 	properties.Title = name;
-	properties.Width = 1200;
+	properties.Width = 800;
 	properties.Height = 800;
 
 	// need to create an OpenGL context without a window to query OpenGL version, then destroy the context
@@ -53,19 +53,21 @@ void Application::Run()
 	sf::Clock clock;
 	sf::Time loopStart = clock.getElapsedTime();
 	sf::Time loopFinish = clock.getElapsedTime();
+	sf::Time ts = loopFinish - loopStart;
+	Timestep timestep = 1000.0f * (float)ts.asSeconds(); // convert to mili seconds
 
 	while (m_Running)
 	{
-		sf::Time ts = loopFinish - loopStart;
-		Timestep timestep = 1000.0f * (float)ts.asSeconds(); // convert to mili seconds
-
+		ts = loopFinish - loopStart;
+		timestep = 1000.0f * (float)ts.asSeconds();
+		
 		loopStart = clock.getElapsedTime();
 
 		OnEvent();
 		OnUpdate(timestep);
 
-		m_Window->GetNativeWindow().display();
-		m_Window->GetNativeWindow().display(); // why do I need two??? probably adding the second one solves a buffer swapping issue in under the hood, that caused flickering
+//		m_Window->GetNativeWindow().display();
+//		m_Window->GetNativeWindow().display(); // why do I need two??? probably adding the second one solves a buffer swapping issue under the hood, that caused flickering
 
 		loopFinish = clock.getElapsedTime();
 	}

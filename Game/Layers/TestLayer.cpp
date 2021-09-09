@@ -6,16 +6,19 @@
 
 #define BIND_EVENT_FN(x) std::bind(&TestLayer::x, this, std::placeholders::_1)
 
-
-
 // vertex shader:
 const char* vertexShaderSource = "#version 460 core\n"
 "layout (location = 0) in vec3 aPos;\n"
 "layout (location = 1) in vec3 aColor;\n"
+"uniform float rotation_angle;\n"
+"uniform float offset_x;\n"
+"uniform float offset_y;\n"
 "out vec3 ourColor;\n"
 "void main()\n"
 "{\n"
-"   gl_Position = vec4(aPos, 1.0f);\n"
+//"   gl_Position = vec4(aPos.x+offset_x, cos(rotation_angle)*aPos.y-sin(rotation_angle)*aPos.z+offset_y, sin(rotation_angle)*aPos.y+cos(rotation_angle)*aPos.z, 1.0f);\n"
+"   gl_Position = vec4(cos(rotation_angle)*aPos.x-sin(rotation_angle)*aPos.y+offset_x, sin(rotation_angle)*aPos.x+cos(rotation_angle)*aPos.y+offset_y, aPos.z, 1.0f);\n"
+//"   gl_Position = vec4(aPos, 1.0f);\n"
 "   ourColor = aColor;\n"
 "}\0";
 
@@ -41,21 +44,21 @@ void TestLayer::OnAttach()
 {
 	LOG_INFO("TestLayer attached");
 
-	// Hello Triangle //
+	// Hello Tetrahedron //
 
 	// Vertices with their own color:
 	float vertices[] = {
 		// position			// color
-		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-		 0.0f,  0.0f, 0.7f, 1.0f, 1.0f, 0.0f
+		-0.05f, -0.05f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 0.05f, -0.05f, 0.0f, 0.0f, 1.0f, 0.0f,
+		 0.0f,  0.05f, 0.0f, 0.0f, 0.0f, 1.0f,
+		 0.0f,  0.0f, -0.7f, 1.0f, 1.0f, 0.0f
 	};
 
 	unsigned int indices[] = {  // note that we start from 0!
 	0, 1, 2,   // first triangle
 	2, 1, 3,    // second triangle
-	0, 2, 3,
+	0, 2, 3,	// ...
 	1, 0, 3
 	};
 
@@ -138,6 +141,8 @@ void TestLayer::OnAttach()
 
 	//---------------------------------------------//
 
+	glEnable(GL_DEPTH_TEST);
+
 }
 
 void TestLayer::OnDetach()
@@ -168,15 +173,36 @@ void TestLayer::OnUpdate(Timestep ts)
 
 	// Render
 	// Clear color buffer
-	glClearColor(0.9f, 0.1f, 0.1f, 1.0f);
+//	glClearColor(0.9f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.0f, 0.05f, 0.3f, 1.0f);
 	//glClear(GL_COLOR_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(m_ShaderProgram);
 	glBindVertexArray(m_VAO);
 
+	int grid_size = 10;
+	for (int i = 1-grid_size; i < grid_size; i++)
+	{
+		for (int j = 1-grid_size; j < grid_size; j++)
+		{
+			GLint loc = glGetUniformLocation(m_ShaderProgram, "rotation_angle");
+			glUniform1f(loc, m_TimeElapsed / 500.0f);
+			loc = glGetUniformLocation(m_ShaderProgram, "offset_x");
+			glUniform1f(loc, (float)i/(float)grid_size);
+			loc = glGetUniformLocation(m_ShaderProgram, "offset_y");
+			glUniform1f(loc, (float)j/(float)grid_size);
+
+			glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+		}
+	}
+
+	GLint loc = glGetUniformLocation(m_ShaderProgram, "rotation_angle");
+	glUniform1f(loc, m_TimeElapsed/500.0f);
+
 	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
+	m_TimeElapsed += ts;
 }
 
 void TestLayer::OnEvent(Event& event)
