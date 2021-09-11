@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC ;NOMINMAX;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit;D:\cpp_codes\37_RealOrbit\Real_Orbit\Source;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC ;NOMINMAX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit;D:\cpp_codes\37_RealOrbit\Real_Orbit\Source;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC ;NOMINMAX;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit;D:\cpp_codes\37_RealOrbit\Real_Orbit\Source;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,7 +139,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC ;NOMINMAX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit;D:\cpp_codes\37_RealOrbit\Real_Orbit\Source;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,37 +151,47 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="core\Application.cpp" />
-    <ClCompile Include="core\events\Event.cpp" />
-    <ClCompile Include="core\Input.cpp" />
-    <ClCompile Include="core\Layer.cpp" />
-    <ClCompile Include="core\LayerStack.cpp" />
-    <ClCompile Include="core\Log.cpp" />
-    <ClCompile Include="core\OpenGLContext.cpp" />
-    <ClCompile Include="core\Real_Orbit_main.cpp" />
-    <ClCompile Include="core\rendering\Buffer.cpp" />
-    <ClCompile Include="core\rendering\Renderer.cpp" />
-    <ClCompile Include="core\Window.cpp" />
-    <ClCompile Include="Game\GameApp.cpp" />
-    <ClCompile Include="Game\Layers\TestLayer.cpp" />
-    <ClCompile Include="Game\Layers\TestLayer2.cpp" />
+    <ClCompile Include="Source\core\Application.cpp" />
+    <ClCompile Include="Source\core\events\Event.cpp" />
+    <ClCompile Include="Source\core\Input.cpp" />
+    <ClCompile Include="Source\core\Layer.cpp" />
+    <ClCompile Include="Source\core\LayerStack.cpp" />
+    <ClCompile Include="Source\core\Log.cpp" />
+    <ClCompile Include="Source\core\OpenGLContext.cpp" />
+    <ClCompile Include="Source\core\Real_Orbit_main.cpp" />
+    <ClCompile Include="Source\core\rendering\Buffer.cpp" />
+    <ClCompile Include="Source\core\rendering\Renderer.cpp" />
+    <ClCompile Include="Source\core\rendering\Shader.cpp" />
+    <ClCompile Include="Source\core\Window.cpp" />
+    <ClCompile Include="Source\Game\GameApp.cpp" />
+    <ClCompile Include="Source\Game\Layers\TestLayer.cpp" />
+    <ClCompile Include="Source\Game\Layers\TestLayer2.cpp" />
+    <ClCompile Include="Source\utils\Matrix_3D.cpp" />
+    <ClCompile Include="Source\utils\shape_creator.cpp" />
+    <ClCompile Include="Source\utils\Vector_2D.cpp" />
+    <ClCompile Include="Source\utils\Vector_3D.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core\OpenGLContext.h" />
-    <ClInclude Include="core\Input.h" />
-    <ClInclude Include="core\Application.h" />
-    <ClInclude Include="core\Core.h" />
-    <ClInclude Include="core\events\Event.h" />
-    <ClInclude Include="core\Layer.h" />
-    <ClInclude Include="core\LayerStack.h" />
-    <ClInclude Include="core\Log.h" />
-    <ClInclude Include="core\pch\pch.h" />
-    <ClInclude Include="core\rendering\Buffer.h" />
-    <ClInclude Include="core\rendering\Renderer.h" />
-    <ClInclude Include="core\Timestep.h" />
-    <ClInclude Include="core\Window.h" />
-    <ClInclude Include="Game\Layers\TestLayer.h" />
-    <ClInclude Include="Game\Layers\TestLayer2.h" />
+    <ClInclude Include="Source\core\Application.h" />
+    <ClInclude Include="Source\core\Core.h" />
+    <ClInclude Include="Source\core\events\Event.h" />
+    <ClInclude Include="Source\core\Input.h" />
+    <ClInclude Include="Source\core\Layer.h" />
+    <ClInclude Include="Source\core\LayerStack.h" />
+    <ClInclude Include="Source\core\Log.h" />
+    <ClInclude Include="Source\core\OpenGLContext.h" />
+    <ClInclude Include="Source\core\pch\pch.h" />
+    <ClInclude Include="Source\core\rendering\Buffer.h" />
+    <ClInclude Include="Source\core\rendering\Renderer.h" />
+    <ClInclude Include="Source\core\rendering\Shader.h" />
+    <ClInclude Include="Source\core\Timestep.h" />
+    <ClInclude Include="Source\core\Window.h" />
+    <ClInclude Include="Source\Game\Layers\TestLayer.h" />
+    <ClInclude Include="Source\Game\Layers\TestLayer2.h" />
+    <ClInclude Include="Source\utils\Matrix_3D.h" />
+    <ClInclude Include="Source\utils\shape_creator.h" />
+    <ClInclude Include="Source\utils\Vector_2D.h" />
+    <ClInclude Include="Source\utils\Vector_3D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

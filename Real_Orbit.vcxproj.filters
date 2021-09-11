@@ -15,93 +15,123 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core\Application.h">
+    <ClInclude Include="Source\Game\Layers\TestLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\Core.h">
+    <ClInclude Include="Source\Game\Layers\TestLayer2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\Layer.h">
+    <ClInclude Include="Source\core\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\Timestep.h">
+    <ClInclude Include="Source\core\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\LayerStack.h">
+    <ClInclude Include="Source\core\Core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\Log.h">
+    <ClInclude Include="Source\core\Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\Window.h">
+    <ClInclude Include="Source\core\Layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\pch\pch.h">
+    <ClInclude Include="Source\core\LayerStack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Layers\TestLayer.h">
+    <ClInclude Include="Source\core\Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\events\Event.h">
+    <ClInclude Include="Source\core\OpenGLContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Layers\TestLayer2.h">
+    <ClInclude Include="Source\core\Timestep.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\Input.h">
+    <ClInclude Include="Source\core\pch\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\rendering\Buffer.h">
+    <ClInclude Include="Source\core\events\Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\rendering\Renderer.h">
+    <ClInclude Include="Source\core\rendering\Buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="core\OpenGLContext.h">
+    <ClInclude Include="Source\core\rendering\Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\rendering\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utils\Matrix_3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utils\shape_creator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utils\Vector_2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utils\Vector_3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="core\Real_Orbit_main.cpp">
+    <ClCompile Include="Source\Game\GameApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core\Layer.cpp">
+    <ClCompile Include="Source\Game\Layers\TestLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core\LayerStack.cpp">
+    <ClCompile Include="Source\Game\Layers\TestLayer2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core\Log.cpp">
+    <ClCompile Include="Source\core\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core\Application.cpp">
+    <ClCompile Include="Source\core\Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game\GameApp.cpp">
+    <ClCompile Include="Source\core\Layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Layers\TestLayer.cpp">
+    <ClCompile Include="Source\core\LayerStack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core\Window.cpp">
+    <ClCompile Include="Source\core\Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core\events\Event.cpp">
+    <ClCompile Include="Source\core\OpenGLContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Layers\TestLayer2.cpp">
+    <ClCompile Include="Source\core\Real_Orbit_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core\Input.cpp">
+    <ClCompile Include="Source\core\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core\rendering\Buffer.cpp">
+    <ClCompile Include="Source\core\events\Event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core\rendering\Renderer.cpp">
+    <ClCompile Include="Source\core\rendering\Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="core\OpenGLContext.cpp">
+    <ClCompile Include="Source\core\rendering\Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\rendering\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\utils\Matrix_3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\utils\shape_creator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\utils\Vector_2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\utils\Vector_3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
