@@ -1,11 +1,10 @@
 
 #include "Application.h"
+#include <core/rendering/Renderer.h>
+#include <core/OpenGLContext.h>
 #include <SFML/System/Time.hpp>
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
-
-#define GL_MAJOR_VERSION 0x821B // copied from glad.h -> but not working here, the SFML opengl header includes GL.h, but it doesnt contain these macros
-#define GL_MINOR_VERSION 0x821C // the problem was that the graphics context was not initialized, 
 
 Application* Application::s_Instance = nullptr;
 
@@ -21,13 +20,8 @@ Application::Application(const std::string& name)
 	properties.Height = 800;
 
 	// need to create an OpenGL context without a window to query OpenGL version, then destroy the context
-	int versionMajor, versionMinor;
-	{
-		sf::Context context;
-		glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);
-		glGetIntegerv(GL_MINOR_VERSION, &versionMinor);
-		LOG_CORE_INFO("OpenGL version queried: Major / Minor: {0} / {1}", versionMajor, versionMinor);
-	}
+	int versionMajor = 4, versionMinor = 6;
+	OpenGLContext::GetMinorMajorVersion(versionMinor, versionMajor);
 
 	sf::ContextSettings settings;
 	settings.depthBits = 24;
@@ -40,7 +34,9 @@ Application::Application(const std::string& name)
 	m_Window = std::unique_ptr<Window>(Window::Create(properties, settings));
 	LOG_CORE_INFO("SFML window created with OpenGL version Major / Minor: {0} / {1}", settings.majorVersion, settings.minorVersion);
 
-//	Renderer::Init();
+	int renderInitStatus = Renderer::Init();
+	LOG_CORE_INFO("Renderer Initialization status: {0}", renderInitStatus);
+
 }
 
 Application::~Application()

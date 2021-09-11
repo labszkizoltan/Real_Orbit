@@ -5,6 +5,8 @@
 #include <core/Core.h>
 #include <core/Layer.h>
 
+#include <SFML/Graphics.hpp>
+
 class TestLayer2 : public Layer
 {
 public:
@@ -29,7 +31,10 @@ private:
 	bool OnMouseEntered(Event& e);
 	bool OnMouseLeft(Event& e);
 
-	
+private:
+	float m_ElapsedTime = 0.0f;
+	sf::Font m_Font;
+	sf::Sprite m_Sprite;
 
 };
 

@@ -1,6 +1,7 @@
 
 #include "TestLayer.h"
 #include <SFML/Window/Event.hpp>
+#include <core/Application.h>
 #include <glad/glad.h>
 
 
@@ -45,7 +46,6 @@ void TestLayer::OnAttach()
 	LOG_INFO("TestLayer attached");
 
 	// Hello Tetrahedron //
-
 	// Vertices with their own color:
 	float vertices[] = {
 		// position			// color
@@ -62,23 +62,29 @@ void TestLayer::OnAttach()
 	1, 0, 3
 	};
 
-	if (!gladLoadGL())
-	{
-		std::cout << "Failed to initialize OpenGL context" << std::endl;
-		return;
-	}
+	// Vertices with their own color:
+	float vertices_rect[] = {
+		// position			// color
+		-0.05f, -0.05f, 0.0f, 1.0f, 0.0f, 0.0f,
+		-0.05f,  0.05f, 0.0f, 0.0f, 1.0f, 0.0f,
+		 0.05f, -0.05f, 0.0f, 0.0f, 0.0f, 1.0f,
+		 0.05f,  0.05f, 0.0f, 1.0f, 1.0f, 0.0f
+	};
 
-	LOG_INFO("Querying OpenGL errors: {0}", glGetError());
-	LOG_INFO("Querying OpenGL errors: {0}", glGetError());
+	unsigned int indices_rect[] = {  // note that we start from 0!
+	0, 1, 2,   // first triangle
+	1, 2, 3    // second triangle
+	};
+
 
 	// create the shaders
 	unsigned int vertexShader;
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	LOG_INFO("Querying OpenGL errors: {0}", glGetError());
+	LOG_INFO("TestLayer::OnAttach: Querying OpenGL errors: {0}", glGetError());
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	LOG_INFO("Querying OpenGL errors: {0}", glGetError());
+	LOG_INFO("TestLayer::OnAttach: Querying OpenGL errors: {0}", glGetError());
 	glCompileShader(vertexShader);
-	LOG_INFO("Querying OpenGL errors: {0}", glGetError());
+	LOG_INFO("TestLayer::OnAttach: Querying OpenGL errors: {0}", glGetError());
 
 	int  success;
 	char infoLog[512];
@@ -118,7 +124,7 @@ void TestLayer::OnAttach()
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	// rest of the opengl code
+	//----- Creating the tetrahedron buffers on the GPU -----//
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
 
@@ -138,6 +144,29 @@ void TestLayer::OnAttach()
 	// color attribute
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+
+
+	//----- Creating the square buffers on the GPU -----//
+	glGenVertexArrays(1, &m_VAO_square);
+	glBindVertexArray(m_VAO_square);
+
+	// copy vertex data
+	glGenBuffers(1, &m_VBO_square);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO_square);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_rect), vertices_rect, GL_STATIC_DRAW);
+
+	// copy index data
+	glGenBuffers(1, &m_EBO_square);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO_square);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_rect), indices_rect, GL_STATIC_DRAW);
+	// set the vertex attribute pointers
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
 
 	//---------------------------------------------//
 
@@ -170,7 +199,6 @@ void TestLayer::OnUpdate(Timestep ts)
 		LOG_INFO("TestLayer OnUpdate: global mouse position: x: {0}, y: {1}", global_mouse_pos.x, global_mouse_pos.y);
 	}
 
-
 	// Render
 	// Clear color buffer
 //	glClearColor(0.9f, 0.1f, 0.1f, 1.0f);
@@ -179,21 +207,37 @@ void TestLayer::OnUpdate(Timestep ts)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(m_ShaderProgram);
-	glBindVertexArray(m_VAO);
 
 	int grid_size = 10;
 	for (int i = 1-grid_size; i < grid_size; i++)
 	{
 		for (int j = 1-grid_size; j < grid_size; j++)
 		{
-			GLint loc = glGetUniformLocation(m_ShaderProgram, "rotation_angle");
-			glUniform1f(loc, m_TimeElapsed / 500.0f);
-			loc = glGetUniformLocation(m_ShaderProgram, "offset_x");
-			glUniform1f(loc, (float)i/(float)grid_size);
-			loc = glGetUniformLocation(m_ShaderProgram, "offset_y");
-			glUniform1f(loc, (float)j/(float)grid_size);
+			if ((i + j) % 2 == 0)
+			{
+				glBindVertexArray(m_VAO);
+				GLint loc = glGetUniformLocation(m_ShaderProgram, "rotation_angle");
+				glUniform1f(loc, m_TimeElapsed / 500.0f);
+				loc = glGetUniformLocation(m_ShaderProgram, "offset_x");
+				glUniform1f(loc, (float)i / (float)grid_size);
+				loc = glGetUniformLocation(m_ShaderProgram, "offset_y");
+				glUniform1f(loc, (float)j / (float)grid_size);
 
-			glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+				glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+			}
+			else
+			{
+				glBindVertexArray(m_VAO_square);
+				GLint loc = glGetUniformLocation(m_ShaderProgram, "rotation_angle");
+				glUniform1f(loc, -m_TimeElapsed / 500.0f);
+				loc = glGetUniformLocation(m_ShaderProgram, "offset_x");
+				glUniform1f(loc, (float)i / (float)grid_size);
+				loc = glGetUniformLocation(m_ShaderProgram, "offset_y");
+				glUniform1f(loc, (float)j / (float)grid_size);
+
+				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+			}
 		}
 	}
 

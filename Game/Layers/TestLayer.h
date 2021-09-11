@@ -34,6 +34,10 @@ private:
 	unsigned int m_VAO = 0;
 	unsigned int m_VBO = 0;
 	unsigned int m_EBO = 0;
+	unsigned int m_VAO_square = 0;
+	unsigned int m_VBO_square = 0;
+	unsigned int m_EBO_square = 0;
+
 	float m_TimeElapsed = 0.0f;
 
 };

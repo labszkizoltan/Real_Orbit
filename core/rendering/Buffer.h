@@ -65,7 +65,7 @@ struct BufferElement
 		case ShaderDataType::Bool:		return 1;
 		}
 
-		DY_CORE_ASSERT(false, "Unknown ShaderDataType in GetElementCount()!");
+//		DY_CORE_ASSERT(false, "Unknown ShaderDataType in GetElementCount()!");
 		return 0;
 	}
 };
@@ -95,7 +95,6 @@ private:
 		uint32_t offset = 0;
 		m_Stride = 0;
 
-		//			for (auto& element : m_Elements)
 		for (BufferElement& element : m_Elements)
 		{
 			element.Offset = offset;
@@ -104,41 +103,63 @@ private:
 		}
 	}
 
-private:
+public:
 	std::vector<BufferElement> m_Elements;
 	uint32_t m_Stride = 0;
 };
 
+
 class VertexBuffer
 {
 public:
-	virtual ~VertexBuffer() {}
+	VertexBuffer() = default;
+	VertexBuffer(uint32_t size);
+	VertexBuffer(float* vertices, uint32_t size);
 
-	virtual void Bind() const = 0;
-	virtual void Unbind() const = 0;
+	VertexBuffer(const VertexBuffer& other) = delete;// copy constructor
+	VertexBuffer& operator=(const VertexBuffer& other) = delete; // copy assignment
+	VertexBuffer(VertexBuffer&& other) noexcept; // move constructor
+	VertexBuffer& operator=(VertexBuffer&& other) noexcept; // move assignment
+	~VertexBuffer();
 
-	virtual const BufferLayout& GetLayout() const = 0;
-	virtual void SetLayout(const BufferLayout& layout) = 0;
+	void Bind() const;
+	void Unbind() const;
 
-	virtual void SetData(const void* data, uint32_t size) = 0;
+	void SetData(const void* data, uint32_t size);
 
-	static Ref<VertexBuffer> Create(uint32_t size);
-	static Ref<VertexBuffer> Create(float* vertices, uint32_t size);
+	const BufferLayout& GetLayout() const { return m_Layout; };
+	void SetLayout(const BufferLayout& layout);
+	void SetLayout();
+
+public:
+	uint32_t m_RendererID = 0;
+	BufferLayout m_Layout;
 };
 
-// Currently only 32-bit index buffers are supported
+
 class IndexBuffer
 {
 public:
-	virtual ~IndexBuffer() {}
+	IndexBuffer() = default;
+	IndexBuffer(uint32_t* indices, uint32_t count);
 
-	virtual void Bind() const = 0;
-	virtual void Unbind() const = 0;
+	IndexBuffer(const IndexBuffer& other) = delete;// copy constructor
+	IndexBuffer& operator=(const IndexBuffer& other) = delete;// copy assignment
+	IndexBuffer(IndexBuffer&& other) noexcept; // move constructor
+	IndexBuffer& operator=(IndexBuffer&& other) noexcept; // move assignment
+	~IndexBuffer();
 
-	virtual uint32_t GetCount() const = 0;
+	void Bind() const;
+	void Unbind() const;
 
-	static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t count);
+	uint32_t GetCount() const { return m_Count; };
+
+public:
+	uint32_t m_RendererID = 0;
+	uint32_t m_Count;
 };
+
+
 
 
 

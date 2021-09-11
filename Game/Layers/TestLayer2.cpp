@@ -1,5 +1,6 @@
 
 #include "TestLayer2.h"
+#include <core/Application.h>
 #include <SFML/Window/Event.hpp>
 
 #define BIND_EVENT_FN(x) std::bind(&TestLayer2::x, this, std::placeholders::_1)
@@ -13,6 +14,16 @@ TestLayer2::TestLayer2()
 void TestLayer2::OnAttach()
 {
 	LOG_INFO("TestLayer2 attached");
+
+	// Create a graphical text to display
+	if (!m_Font.loadFromFile("Game/assets/arial.ttf"))
+		LOG_ERROR("TestLayer2 OnAttach: failed to load font");
+
+	// Load a sprite to display
+	sf::Texture texture;
+	if (!texture.loadFromFile("Game/assets/saucer_texture.png"))
+		LOG_ERROR("TestLayer2 OnAttach: failed to load texture");
+	m_Sprite = sf::Sprite(texture);
 }
 
 void TestLayer2::OnDetach()
@@ -39,6 +50,18 @@ void TestLayer2::OnUpdate(Timestep ts)
 		LOG_INFO("TestLayer2 OnUpdate: window mouse position: x: {0}, y: {1}", global_mouse_pos.x, global_mouse_pos.y);
 	}
 
+	// try to display some text
+	/*
+	Window& window = Application::Get().GetWindow();
+	window.GetNativeWindow().pushGLStates();
+	window.GetNativeWindow().resetGLStates();
+	sf::Text text("Hello SFML " + std::to_string((int)(m_ElapsedTime/1000)), m_Font, 50);
+	window.GetNativeWindow().draw(text);
+//	window.GetNativeWindow().draw(m_Sprite);
+	window.GetNativeWindow().popGLStates();
+	*/
+
+	m_ElapsedTime += ts;
 }
 
 void TestLayer2::OnEvent(Event& event)

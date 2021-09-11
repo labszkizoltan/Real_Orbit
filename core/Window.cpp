@@ -34,7 +34,7 @@ uint32_t Window::GetHeight()
 	return m_Props.Height;
 }
 
-sf::Window& Window::GetNativeWindow()
+sf::RenderWindow& Window::GetNativeWindow()
 {
 	return m_Window;
 }

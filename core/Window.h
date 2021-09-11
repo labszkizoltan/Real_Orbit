@@ -9,8 +9,12 @@
 #include "core/Core.h"
 #include "core/events/Event.h"
 
-#include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
+//#include <SFML/Window.hpp>
+// this somehow brings in a windows header, that defines a min/max macro, which then messes up functions in Rect.inl,
+// so the solution is to define NOMINMAX before that windows header, but since I dont know where that is included,
+// I just added it to the whole solution (properties->C/C++ -> preprocessor -> Preprocessor Definitions)
+#include <SFML/Graphics.hpp>
+//#include <SFML/Graphics/RenderWindow.hpp>
 
 struct WindowProps
 {
@@ -18,7 +22,7 @@ struct WindowProps
 	uint32_t Width;
 	uint32_t Height;
 
-	WindowProps(const std::string& title = "Real_Orbit_window", // std::string("Real_Orbit_window")
+	WindowProps(const std::string& title = "Real_Orbit_window",
 		uint32_t width = 800,
 		uint32_t height = 800)
 		: Title(title), Width(width), Height(height) {}
@@ -38,7 +42,7 @@ public:
 	
 	uint32_t GetWidth();
 	uint32_t GetHeight();
-	sf::Window& GetNativeWindow();
+	sf::RenderWindow& GetNativeWindow();
 
 	// Window attributes
 	void SetEventCallback(const EventCallbackFn& callback);
@@ -49,7 +53,7 @@ public:
 
 
 private:
-	sf::Window m_Window; // heres a link on how to construct an SFML window + an opengl context https://www.sfml-dev.org/tutorials/2.5/window-opengl.php
+	sf::RenderWindow m_Window; // heres a link on how to construct an SFML window + an opengl context https://www.sfml-dev.org/tutorials/2.5/window-opengl.php
 	bool m_Vsynced;
 	WindowProps m_Props;
 	EventCallbackFn m_EventFunction;
@@ -58,38 +62,8 @@ private:
 
 
 
-/*
-// this is the window class from the Cherno engine, but this is overkill for what I want to do
-// this is too much abstraction for me, and couldt make it work so far, most likely I will create
-// a non abstracted window class based upon SFML
 
-// Interface representing a desktop sstem based Window
-class Window
-{
-public:
-	using EventCallbackFn = std::function<void(Event&)>;
 
-	Window(const WindowProps& props);
-	virtual ~Window() {}
-
-	virtual void OnUpdate() = 0;
-
-	virtual uint32_t GetWidth() const = 0;
-	virtual uint32_t GetHeight() const = 0;
-
-	// Window attributes
-	virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
-	virtual void SetVSync(bool enabled) = 0;
-	virtual bool IsVSync() const = 0;
-
-	virtual void* GetNativeWindow() const = 0;
-
-//	static Window* Create(const WindowProps& props = WindowProps());
-	//		static Scope<Window> Create(const WindowProps& props = WindowProps());
-
-};
-
-*/
 
 
 
