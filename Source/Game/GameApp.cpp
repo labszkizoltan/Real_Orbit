@@ -9,7 +9,7 @@ class TestApplication : public Application
 public:
 	TestApplication()
 	{
-		PushLayer(new TestLayer());
+//		PushLayer(new TestLayer());
 		PushLayer(new TestLayer2());
 	}
 

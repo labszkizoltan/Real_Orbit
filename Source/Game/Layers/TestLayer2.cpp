@@ -3,6 +3,9 @@
 #include <core/Application.h>
 #include <SFML/Window/Event.hpp>
 
+#include <utils/Vector_3D.h>
+#include <glad/glad.h>
+
 #define BIND_EVENT_FN(x) std::bind(&TestLayer2::x, this, std::placeholders::_1)
 
 TestLayer2::TestLayer2()
@@ -15,8 +18,52 @@ void TestLayer2::OnAttach()
 {
 	LOG_INFO("TestLayer2 attached");
 
+	m_Shader = std::unique_ptr<Shader>(
+		new Shader(
+			ParseShader("Source/core/rendering/shader_source_files/basic_3D_vertex_shd.glsl"),
+			ParseShader("Source/core/rendering/shader_source_files/basic_3D_fragment_shd.glsl")
+		)
+	);
 
+	m_Shader->Bind();
+	m_Shader->UploadUniformFloat("aspect_ratio", 1.0f);
+	m_Shader->UploadUniformFloat("rotation_angle", 0.0f);
+	m_Shader->UploadUniformFloat("offset_x", 0.0f);
+	m_Shader->UploadUniformFloat("offset_y", 0.0f);
 
+	// Hello Tetrahedron //
+	// Vertices with their own color:
+	std::vector<Vec3D> vertices = {
+		{-0.05f, -0.05f, 0.0f}, {1.0f, 0.0f, 0.0f},
+		{0.05f, -0.05f, 0.0f}, {0.0f, 1.0f, 0.0f},
+		{0.0f,  0.05f, 0.0f}, {0.0f, 0.0f, 1.0f},
+		{0.0f,  0.0f, -0.7f}, {1.0f, 1.0f, 0.0f}
+	};
+
+	std::vector<uint32_t> indices = {
+		0, 1, 2,   // first triangle
+		2, 1, 3,    // second triangle
+		0, 2, 3,	// ...
+		1, 0, 3
+	};
+
+	m_Tetrahedron = std::unique_ptr<Mesh>(new Mesh(vertices, indices));
+
+	std::vector<Vec3D> vertices_rect = {
+		{-0.05f, -0.05f, 0.0f}, {1.0f, 0.0f, 0.0f},
+		{-0.05f,  0.05f, 0.0f}, {0.0f, 1.0f, 0.0f},
+		{ 0.05f, -0.05f, 0.0f}, {0.0f, 0.0f, 1.0f},
+		{ 0.05f,  0.05f, 0.0f}, {1.0f, 1.0f, 0.0f}
+	};
+
+	std::vector<uint32_t> indices_rect = {
+		0, 1, 2,   // first triangle
+		1, 2, 3    // second triangle
+	};
+
+	m_Rectangle = std::unique_ptr<Mesh>(new Mesh(vertices_rect, indices_rect));
+
+	glEnable(GL_DEPTH_TEST);
 }
 
 void TestLayer2::OnDetach()
@@ -44,6 +91,32 @@ void TestLayer2::OnUpdate(Timestep ts)
 	}
 
 
+	// Render
+	glClearColor(0.0f, 0.05f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+	int grid_size = 10;
+	for (int i = 1 - grid_size; i < grid_size; i++)
+	{
+		for (int j = 1 - grid_size; j < grid_size; j++)
+		{
+			if ((i + j) % 2 == 0)
+			{
+				m_Shader->UploadUniformFloat("rotation_angle", m_ElapsedTime / 500.0f);
+				m_Shader->UploadUniformFloat("offset_x", (float)i / (float)grid_size);
+				m_Shader->UploadUniformFloat("offset_y", (float)j / (float)grid_size);
+				m_Tetrahedron->Draw();
+			}
+			else
+			{
+				m_Shader->UploadUniformFloat("rotation_angle", -m_ElapsedTime/500.0f);
+				m_Shader->UploadUniformFloat("offset_x", (float)i / (float)grid_size);
+				m_Shader->UploadUniformFloat("offset_y", (float)j / (float)grid_size);
+				m_Rectangle->Draw();
+			}
+		}
+	}
 
 	m_ElapsedTime += ts;
 }

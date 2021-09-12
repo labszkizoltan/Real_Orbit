@@ -2,6 +2,7 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+#include <core/rendering/ShaderLibrary.h>
 #include <glad/glad.h>
 #include <iostream>
 
@@ -33,17 +34,16 @@ static bool GLLogCall(const char* function, const char* file, int line)
 class Renderer
 {
 public:
+	Renderer() = default;
+	~Renderer();
 
 	static int Init();
 //	static something Draw();
-	static void SetAspectRatio();
-
-
+	static void SetAspectRatio(float aspect_ratio);
 
 private:
-	float m_AspectRatio;
-//	ShaderLibrary m_ShaderLibrary;
-
+	static float s_AspectRatio;
+	static ShaderLibrary s_ShaderLibrary;
 
 };
 

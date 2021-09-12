@@ -100,6 +100,12 @@ Shader::~Shader()
 	glDeleteProgram(m_RendererID);
 }
 
+GLint Shader::GetUniformLocation(const std::string& uniformName)
+{
+	GLint loc = glGetUniformLocation(m_RendererID, uniformName.c_str());
+	return GLint();
+}
+
 void Shader::Bind() const
 {
 	glUseProgram(m_RendererID);

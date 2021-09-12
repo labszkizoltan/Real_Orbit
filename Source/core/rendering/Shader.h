@@ -27,6 +27,8 @@ public:
 	Shader& operator=(Shader&& other) noexcept; // move assignment
 	~Shader();
 
+	GLint GetUniformLocation(const std::string& uniformName);
+
 	void Bind() const;
 	void Unbind() const;
 

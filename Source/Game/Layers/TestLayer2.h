@@ -5,6 +5,8 @@
 #include <core/Core.h>
 #include <core/Layer.h>
 
+#include <core/rendering/Shader.h>
+#include <core/rendering/drawables/Mesh.h>
 
 class TestLayer2 : public Layer
 {
@@ -32,7 +34,9 @@ private:
 
 private:
 	float m_ElapsedTime = 0.0f;
-
+	std::unique_ptr<Mesh> m_Tetrahedron = nullptr;
+	std::unique_ptr<Mesh> m_Rectangle = nullptr;
+	std::unique_ptr<Shader> m_Shader = nullptr;
 };
 
 

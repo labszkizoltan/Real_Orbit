@@ -104,7 +104,6 @@ void VertexBuffer::SetLayout()
 
 	for (int i = 0; i < m_Layout.m_Elements.size(); i++)
 	{
-		glEnableVertexAttribArray(index);
 		glVertexAttribPointer(
 			index,
 			m_Layout.m_Elements[i].GetComponentCount(),
@@ -113,6 +112,7 @@ void VertexBuffer::SetLayout()
 			m_Layout.GetStride(),
 			(const void*)m_Layout.m_Elements[i].Offset
 		);
+		glEnableVertexAttribArray(index);
 		index++;
 	}
 
