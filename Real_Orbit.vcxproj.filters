@@ -84,6 +84,15 @@
     <ClInclude Include="Source\core\rendering\drawables\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\core\rendering\drawables\ColouredMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\rendering\shader_source_files\basic_3D_shaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\rendering\shader_source_files\ShaderSourceCollection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Game\GameApp.cpp">
@@ -147,6 +156,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\core\rendering\VertexArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\rendering\drawables\ColouredMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\core\rendering\drawables\Mesh.cpp">

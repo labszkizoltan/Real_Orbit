@@ -3,6 +3,7 @@
 #define RENDERER_H
 
 #include <core/rendering/ShaderLibrary.h>
+#include <core/rendering/drawables/Mesh.h>
 #include <glad/glad.h>
 #include <iostream>
 
@@ -38,7 +39,10 @@ public:
 	~Renderer();
 
 	static int Init();
-//	static something Draw();
+	static void Draw(Mesh* mesh);
+	static void Draw(Mesh* mesh, float rotation_angle, float offset_x, float offset_y); // temporary draw function, remove later!!
+
+//	static void Draw(Entity entity);
 	static void SetAspectRatio(float aspect_ratio);
 
 private:

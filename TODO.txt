@@ -1,0 +1,35 @@
+
+Currently the renderers shader library can be populated with sahders. All mesh classes will have a function that returns their type
+and the renderer would bind the appropriate shader based on this type then call the draw function of the mesh (which would populate the uniforms in the shader).->
+-> There is a little problem here, the mesh would need to upload the uniforms, but for that it would need a pointer or reference to the bound shader. I can make
+a draw function that takes a shader parameter and in the meshes draw call use it to upload the uniforms, but this solution feels like it would entangle parts
+of the code that shouldnt be entangled.
+
+This function can query the currently bound texture (https://gamedev.stackexchange.com/questions/79075/how-to-obtain-the-currently-bound-texture-id-in-an-opengl-es-2-0-project):
+GLint whichID;
+glGetIntegerv(GL_TEXTURE_BINDING_2D, &whichID);
+
+And this one do the same for shader (https://community.khronos.org/t/how-do-i-get-restore-the-current-shader/67005)
+GLint id;
+glGetIntegerv(GL_CURRENT_PROGRAM,&id);
+
+This feels somewhat fragile, because populating the shader library and binding shaders based on mesh type needs to be consistent, which could break.
+I dont know how well this is going to work, maybe with sufficiently low number of shaders and mesh types this is okay, or maybe with a few simple checks
+the inconsistencies can be revealed more easily. I will see...
+
+
+
+Or... Perhaps I should set up the ECS first. Then the entities would have a draw function. The draw function would bind or just select the shader from the library based on the
+entities material. In this case it would already have access to the appropriate shader, so uploading other uniforms based on other components of the entiyt might be easier.
+
+
+
+
+
+
+
+
+
+
+
+

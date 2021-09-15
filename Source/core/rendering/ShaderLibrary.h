@@ -3,6 +3,7 @@
 #define SHADER_LIBRARY_H
 
 #include <core/rendering/Shader.h>
+#include <core/rendering/drawables/Mesh.h>
 #include <vector>
 
 class ShaderLibrary
@@ -16,8 +17,13 @@ public:
 
 	void SetAspectRatio(float aspectRatio);
 
+	void BindShader(MeshType meshType);
+	Shader* GetLastBoundShader();
+
+
 private:
-	std::vector<Shader*> m_Shaders;
+	std::vector<Shader*> m_Shaders; // this may need to be changed to a map, or unordered map, where the shader can be selected based on MeshType
+	Shader* m_LastBoundShader = nullptr;
 
 };
 

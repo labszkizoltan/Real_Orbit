@@ -2,6 +2,8 @@
 #include "TestLayer2.h"
 #include <core/Application.h>
 #include <SFML/Window/Event.hpp>
+#include <core/rendering/Renderer.h>
+#include <core/rendering/drawables/ColouredMesh.h>
 
 #include <utils/Vector_3D.h>
 #include <glad/glad.h>
@@ -18,7 +20,7 @@ void TestLayer2::OnAttach()
 {
 	LOG_INFO("TestLayer2 attached");
 
-	m_Shader = std::unique_ptr<Shader>(
+	m_Shader = std::shared_ptr<Shader>(
 		new Shader(
 			ParseShader("Source/core/rendering/shader_source_files/basic_3D_vertex_shd.glsl"),
 			ParseShader("Source/core/rendering/shader_source_files/basic_3D_fragment_shd.glsl")
@@ -47,7 +49,7 @@ void TestLayer2::OnAttach()
 		1, 0, 3
 	};
 
-	m_Tetrahedron = std::unique_ptr<Mesh>(new Mesh(vertices, indices));
+	m_Tetrahedron = std::shared_ptr<Mesh>(new ColouredMesh(vertices, indices));
 
 	std::vector<Vec3D> vertices_rect = {
 		{-0.05f, -0.05f, 0.0f}, {1.0f, 0.0f, 0.0f},
@@ -61,7 +63,7 @@ void TestLayer2::OnAttach()
 		1, 2, 3    // second triangle
 	};
 
-	m_Rectangle = std::unique_ptr<Mesh>(new Mesh(vertices_rect, indices_rect));
+	m_Rectangle = std::shared_ptr<Mesh>(new ColouredMesh(vertices_rect, indices_rect));
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -103,13 +105,15 @@ void TestLayer2::OnUpdate(Timestep ts)
 		{
 			if ((i + j) % 2 == 0)
 			{
-				m_Shader->UploadUniformFloat("rotation_angle", m_ElapsedTime / 500.0f);
-				m_Shader->UploadUniformFloat("offset_x", (float)i / (float)grid_size);
-				m_Shader->UploadUniformFloat("offset_y", (float)j / (float)grid_size);
-				m_Tetrahedron->Draw();
+//				m_Shader->UploadUniformFloat("rotation_angle", m_ElapsedTime / 500.0f);
+//				m_Shader->UploadUniformFloat("offset_x", (float)i / (float)grid_size);
+//				m_Shader->UploadUniformFloat("offset_y", (float)j / (float)grid_size);
+//				m_Tetrahedron->Draw();
+				Renderer::Draw(m_Tetrahedron.get(), m_ElapsedTime / 500.0f, (float)i / (float)grid_size, (float)j / (float)grid_size);
 			}
 			else
 			{
+				m_Shader->Bind();
 				m_Shader->UploadUniformFloat("rotation_angle", -m_ElapsedTime/500.0f);
 				m_Shader->UploadUniformFloat("offset_x", (float)i / (float)grid_size);
 				m_Shader->UploadUniformFloat("offset_y", (float)j / (float)grid_size);
@@ -125,6 +129,7 @@ void TestLayer2::OnEvent(Event& event)
 {
 	LOG_INFO("TestLayer2 event received");
 
+	event.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
 	event.Dispatch<sf::Event::EventType::LostFocus>				(BIND_EVENT_FN(OnLoosingFocus));
 	event.Dispatch<sf::Event::EventType::GainedFocus>			(BIND_EVENT_FN(OnGainingFocus));
 	event.Dispatch<sf::Event::EventType::KeyPressed>			(BIND_EVENT_FN(OnKeyPressed));
@@ -138,6 +143,15 @@ void TestLayer2::OnEvent(Event& event)
 /***********************************
 ***** Private member functions *****
 ************************************/
+
+bool TestLayer2::OnWindowResize(Event& e)
+{
+	sf::Event& event = e.GetEvent();
+	LOG_CORE_INFO("Window Resize event captured in TestLayer2: width - {0}, height - {1}", event.size.width, event.size.height);
+	m_Shader->Bind();
+	m_Shader->UploadUniformFloat("aspect_ratio", (float)event.size.width/(float)event.size.height);
+	return false;
+}
 
 bool TestLayer2::OnLoosingFocus(Event& e)
 {

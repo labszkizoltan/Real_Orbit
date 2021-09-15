@@ -139,17 +139,11 @@ bool Application::OnWindowResize(Event& e)
 
 	// adjust the viewport when the window is resized
 	glViewport(0, 0, event.size.width, event.size.height);
+	Renderer::SetAspectRatio((float)event.size.width / (float)event.size.height);
 
-	//	if (e.GetWidth() == 0 || e.GetHeight() == 0)
-	//	{
-	//		m_Minimized = true;
-	//		return false;
-	//	}
-	//
-	//	m_Minimized = false;
-	//	Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
-
-	return true;
+	// Temporarly setting this to false, otherwise this event cant propagate to TestLayer2 and the aspect ratio cannot be changed upon window resizing
+//	return true;
+	return false;
 }
 
 bool Application::OnLoosingFocus(Event& e)

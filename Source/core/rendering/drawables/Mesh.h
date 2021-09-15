@@ -2,25 +2,24 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include <core/rendering/VertexArray.h>
 #include <core/rendering/Buffer.h>
-#include <utils/Vector_3D.h>
+
+// each mesh type has a fixed layout, and a corresponding shader that can draw it
+enum class MeshType
+{
+	COLOURED_MESH
+};
 
 class Mesh
 {
 public:
-	Mesh();
-	Mesh(const std::vector<Vec3D>& vertexAndColorData, const std::vector<uint32_t>& indexData);
-//	Mesh(const std::string& filename);
-	~Mesh();
+	virtual ~Mesh() {};
 
-	void Draw();
+	virtual void Draw() = 0;
+	virtual MeshType GetMeshType() = 0;
+	virtual BufferLayout GetBufferLayout() = 0;
 
-private:
-	VertexArray m_VertexArray;
-	VertexBuffer m_VertexBuffer;
-	IndexBuffer m_IndexBuffer;
-
+	static std::unique_ptr<Mesh> Create(MeshType type);
 };
 
 

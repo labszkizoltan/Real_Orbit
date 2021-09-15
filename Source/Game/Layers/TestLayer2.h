@@ -20,6 +20,7 @@ public:
 	virtual void OnEvent(Event& event) override;
 
 private:
+	bool OnWindowResize(Event& e);
 	bool OnLoosingFocus(Event& e);
 	bool OnGainingFocus(Event& e);
 	bool OnTextEntered(Event& e);
@@ -34,9 +35,9 @@ private:
 
 private:
 	float m_ElapsedTime = 0.0f;
-	std::unique_ptr<Mesh> m_Tetrahedron = nullptr;
-	std::unique_ptr<Mesh> m_Rectangle = nullptr;
-	std::unique_ptr<Shader> m_Shader = nullptr;
+	std::shared_ptr<Mesh> m_Tetrahedron = nullptr;
+	std::shared_ptr<Mesh> m_Rectangle = nullptr;
+	std::shared_ptr<Shader> m_Shader = nullptr;
 };
 
 
