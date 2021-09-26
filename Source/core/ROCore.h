@@ -1,6 +1,6 @@
 
-#ifndef CORE_H
-#define CORE_H
+#ifndef ROCORE_H
+#define ROCORE_H
 
 #include <core/Log.h>
 #include <core/Events/Event.h>
@@ -19,4 +19,4 @@
 
 
 
-#endif // CORE_H
+#endif // ROCORE_H

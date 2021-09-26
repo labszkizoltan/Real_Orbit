@@ -2,7 +2,7 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include <core/Core.h>
+#include <core/ROCore.h>
 #include <core/pch/pch.h>
 #include <SFML/Window/Event.hpp>
 

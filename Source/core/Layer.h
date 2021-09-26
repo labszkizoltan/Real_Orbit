@@ -3,7 +3,7 @@
 #define LAYER_H
 
 #include <string>
-#include <core/Core.h>
+#include <core/ROCore.h>
 
 class Layer
 {

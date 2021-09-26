@@ -15,14 +15,10 @@ int Renderer::Init()
 	if (!result)
 		std::cout << "Failed to initialize OpenGL context\n";
 
-//	// MeshType::COLOURED_MESH
-//	s_ShaderLibrary.AddShader(
-//		ParseShader("Source/core/rendering/shader_source_files/basic_3D_vertex_shd.glsl"),
-//		ParseShader("Source/core/rendering/shader_source_files/basic_3D_fragment_shd.glsl")
-//	);
-
 	// MeshType::COLOURED_MESH
 	s_ShaderLibrary.AddShader(
+//		ParseShader("Source/core/rendering/shader_source_files/basic_3D_vertex_shd.glsl"),
+//		ParseShader("Source/core/rendering/shader_source_files/basic_3D_fragment_shd.glsl")
 		std::string(basic_3d_shader_vertexSrc),
 		std::string(basic_3d_shader_fragmentSrc)
 	);

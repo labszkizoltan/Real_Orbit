@@ -3,7 +3,7 @@
 #define LOG_H
 
 #include <core/pch/pch.h>
-#include <core/Core.h>
+#include <core/ROCore.h>
 #include <vendor/spdlog/include/spdlog/spdlog.h>
 #include <vendor/spdlog/include/spdlog/fmt/ostr.h>
 

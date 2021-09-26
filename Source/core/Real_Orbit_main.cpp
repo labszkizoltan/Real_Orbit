@@ -1,7 +1,7 @@
 
 #include <iostream>
 
-#include <core/Core.h>
+#include <core/ROCore.h>
 #include <core/Application.h>
 #include <core/Log.h>
 
