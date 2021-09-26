@@ -20,6 +20,8 @@ void TestLayer2::OnAttach()
 {
 	LOG_INFO("TestLayer2 attached");
 
+	// when the compiled exe file is directly used, these shader files are not found, so the shader
+	// is invalid and everything that should be drawn with it will be corrupted
 	m_Shader = std::shared_ptr<Shader>(
 		new Shader(
 			ParseShader("Source/core/rendering/shader_source_files/basic_3D_vertex_shd.glsl"),
@@ -113,11 +115,12 @@ void TestLayer2::OnUpdate(Timestep ts)
 			}
 			else
 			{
-				m_Shader->Bind();
-				m_Shader->UploadUniformFloat("rotation_angle", -m_ElapsedTime/500.0f);
-				m_Shader->UploadUniformFloat("offset_x", (float)i / (float)grid_size);
-				m_Shader->UploadUniformFloat("offset_y", (float)j / (float)grid_size);
-				m_Rectangle->Draw();
+//				m_Shader->Bind();
+//				m_Shader->UploadUniformFloat("rotation_angle", -m_ElapsedTime/500.0f);
+//				m_Shader->UploadUniformFloat("offset_x", (float)i / (float)grid_size);
+//				m_Shader->UploadUniformFloat("offset_y", (float)j / (float)grid_size);
+//				m_Rectangle->Draw();
+				Renderer::Draw(m_Rectangle.get(), -m_ElapsedTime / 500.0f, (float)i / (float)grid_size, (float)j / (float)grid_size);
 			}
 		}
 	}

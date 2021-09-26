@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC ;NOMINMAX;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit;D:\cpp_codes\37_RealOrbit\Real_Orbit\Source;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,7 +139,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC ;NOMINMAX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit;D:\cpp_codes\37_RealOrbit\Real_Orbit\Source;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\include;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
