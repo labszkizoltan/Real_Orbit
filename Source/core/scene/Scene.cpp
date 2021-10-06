@@ -17,8 +17,8 @@ Scene::~Scene()
 Entity Scene::CreateEntity(const std::string& name)
 {
 	Entity entity = { m_Registry.create(), this };
-	entity.AddComponent<TransformComponent>();
-	auto& tag = entity.AddComponent<TagComponent>();
+//	entity.AddComponent<TransformComponent>();
+	TagComponent& tag = entity.AddComponent<TagComponent>();
 	tag.Tag = name.empty() ? "UnnamedEntity" : name;
 
 	return entity;

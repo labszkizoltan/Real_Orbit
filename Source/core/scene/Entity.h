@@ -3,7 +3,7 @@
 #define ENTITY_H
 
 #include <core/scene/Scene.h>
-#include <core/ROCore.h>
+#include <core/Core.h>
 #include <entt/entt.hpp>
 
 class Entity
@@ -40,7 +40,7 @@ private:
 template<typename T, typename... Args>
 T& Entity::AddComponent(Args&&... args)
 {
-	if (!HasComponent<T>())
+	if (HasComponent<T>())
 		LOG_CORE_WARN("Entity::AddComponent() warning: Entity already has component!");
 	return m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
 }
@@ -48,7 +48,8 @@ T& Entity::AddComponent(Args&&... args)
 template<typename T>
 T& Entity::GetComponent()
 {
-	LOG_CORE_WARN("Entity::GetComponent() warning: Entity does not have component!");
+	if(!HasComponent<T>())
+		LOG_CORE_WARN("Entity::GetComponent() warning: Entity does not have component!");
 	return m_Scene->m_Registry.get<T>(m_EntityHandle);
 }
 
@@ -56,7 +57,6 @@ template<typename T>
 bool Entity::HasComponent()
 {
 	return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
-	return false;
 }
 
 template<typename T>

@@ -4,6 +4,7 @@
 
 // #include <glm/glm.hpp>
 #include <string>
+#include <core/rendering/drawables/Mesh.h>
 
 struct TagComponent
 {
@@ -18,7 +19,7 @@ struct TagComponent
 
 struct TransformComponent
 {
-	float x, y;
+	float x, y, rotation;
 //	glm::mat4 Transform = glm::mat4(1.0f);
 //
 //	TransformComponent() = default;
@@ -28,6 +29,11 @@ struct TransformComponent
 //
 //	operator const glm::mat4& () const { return Transform; } // this is like an implicit cast so the TransformComponent struct can be passed as a glm::mat4 to functions
 //	operator glm::mat4& () { return Transform; }
+};
+
+struct MeshComponent
+{
+	std::shared_ptr<Mesh> meshPtr;
 };
 
 //struct CameraComponent

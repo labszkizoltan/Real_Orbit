@@ -182,7 +182,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\core\Application.h" />
-    <ClInclude Include="Source\core\ROCore.h" />
+    <ClInclude Include="Source\core\Core.h" />
     <ClInclude Include="Source\core\events\Event.h" />
     <ClInclude Include="Source\core\Input.h" />
     <ClInclude Include="Source\core\Layer.h" />

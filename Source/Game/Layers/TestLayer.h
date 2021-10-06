@@ -2,7 +2,7 @@
 #ifndef TEST_LAYER_H
 #define TEST_LAYER_H
 
-#include <core/ROCore.h>
+#include <core/Core.h>
 #include <core/Layer.h>
 
 class TestLayer : public Layer

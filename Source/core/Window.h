@@ -6,7 +6,7 @@
 #include <functional>
 
 #include "core/pch/pch.h"
-#include "core/ROCore.h"
+#include "core/Core.h"
 #include "core/events/Event.h"
 
 //#include <SFML/Window.hpp>

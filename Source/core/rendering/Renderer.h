@@ -4,6 +4,7 @@
 
 #include <core/rendering/ShaderLibrary.h>
 #include <core/rendering/drawables/Mesh.h>
+#include <core/scene/Entity.h>
 #include <glad/glad.h>
 #include <iostream>
 
@@ -42,8 +43,12 @@ public:
 	static void Draw(Mesh* mesh);
 	static void Draw(Mesh* mesh, float rotation_angle, float offset_x, float offset_y); // temporary draw function, remove later!!
 
-//	static void Draw(Entity entity);
+	static void Draw(Entity entity);
 	static void SetAspectRatio(float aspect_ratio);
+
+	// a few helper function could go here, like something that uploads various uniform combinations into the shaders
+private:
+
 
 private:
 	static float s_AspectRatio;

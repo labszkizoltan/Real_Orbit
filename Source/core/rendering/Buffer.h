@@ -2,7 +2,7 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#include <core/ROCore.h>
+#include <core/Core.h>
 
 enum class ShaderDataType
 {

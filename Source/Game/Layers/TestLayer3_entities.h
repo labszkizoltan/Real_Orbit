@@ -2,7 +2,7 @@
 #ifndef TEST_LAYER_3_ENTITIES_H
 #define TEST_LAYER_3_ENTITIES_H
 
-#include <core/ROCore.h>
+#include <core/Core.h>
 #include <core/Layer.h>
 
 #include <core/scene/Scene.h>

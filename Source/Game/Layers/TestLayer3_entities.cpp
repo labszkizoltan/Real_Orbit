@@ -4,6 +4,7 @@
 #include <SFML/Window/Event.hpp>
 #include <core/rendering/Renderer.h>
 #include <core/rendering/drawables/ColouredMesh.h>
+#include <core/scene/Components.h>
 
 #include <utils/Vector_3D.h>
 #include <glad/glad.h>
@@ -52,6 +53,28 @@ void TestLayer3::OnAttach()
 
 	m_Rectangle = std::shared_ptr<Mesh>(new ColouredMesh(vertices_rect, indices_rect));
 
+
+	// construct the scene and the entities
+
+	m_Scene = std::shared_ptr<Scene>(new Scene());
+
+	m_TetrahedronEntity = m_Scene->CreateEntity("Tetrahedron");
+	m_RectangleEntity = m_Scene->CreateEntity("Rectangle");
+
+	m_TetrahedronEntity.AddComponent<TransformComponent>(TransformComponent({ 0, 0, 0 }));
+	m_RectangleEntity.AddComponent<TransformComponent>(TransformComponent({ 0, 0.1f, 0 }));
+
+	MeshComponent tetrahedron_mesh_component; tetrahedron_mesh_component.meshPtr = m_Tetrahedron;
+	MeshComponent rectangle_mesh_component; rectangle_mesh_component.meshPtr = m_Rectangle;
+	m_TetrahedronEntity.AddComponent<MeshComponent>(tetrahedron_mesh_component);
+	m_RectangleEntity.AddComponent<MeshComponent>(rectangle_mesh_component);
+
+
+	//	m_TetrahedronEntity.AddComponent<std::shared_ptr<Mesh>>(m_Tetrahedron);
+	//	m_RectangleEntity.AddComponent<std::shared_ptr<Mesh>>(m_Rectangle);
+
+
+
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -68,18 +91,28 @@ void TestLayer3::OnUpdate(Timestep ts)
 	glClearColor(0.0f, 0.05f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	int grid_size = 10;
+	int grid_size = 12;
 	for (int i = 1 - grid_size; i < grid_size; i++)
 	{
 		for (int j = 1 - grid_size; j < grid_size; j++)
 		{
 			if ((i + j) % 2 == 0)
 			{
-				Renderer::Draw(m_Tetrahedron.get(), m_ElapsedTime / 500.0f, (float)i / (float)grid_size, (float)j / (float)grid_size);
+				// Renderer::Draw(m_Tetrahedron.get(), m_ElapsedTime / 500.0f, (float)i / (float)grid_size, (float)j / (float)grid_size);
+				TransformComponent& trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
+				trf.rotation = m_ElapsedTime / 500.0f;
+				trf.x = (float)i / (float)grid_size;
+				trf.y = (float)j / (float)grid_size;
+				Renderer::Draw(m_TetrahedronEntity);
 			}
 			else
 			{
-				Renderer::Draw(m_Rectangle.get(), -m_ElapsedTime / 500.0f, (float)i / (float)grid_size, (float)j / (float)grid_size);
+				//Renderer::Draw(m_Rectangle.get(), -m_ElapsedTime / 500.0f, (float)i / (float)grid_size, (float)j / (float)grid_size);
+				TransformComponent& trf = m_RectangleEntity.GetComponent<TransformComponent>();
+				trf.rotation = -m_ElapsedTime / 500.0f;
+				trf.x = (float)i / (float)grid_size;
+				trf.y = (float)j / (float)grid_size;
+				Renderer::Draw(m_RectangleEntity);
 			}
 		}
 	}
