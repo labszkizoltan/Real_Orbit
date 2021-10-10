@@ -97,6 +97,7 @@ Shader& Shader::operator=(Shader&& other) noexcept
 
 Shader::~Shader()
 {
+	std::cout << "Shader destroyed: " << m_RendererID << "\n";
 	glDeleteProgram(m_RendererID);
 }
 

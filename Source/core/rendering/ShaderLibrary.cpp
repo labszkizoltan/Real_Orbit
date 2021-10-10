@@ -4,6 +4,13 @@ ShaderLibrary::~ShaderLibrary()
 {
 	// when the std::vector is destroyed, it should call the destructor on each of its element
 	// so I think it is fine to have this empty
+	// -> update, now I dont think it's fine, so I explicitely call the destructors, but as I read about the topic,
+	// this is bad : https://stackoverflow.com/questions/14187006/is-calling-destructor-manually-always-a-sign-of-bad-design
+
+	for (int i = 0; i < m_Shaders.size(); i++)
+	{
+		m_Shaders[i]->~Shader();
+	}
 }
 
 void ShaderLibrary::AddShader(Shader* shader)
@@ -25,11 +32,22 @@ void ShaderLibrary::SetAspectRatio(float aspectRatio)
 	}
 }
 
-void ShaderLibrary::BindShader(MeshType meshType)
+void ShaderLibrary::SetCamera(TransformComponent camera_transform)
+{
+	for (int i = 0; i < m_Shaders.size(); i++)
+	{
+		m_Shaders[i]->Bind();
+		m_Shaders[i]->UploadUniformFloat3("camera_location", camera_transform.location.Glm());
+		m_Shaders[i]->UploadUniformMat3("camera_orientation", camera_transform.orientation.Glm());
+	}
+	m_LastBoundShader = m_Shaders[m_Shaders.size()-1];
+}
+
+Shader* ShaderLibrary::BindShader(MeshType meshType)
 {
 	switch (meshType)
 	{
-	case MeshType::COLOURED_MESH:	m_Shaders[0]->Bind(); m_LastBoundShader = m_Shaders[0]; return;
+	case MeshType::COLOURED_MESH:	m_Shaders[0]->Bind(); m_LastBoundShader = m_Shaders[0]; return m_LastBoundShader;
 	}
 
 	LOG_CORE_INFO("MeshType not recognized, cannot bind shader");

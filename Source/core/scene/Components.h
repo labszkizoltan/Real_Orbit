@@ -4,7 +4,9 @@
 
 // #include <glm/glm.hpp>
 #include <string>
+#include <utils/Matrix_3D.h>
 #include <core/rendering/drawables/Mesh.h>
+
 
 struct TagComponent
 {
@@ -19,7 +21,9 @@ struct TagComponent
 
 struct TransformComponent
 {
-	float x, y, rotation;
+	Vec3D location;
+	Mat_3D orientation;
+
 //	glm::mat4 Transform = glm::mat4(1.0f);
 //
 //	TransformComponent() = default;

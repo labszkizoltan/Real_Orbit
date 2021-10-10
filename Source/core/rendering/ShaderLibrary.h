@@ -4,6 +4,7 @@
 
 #include <core/rendering/Shader.h>
 #include <core/rendering/drawables/Mesh.h>
+#include <core/scene/Components.h>
 #include <vector>
 
 class ShaderLibrary
@@ -16,8 +17,9 @@ public:
 	void AddShader(const std::string& vertexSrc, const std::string& fragmentSrc);
 
 	void SetAspectRatio(float aspectRatio);
+	void SetCamera(TransformComponent camera_transform);
 
-	void BindShader(MeshType meshType);
+	Shader* BindShader(MeshType meshType);
 	Shader* GetLastBoundShader();
 
 

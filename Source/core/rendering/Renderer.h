@@ -5,6 +5,7 @@
 #include <core/rendering/ShaderLibrary.h>
 #include <core/rendering/drawables/Mesh.h>
 #include <core/scene/Entity.h>
+#include <core/scene/Components.h>
 #include <glad/glad.h>
 #include <iostream>
 
@@ -45,6 +46,8 @@ public:
 
 	static void Draw(Entity entity);
 	static void SetAspectRatio(float aspect_ratio);
+	static void SetCamera(TransformComponent camera_transform);
+
 
 	// a few helper function could go here, like something that uploads various uniform combinations into the shaders
 private:

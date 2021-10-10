@@ -99,10 +99,10 @@
     <ClInclude Include="Source\core\scene\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Game\Layers\TestLayer3_entities.h">
+    <ClInclude Include="Source\core\Core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\core\Core.h">
+    <ClInclude Include="Source\Game\Layers\TestLayer4_perspCamTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -182,7 +182,7 @@
     <ClCompile Include="Source\core\scene\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Game\Layers\TestLayer3_entities.cpp">
+    <ClCompile Include="Source\Game\Layers\TestLayer4_perspCamTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

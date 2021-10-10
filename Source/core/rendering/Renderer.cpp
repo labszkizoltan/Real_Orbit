@@ -20,8 +20,12 @@ int Renderer::Init()
 	s_ShaderLibrary.AddShader(
 //		ParseShader("Source/core/rendering/shader_source_files/basic_3D_vertex_shd.glsl"),
 //		ParseShader("Source/core/rendering/shader_source_files/basic_3D_fragment_shd.glsl")
-		std::string(basic_3d_shader_vertexSrc),
-		std::string(basic_3d_shader_fragmentSrc)
+
+//		std::string(basic_3d_shader_vertexSrc),
+//		std::string(basic_3d_shader_fragmentSrc)
+
+		std::string(perspective_3d_shader_vertexSrc),
+		std::string(perspective_3d_shader_fragmentSrc)
 	);
 
 
@@ -34,6 +38,11 @@ int Renderer::Init()
 
 
 	SetAspectRatio(s_AspectRatio);
+
+	TransformComponent camera_trf;
+	camera_trf.location = Vec3D({ 0,0,-1 });
+	camera_trf.orientation = Identity(1.0f);
+	SetCamera(camera_trf);
 
 	return result;
 }
@@ -72,26 +81,28 @@ void Renderer::Draw(Mesh* mesh)
 
 void Renderer::Draw(Entity entity)
 {
-	TransformComponent& trf = entity.GetComponent<TransformComponent>();
-	MeshComponent& mesh = entity.GetComponent<MeshComponent>();
-//	LOG_CORE_INFO("Transform component = {0}, {1}, {2}; mesh type = {3}", trf.x, trf.y, trf.rotation, (int)mesh.meshPtr->GetMeshType());
-	s_ShaderLibrary.BindShader(mesh.meshPtr->GetMeshType()); //	MeshType::COLOURED_MESH
+	// check if the required components are there, otherwise skip the function body
+	if (entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
+	{
+		TransformComponent& trf = entity.GetComponent<TransformComponent>();
+		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
+		//	LOG_CORE_INFO("Transform component = {0}, {1}, {2}; mesh type = {3}", trf.x, trf.y, trf.rotation, (int)mesh.meshPtr->GetMeshType());
 
-	GLint whichID;
-	glGetIntegerv(GL_CURRENT_PROGRAM, &whichID);
+		Shader* shader = s_ShaderLibrary.BindShader(mesh.meshPtr->GetMeshType()); //	MeshType::COLOURED_MESH
+		shader->UploadUniformFloat3("body_location", trf.location.Glm());
+		shader->UploadUniformMat3("body_orientation", trf.orientation.Glm());
 
-	GLint loc = glGetUniformLocation(whichID, "rotation_angle");
-	glUniform1f(loc, trf.rotation);
-	loc = glGetUniformLocation(whichID, "offset_x");
-	glUniform1f(loc, trf.x);
-	loc = glGetUniformLocation(whichID, "offset_y");
-	glUniform1f(loc, trf.y);
-
-	mesh.meshPtr->Draw();
+		mesh.meshPtr->Draw();
+	}
 }
 
 void Renderer::SetAspectRatio(float aspect_ratio)
 {
 	s_AspectRatio = aspect_ratio;
 	s_ShaderLibrary.SetAspectRatio(aspect_ratio);
+}
+
+void Renderer::SetCamera(TransformComponent camera_transform)
+{
+	s_ShaderLibrary.SetCamera(camera_transform);
 }
