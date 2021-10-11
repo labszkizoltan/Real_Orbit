@@ -13,19 +13,19 @@ public:
 	ShaderLibrary() = default;
 	~ShaderLibrary();
 
-	void AddShader(Shader* shader);
+	void AddShader(std::shared_ptr<Shader> shader);
 	void AddShader(const std::string& vertexSrc, const std::string& fragmentSrc);
 
 	void SetAspectRatio(float aspectRatio);
 	void SetCamera(TransformComponent camera_transform);
 
-	Shader* BindShader(MeshType meshType);
-	Shader* GetLastBoundShader();
+	std::shared_ptr<Shader> BindShader(MeshType meshType);
+	std::shared_ptr<Shader> GetLastBoundShader();
 
 
 private:
-	std::vector<Shader*> m_Shaders; // this may need to be changed to a map, or unordered map, where the shader can be selected based on MeshType
-	Shader* m_LastBoundShader = nullptr;
+	std::vector<std::shared_ptr<Shader>> m_Shaders; // this may need to be changed to a map, or unordered map, where the shader can be selected based on MeshType
+	std::shared_ptr<Shader> m_LastBoundShader = nullptr;
 
 };
 

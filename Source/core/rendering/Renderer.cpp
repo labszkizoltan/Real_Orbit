@@ -88,7 +88,7 @@ void Renderer::Draw(Entity entity)
 		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
 		//	LOG_CORE_INFO("Transform component = {0}, {1}, {2}; mesh type = {3}", trf.x, trf.y, trf.rotation, (int)mesh.meshPtr->GetMeshType());
 
-		Shader* shader = s_ShaderLibrary.BindShader(mesh.meshPtr->GetMeshType()); //	MeshType::COLOURED_MESH
+		std::shared_ptr<Shader> shader = s_ShaderLibrary.BindShader(mesh.meshPtr->GetMeshType()); //	MeshType::COLOURED_MESH
 		shader->UploadUniformFloat3("body_location", trf.location.Glm());
 		shader->UploadUniformMat3("body_orientation", trf.orientation.Glm());
 
