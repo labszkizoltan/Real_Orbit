@@ -35,6 +35,8 @@ private:
 	bool OnMouseEntered(Event& e);
 	bool OnMouseLeft(Event& e);
 
+	void HandleUserInput(Timestep ts);
+
 private:
 	float m_ElapsedTime = 0.0f;
 	std::shared_ptr<Mesh> m_Tetrahedron = nullptr;

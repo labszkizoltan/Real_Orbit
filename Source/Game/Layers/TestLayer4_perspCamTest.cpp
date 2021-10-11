@@ -53,7 +53,6 @@ void TestLayer4::OnAttach()
 
 	m_Rectangle = std::shared_ptr<Mesh>(new ColouredMesh(vertices_rect, indices_rect));
 
-
 	// construct the scene and the entities
 	TransformComponent cam_trf;
 	cam_trf.location = Vec3D({ 0.0f,0.0f,-1.0f });
@@ -83,7 +82,6 @@ void TestLayer4::OnAttach()
 	m_RectangleEntity.AddComponent<MeshComponent>(rectangle_mesh_component);
 
 	glEnable(GL_DEPTH_TEST);
-//	glDisable(GL_CULL_FACE);
 }
 
 void TestLayer4::OnDetach()
@@ -94,6 +92,8 @@ void TestLayer4::OnDetach()
 void TestLayer4::OnUpdate(Timestep ts)
 {
 	//	LOG_INFO("TestLayer4 updated");
+
+	HandleUserInput(ts);
 
 	// Render
 	glClearColor(0.0f, 0.05f, 0.3f, 1.0f);
@@ -107,41 +107,6 @@ void TestLayer4::OnUpdate(Timestep ts)
 	rect_trf.orientation = rect_trf.orientation * Rotation(0.001f * ts, Vec3D({ 0.0f, -1.0f, 0.0f }));
 	rect_trf.location = Vec3D({ 0.5f, 0.2f*sin(0.005f * m_ElapsedTime), 0.0f });
 	Renderer::Draw(m_RectangleEntity);
-
-	TransformComponent& cam_trf = m_CameraEntity.GetComponent<TransformComponent>();
-	if (Input::IsKeyPressed(sf::Keyboard::Key::W))
-	{
-		LOG_CORE_INFO("W key is pressed");
-		cam_trf.location.z += ts * 0.001f;
-	}
-	if (Input::IsKeyPressed(sf::Keyboard::Key::S))
-	{
-		LOG_CORE_INFO("S key is pressed");
-		cam_trf.location.z -= ts * 0.001f;
-	}
-	if (Input::IsKeyPressed(sf::Keyboard::Key::A))
-	{
-		LOG_CORE_INFO("A key is pressed");
-		cam_trf.location.x -= ts * 0.001f;
-	}
-	if (Input::IsKeyPressed(sf::Keyboard::Key::D))
-	{
-		LOG_CORE_INFO("D key is pressed");
-		cam_trf.location.x += ts * 0.001f;
-	}
-	if (Input::IsKeyPressed(sf::Keyboard::Key::R))
-	{
-		LOG_CORE_INFO("A key is pressed");
-		cam_trf.location.y += ts * 0.001f;
-	}
-	if (Input::IsKeyPressed(sf::Keyboard::Key::F))
-	{
-		LOG_CORE_INFO("D key is pressed");
-		cam_trf.location.y -= ts * 0.001f;
-	}
-
-	Renderer::SetCamera(cam_trf);
-
 
 	m_ElapsedTime += ts;
 }
@@ -238,4 +203,26 @@ bool TestLayer4::OnMouseLeft(Event& e)
 {
 	LOG_INFO("TestLayer4 received OnMouseLeft event");
 	return false;
+}
+
+void TestLayer4::HandleUserInput(Timestep ts)
+{
+	TransformComponent& cam_trf = m_CameraEntity.GetComponent<TransformComponent>();
+
+	// moves
+	if (Input::IsKeyPressed(sf::Keyboard::Key::W)) { cam_trf.location += ts * 0.001f * cam_trf.orientation.f3; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::S)) { cam_trf.location -= ts * 0.001f * cam_trf.orientation.f3; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::A)) { cam_trf.location -= ts * 0.001f * cam_trf.orientation.f1; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::D)) { cam_trf.location += ts * 0.001f * cam_trf.orientation.f1; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::R)) { cam_trf.location += ts * 0.001f * cam_trf.orientation.f2; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::F)) { cam_trf.location -= ts * 0.001f * cam_trf.orientation.f2; }
+	// rotations
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Up)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f1) * cam_trf.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Down)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f1) * cam_trf.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Left)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Right)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
+
+	Renderer::SetCamera(cam_trf);
 }
