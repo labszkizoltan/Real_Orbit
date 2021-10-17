@@ -18,6 +18,7 @@ public:
 
 	void SetAspectRatio(float aspectRatio);
 	void SetCamera(TransformComponent camera_transform);
+	void SetZoomLevel(float zoom_level);
 
 	std::shared_ptr<Shader> BindShader(MeshType meshType);
 	std::shared_ptr<Shader> GetLastBoundShader();

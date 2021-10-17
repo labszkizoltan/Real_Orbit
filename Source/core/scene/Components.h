@@ -23,16 +23,16 @@ struct TransformComponent
 {
 	Vec3D location;
 	Mat_3D orientation;
+	float scale;
+};
 
-//	glm::mat4 Transform = glm::mat4(1.0f);
-//
-//	TransformComponent() = default;
-//	TransformComponent(const TransformComponent&) = default;
-//	TransformComponent(const glm::mat4& transform)
-//		: Transform(transform) {}
-//
-//	operator const glm::mat4& () const { return Transform; } // this is like an implicit cast so the TransformComponent struct can be passed as a glm::mat4 to functions
-//	operator glm::mat4& () { return Transform; }
+struct DynamicPropertiesComponent
+{
+	float mass;
+	Vec3D velocity;
+	Vec3D angular_velocity;
+
+//	Vec3D acceleration;
 };
 
 struct MeshComponent

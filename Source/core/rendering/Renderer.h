@@ -47,6 +47,7 @@ public:
 	static void Draw(Entity entity);
 	static void SetAspectRatio(float aspect_ratio);
 	static void SetCamera(TransformComponent camera_transform);
+	static void SetZoomLevel(float zoom_level);
 
 
 	// a few helper function could go here, like something that uploads various uniform combinations into the shaders

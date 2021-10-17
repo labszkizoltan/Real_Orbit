@@ -33,6 +33,7 @@ void ShaderLibrary::SetAspectRatio(float aspectRatio)
 		m_Shaders[i]->Bind();
 		m_Shaders[i]->UploadUniformFloat("aspect_ratio", aspectRatio);
 	}
+	m_LastBoundShader = m_Shaders[m_Shaders.size() - 1];
 }
 
 void ShaderLibrary::SetCamera(TransformComponent camera_transform)
@@ -46,6 +47,16 @@ void ShaderLibrary::SetCamera(TransformComponent camera_transform)
 	m_LastBoundShader = m_Shaders[m_Shaders.size()-1];
 }
 
+void ShaderLibrary::SetZoomLevel(float zoom_level)
+{
+	for (int i = 0; i < m_Shaders.size(); i++)
+	{
+		m_Shaders[i]->Bind();
+		m_Shaders[i]->UploadUniformFloat("zoom_level", zoom_level);
+	}
+	m_LastBoundShader = m_Shaders[m_Shaders.size() - 1];
+}
+
 std::shared_ptr<Shader> ShaderLibrary::BindShader(MeshType meshType)
 {
 	switch (meshType)
@@ -55,6 +66,7 @@ std::shared_ptr<Shader> ShaderLibrary::BindShader(MeshType meshType)
 
 	LOG_CORE_INFO("MeshType not recognized, cannot bind shader");
 	m_LastBoundShader = nullptr;
+	return nullptr;
 }
 
 std::shared_ptr<Shader> ShaderLibrary::GetLastBoundShader()

@@ -57,14 +57,17 @@ void TestLayer4::OnAttach()
 	TransformComponent cam_trf;
 	cam_trf.location = Vec3D({ 0.0f,0.0f,-1.0f });
 	cam_trf.orientation = Identity(1.0f);
+	//cam_trf.scale = 1.0f;
 
 	TransformComponent tetrahedron_trf;
 	tetrahedron_trf.location = Vec3D({ 0,0,0 });
 	tetrahedron_trf.orientation = Identity(1.0f);
+	tetrahedron_trf.scale = 1.0f;
 
 	TransformComponent rect_trf;
 	rect_trf.location = Vec3D({ 0.5,0,0 });
 	rect_trf.orientation = Identity(1.0f);
+	rect_trf.scale = 1.0f;
 
 	m_Scene = std::shared_ptr<Scene>(new Scene());
 
@@ -115,7 +118,7 @@ void TestLayer4::OnEvent(Event& event)
 {
 	LOG_INFO("TestLayer4 event received");
 
-	event.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
+//	event.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
 	event.Dispatch<sf::Event::EventType::LostFocus>				(BIND_EVENT_FN(OnLoosingFocus));
 	event.Dispatch<sf::Event::EventType::GainedFocus>			(BIND_EVENT_FN(OnGainingFocus));
 	event.Dispatch<sf::Event::EventType::KeyPressed>			(BIND_EVENT_FN(OnKeyPressed));
@@ -158,6 +161,18 @@ bool TestLayer4::OnTextEntered(Event& e)
 bool TestLayer4::OnKeyPressed(Event& e)
 {
 	sf::Event& event = e.GetEvent();
+
+	if(event.key.code == sf::Keyboard::Key::Add)
+	{
+		TransformComponent& trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
+		trf.scale *= 1.1f;
+	}
+	if (event.key.code == sf::Keyboard::Key::Subtract)
+	{
+		TransformComponent& trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
+		trf.scale /= 1.1f;
+	}
+
 	LOG_INFO("TestLayer received KeyPressed evet: {0}", event.key.code);
 	return false;
 }
@@ -170,7 +185,16 @@ bool TestLayer4::OnKeyReleased(Event& e)
 
 bool TestLayer4::MouseWheelScrolled(Event& e)
 {
+	static float zoom_level = 1.0f;
+
 	sf::Event& event = e.GetEvent();
+
+	zoom_level *= event.mouseWheelScroll.delta > 0 ? 2.0f : 0.5f;
+	zoom_level = zoom_level < 1.0f ? 1.0f : zoom_level;
+	zoom_level = zoom_level > 128.0f ? 128.0f : zoom_level;
+
+	Renderer::SetZoomLevel(zoom_level);
+
 	LOG_INFO("TestLayer4 received MouseWheelScrolled evet: delta: {0}, x: {1}, y: {2}", event.mouseWheelScroll.delta, event.mouseWheelScroll.x, event.mouseWheelScroll.y);
 	return false;
 }

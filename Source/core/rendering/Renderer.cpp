@@ -43,6 +43,7 @@ int Renderer::Init()
 	camera_trf.location = Vec3D({ 0,0,-1 });
 	camera_trf.orientation = Identity(1.0f);
 	SetCamera(camera_trf);
+	SetZoomLevel(1.0f);
 
 	return result;
 }
@@ -91,6 +92,7 @@ void Renderer::Draw(Entity entity)
 		std::shared_ptr<Shader> shader = s_ShaderLibrary.BindShader(mesh.meshPtr->GetMeshType()); //	MeshType::COLOURED_MESH
 		shader->UploadUniformFloat3("body_location", trf.location.Glm());
 		shader->UploadUniformMat3("body_orientation", trf.orientation.Glm());
+		shader->UploadUniformFloat("body_scale", trf.scale);
 
 		mesh.meshPtr->Draw();
 	}
@@ -105,4 +107,9 @@ void Renderer::SetAspectRatio(float aspect_ratio)
 void Renderer::SetCamera(TransformComponent camera_transform)
 {
 	s_ShaderLibrary.SetCamera(camera_transform);
+}
+
+void Renderer::SetZoomLevel(float zoom_level)
+{
+	s_ShaderLibrary.SetZoomLevel(zoom_level);
 }

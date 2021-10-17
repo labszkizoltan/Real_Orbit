@@ -48,6 +48,9 @@ const char* perspective_3d_shader_vertexSrc =
 
 "uniform vec3 body_location; \n"
 "uniform mat3 body_orientation; \n"
+"uniform float body_scale; \n"
+
+"uniform float zoom_level; \n"
 //uniform float scale;
 
 "uniform vec3 camera_location; \n"
@@ -59,11 +62,8 @@ const char* perspective_3d_shader_vertexSrc =
 
 "void main()\n"
 "{\n"
-"	float zoom_level = 1.0; \n"
-"	float scale = 1.0; \n"
-
 // point coordinate in the absolute coordinate system
-"	vec3 position_tmp = body_location - camera_location + scale * (aPos[0] * body_orientation[0] + aPos[1] * body_orientation[1] + aPos[2] * body_orientation[2]); \n"
+"	vec3 position_tmp = body_location - camera_location + body_scale * (aPos[0] * body_orientation[0] + aPos[1] * body_orientation[1] + aPos[2] * body_orientation[2]); \n"
 
 // point coordinate in the observers coordinate system
 "	position_tmp = vec3(\n"
