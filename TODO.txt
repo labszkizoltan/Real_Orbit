@@ -23,7 +23,7 @@ Or... Perhaps I should set up the ECS first. Then the entities would have a draw
 entities material. In this case it would already have access to the appropriate shader, so uploading other uniforms based on other components of the entiyt might be easier.
 
 
-
+For serializing the scene and meshes, I may need to store the vertex buffer files.
 
 
 

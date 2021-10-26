@@ -339,3 +339,6 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /vendor/GLAD/glad.zip
+
+# Exclude folders
+assets/**

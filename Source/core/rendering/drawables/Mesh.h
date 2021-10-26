@@ -7,7 +7,7 @@
 // each mesh type has a fixed layout, and a corresponding shader that can draw it
 enum class MeshType
 {
-	COLOURED_MESH
+	COLOURED_MESH, TEXTURED_MESH, SKYBOX
 };
 
 class Mesh

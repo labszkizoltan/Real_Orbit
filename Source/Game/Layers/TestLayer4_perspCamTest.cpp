@@ -4,6 +4,7 @@
 #include <SFML/Window/Event.hpp>
 #include <core/rendering/Renderer.h>
 #include <core/rendering/drawables/ColouredMesh.h>
+#include <core/rendering/drawables/TexturedMesh.h>
 #include <core/scene/Components.h>
 
 #include <utils/Vector_3D.h>
@@ -39,6 +40,7 @@ void TestLayer4::OnAttach()
 
 	m_Tetrahedron = std::shared_ptr<Mesh>(new ColouredMesh(vertices, indices));
 
+	// rectangle
 	std::vector<Vec3D> vertices_rect = {
 		{-0.05f, -0.05f, 0.0f}, {1.0f, 0.0f, 0.0f},
 		{-0.05f,  0.05f, 0.0f}, {0.0f, 1.0f, 0.0f},
@@ -52,6 +54,21 @@ void TestLayer4::OnAttach()
 	};
 
 	m_Rectangle = std::shared_ptr<Mesh>(new ColouredMesh(vertices_rect, indices_rect));
+
+	// textured rectangle
+	std::vector<float> vertices_textured = {
+		-0.05f, -0.05f, 0.0f, 0.0f, 0.0f,
+		-0.05f,  0.05f, 0.0f, 0.0f, 1.0f,
+		 0.05f, -0.05f, 0.0f, 1.0f, 0.0f,
+		 0.05f,  0.05f, 0.0f, 1.0f, 1.0f
+	};
+
+	std::vector<uint32_t> indices_textured = {
+		0, 1, 2,   // first triangle
+		1, 2, 3    // second triangle
+	};
+
+	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured));
 
 	// construct the scene and the entities
 	TransformComponent cam_trf;
@@ -69,20 +86,29 @@ void TestLayer4::OnAttach()
 	rect_trf.orientation = Identity(1.0f);
 	rect_trf.scale = 1.0f;
 
+	TransformComponent textured_trf;
+	textured_trf.location = Vec3D({ 0.25,0.5,0 });
+	textured_trf.orientation = Identity(1.0f);
+	textured_trf.scale = 1.0f;
+
 	m_Scene = std::shared_ptr<Scene>(new Scene());
 
 	m_CameraEntity = m_Scene->CreateEntity("Camera");
 	m_TetrahedronEntity = m_Scene->CreateEntity("Tetrahedron");
 	m_RectangleEntity = m_Scene->CreateEntity("Rectangle");
+	m_TexturedEntity = m_Scene->CreateEntity("Textured");
 
 	m_CameraEntity.AddComponent<TransformComponent>(cam_trf);
 	m_TetrahedronEntity.AddComponent<TransformComponent>(tetrahedron_trf);
 	m_RectangleEntity.AddComponent<TransformComponent>(rect_trf);
+	m_TexturedEntity.AddComponent<TransformComponent>(textured_trf);
 
 	MeshComponent tetrahedron_mesh_component; tetrahedron_mesh_component.meshPtr = m_Tetrahedron;
 	MeshComponent rectangle_mesh_component; rectangle_mesh_component.meshPtr = m_Rectangle;
+	MeshComponent textured_mesh_component; textured_mesh_component.meshPtr = m_Textured;
 	m_TetrahedronEntity.AddComponent<MeshComponent>(tetrahedron_mesh_component);
 	m_RectangleEntity.AddComponent<MeshComponent>(rectangle_mesh_component);
+	m_TexturedEntity.AddComponent<MeshComponent>(textured_mesh_component);
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -110,6 +136,9 @@ void TestLayer4::OnUpdate(Timestep ts)
 	rect_trf.orientation = rect_trf.orientation * Rotation(0.001f * ts, Vec3D({ 0.0f, -1.0f, 0.0f }));
 	rect_trf.location = Vec3D({ 0.5f, 0.2f*sin(0.005f * m_ElapsedTime), 0.0f });
 	Renderer::Draw(m_RectangleEntity);
+
+	Renderer::Draw(m_TexturedEntity);
+
 
 	m_ElapsedTime += ts;
 }

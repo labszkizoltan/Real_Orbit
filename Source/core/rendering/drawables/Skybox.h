@@ -1,19 +1,19 @@
 
-#ifndef COLOURED_MESH_H
-#define COLOURED_MESH_H
+#ifndef SKYBOX_H
+#define SKYBOX_H
 
 #include <core/rendering/drawables/Mesh.h>
 #include <core/rendering/Buffer.h>
 #include <core/rendering/VertexArray.h>
 #include <utils/Vector_3D.h>
 
-class ColouredMesh : public Mesh
+class Skybox : public Mesh
 {
 public:
-	ColouredMesh();
-	ColouredMesh(const std::vector<Vec3D>& vertexAndColorData, const std::vector<uint32_t>& indexData);
+	Skybox();
+	Skybox(const std::vector<Vec3D>& vertexAndColorData, const std::vector<uint32_t>& indexData);
 	//	ColouredMesh(const std::string& filename);
-	~ColouredMesh();
+	~Skybox();
 
 	virtual void Draw() override;
 	virtual MeshType GetMeshType() override;
@@ -31,9 +31,4 @@ private:
 
 };
 
-
-
-
-
-
-#endif // COLOURED_MESH_H
+#endif // SKYBOX_H

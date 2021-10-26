@@ -1,6 +1,7 @@
 
 #include "Renderer.h"
-#include <core/rendering/shader_source_files/basic_3D_shaders.h>
+#include <core/rendering/shader_source_files/ShaderSourceCollection.h>
+//#include <core/rendering/shader_source_files/basic_3D_shaders.h>
 #include <core/scene/Components.h>
 
 float Renderer::s_AspectRatio = 1.0f;
@@ -28,7 +29,19 @@ int Renderer::Init()
 		std::string(perspective_3d_shader_fragmentSrc)
 	);
 
+	// MeshType::TEXTURED_MESH
+	s_ShaderLibrary.AddShader(
+		std::string(textured_3d_shader_vertexSrc),
+		std::string(textured_3d_shader_fragmentSrc)
+	);
 
+//	// MeshType::SKYBOX
+//	s_ShaderLibrary.AddShader(
+//		ParseShader("Source/core/rendering/shader_source_files/other_3D_vertex_shd.glsl"),
+//		ParseShader("Source/core/rendering/shader_source_files/other_3D_fragment_shd.glsl")
+//	);
+
+	
 //	// Add subsequent shader here:
 //	// MeshType::OTHER_MESH_TYPE
 //	s_ShaderLibrary.AddShader(

@@ -16,10 +16,6 @@ ColouredMesh::ColouredMesh(const std::vector<Vec3D>& vertexAndColorData, const s
 {
 	m_VertexArray.Bind();
 	m_VertexBuffer.SetLayout(s_Layout);
-//	m_VertexBuffer.SetLayout({
-//		{ShaderDataType::Float3, "aPos"},
-//		{ShaderDataType::Float3, "aColor"}
-//		});
 	m_IndexBuffer.Bind();
 	m_VertexArray.UnBind();
 }
@@ -40,10 +36,15 @@ void ColouredMesh::Draw()
 
 MeshType ColouredMesh::GetMeshType()
 {
-	return MeshType::COLOURED_MESH;
+	return GetStaticMeshType();
 }
 
 BufferLayout ColouredMesh::GetBufferLayout()
 {
 	return s_Layout;
+}
+
+MeshType ColouredMesh::GetStaticMeshType()
+{
+	return MeshType::COLOURED_MESH;
 }

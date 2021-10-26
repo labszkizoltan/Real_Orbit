@@ -41,10 +41,13 @@ private:
 	float m_ElapsedTime = 0.0f;
 	std::shared_ptr<Mesh> m_Tetrahedron = nullptr;
 	std::shared_ptr<Mesh> m_Rectangle = nullptr;
+	std::shared_ptr<Mesh> m_Textured  = nullptr;
+
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	Entity m_CameraEntity;
 	Entity m_TetrahedronEntity;
 	Entity m_RectangleEntity;
+	Entity m_TexturedEntity;
 };
 
 
