@@ -67,8 +67,9 @@ void TestLayer4::OnAttach()
 		0, 1, 2,   // first triangle
 		1, 2, 3    // second triangle
 	};
-
-	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured));
+	
+//	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/saucer_texture.png"));
+	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/all_in_one.png"));
 
 	// construct the scene and the entities
 	TransformComponent cam_trf;

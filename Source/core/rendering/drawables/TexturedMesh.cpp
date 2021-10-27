@@ -14,17 +14,13 @@ TexturedMesh::TexturedMesh()
 {
 }
 
-TexturedMesh::TexturedMesh(const std::vector<float>& vertexAndTexCoordData, const std::vector<uint32_t>& indexData)
-    : m_VertexArray(), m_VertexBuffer((float*)&vertexAndTexCoordData[0], vertexAndTexCoordData.size() * sizeof(float)), m_IndexBuffer((uint32_t*)&indexData[0], indexData.size())
+TexturedMesh::TexturedMesh(const std::vector<float>& vertexAndTexCoordData, const std::vector<uint32_t>& indexData, const std::string& texturePath)
+    : m_VertexArray(),
+	m_VertexBuffer((float*)&vertexAndTexCoordData[0], vertexAndTexCoordData.size() * sizeof(float)),
+	m_IndexBuffer((uint32_t*)&indexData[0], indexData.size()),
+	m_Texture(texturePath)
 {
-//    sf::Image img;
-//    img.loadFromFile("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/saucer_texture.png");
-//    if (!m_Texture.loadFromFile("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/saucer_texture.png"))
-//    {
-//        std::cout << "loading texture failed\n";
-//    }
-
-
+	/*
 	// Create the texture
 	{
 		std::string textureFilepath("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/saucer_texture.png");
@@ -60,6 +56,7 @@ TexturedMesh::TexturedMesh(const std::vector<float>& vertexAndTexCoordData, cons
 		stbi_image_free(data);
 	}
 
+	*/
 
     m_VertexArray.Bind();
     m_VertexBuffer.SetLayout(s_Layout);
@@ -74,11 +71,8 @@ TexturedMesh::~TexturedMesh()
 void TexturedMesh::Draw()
 {
     m_VertexArray.Bind();
-//    sf::Texture::bind(&m_Texture);
-	glBindTextureUnit(0, m_Texture);
+	m_Texture.Bind();
     glDrawElements(GL_TRIANGLES, m_IndexBuffer.m_Count, GL_UNSIGNED_INT, nullptr);
-    // unbind the texture
-    // sf::Texture::bind(NULL);
 }
 
 MeshType TexturedMesh::GetMeshType()
