@@ -162,9 +162,11 @@
     <ClCompile Include="Source\core\OpenGLContext.cpp" />
     <ClCompile Include="Source\core\Real_Orbit_main.cpp" />
     <ClCompile Include="Source\core\rendering\Buffer.cpp" />
+    <ClCompile Include="Source\core\rendering\Depthbuffer.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\ColouredMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\Mesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\TexturedMesh.cpp" />
+    <ClCompile Include="Source\core\rendering\Framebuffer.cpp" />
     <ClCompile Include="Source\core\rendering\Renderer.cpp" />
     <ClCompile Include="Source\core\rendering\Shader.cpp" />
     <ClCompile Include="Source\core\rendering\ShaderLibrary.cpp" />
@@ -193,10 +195,12 @@
     <ClInclude Include="Source\core\OpenGLContext.h" />
     <ClInclude Include="Source\core\pch\pch.h" />
     <ClInclude Include="Source\core\rendering\Buffer.h" />
+    <ClInclude Include="Source\core\rendering\Depthbuffer.h" />
     <ClInclude Include="Source\core\rendering\drawables\ColouredMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Mesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Skybox.h" />
     <ClInclude Include="Source\core\rendering\drawables\TexturedMesh.h" />
+    <ClInclude Include="Source\core\rendering\Framebuffer.h" />
     <ClInclude Include="Source\core\rendering\Renderer.h" />
     <ClInclude Include="Source\core\rendering\Shader.h" />
     <ClInclude Include="Source\core\rendering\ShaderLibrary.h" />

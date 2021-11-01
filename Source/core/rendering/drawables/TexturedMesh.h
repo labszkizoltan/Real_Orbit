@@ -6,6 +6,7 @@
 #include <core/rendering/Buffer.h>
 #include <core/rendering/VertexArray.h>
 #include <core/rendering/Texture.h>
+#include <core/rendering/Depthbuffer.h>
 #include <utils/Vector_3D.h>
 
 #include <SFML/Graphics/Texture.hpp>
@@ -14,6 +15,7 @@ class TexturedMesh : public Mesh
 {
 public:
 	TexturedMesh();
+	TexturedMesh(const std::vector<float>& vertexAndTexCoordData, const std::vector<uint32_t>& indexData, std::shared_ptr<Texture> texture); // use existing texture instead of creating one from a file
 	TexturedMesh(const std::vector<float>& vertexAndTexCoordData, const std::vector<uint32_t>& indexData, const std::string& texturePath);
 	//	TexturedMesh(const std::string& filename);
 	~TexturedMesh();
@@ -28,7 +30,7 @@ private:
 	VertexArray m_VertexArray;
 	VertexBuffer m_VertexBuffer;
 	IndexBuffer m_IndexBuffer;
-	Texture m_Texture;
+	std::shared_ptr<Texture> m_Texture;
 //	uint32_t m_Texture;
 
 private:

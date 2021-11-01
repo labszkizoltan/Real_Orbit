@@ -111,7 +111,7 @@ void TestLayer2::OnUpdate(Timestep ts)
 //				m_Shader->UploadUniformFloat("offset_x", (float)i / (float)grid_size);
 //				m_Shader->UploadUniformFloat("offset_y", (float)j / (float)grid_size);
 //				m_Tetrahedron->Draw();
-				Renderer::Draw(m_Tetrahedron.get(), m_ElapsedTime / 500.0f, (float)i / (float)grid_size, (float)j / (float)grid_size);
+//				Renderer::Draw(m_Tetrahedron.get(), m_ElapsedTime / 500.0f, (float)i / (float)grid_size, (float)j / (float)grid_size);
 			}
 			else
 			{
@@ -120,7 +120,7 @@ void TestLayer2::OnUpdate(Timestep ts)
 //				m_Shader->UploadUniformFloat("offset_x", (float)i / (float)grid_size);
 //				m_Shader->UploadUniformFloat("offset_y", (float)j / (float)grid_size);
 //				m_Rectangle->Draw();
-				Renderer::Draw(m_Rectangle.get(), -m_ElapsedTime / 500.0f, (float)i / (float)grid_size, (float)j / (float)grid_size);
+//				Renderer::Draw(m_Rectangle.get(), -m_ElapsedTime / 500.0f, (float)i / (float)grid_size, (float)j / (float)grid_size);
 			}
 		}
 	}

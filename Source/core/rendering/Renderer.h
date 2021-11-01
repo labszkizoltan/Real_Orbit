@@ -3,6 +3,7 @@
 #define RENDERER_H
 
 #include <core/rendering/ShaderLibrary.h>
+#include <core/rendering/Framebuffer.h>
 #include <core/rendering/drawables/Mesh.h>
 #include <core/scene/Entity.h>
 #include <core/scene/Components.h>
@@ -42,9 +43,9 @@ public:
 
 	static int Init();
 	static void Draw(Mesh* mesh);
-	static void Draw(Mesh* mesh, float rotation_angle, float offset_x, float offset_y); // temporary draw function, remove later!!
 
 	static void Draw(Entity entity);
+//	static void DrawToTexture(Entity entity, Framebuffer fbo);
 	static void SetAspectRatio(float aspect_ratio);
 	static void SetCamera(TransformComponent camera_transform);
 	static void SetZoomLevel(float zoom_level);

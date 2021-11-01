@@ -61,28 +61,6 @@ int Renderer::Init()
 	return result;
 }
 
-
-void Renderer::Draw(Mesh* mesh, float rotation_angle, float offset_x, float offset_y)
-{
-	if (mesh == nullptr)
-		return;
-
-	s_ShaderLibrary.BindShader(mesh->GetMeshType());
-	// shader uniforms should be uploaded here later on
-
-	GLint whichID;
-	glGetIntegerv(GL_CURRENT_PROGRAM, &whichID);
-
-	GLint loc = glGetUniformLocation(whichID, "rotation_angle");
-	glUniform1f(loc, rotation_angle);
-	loc = glGetUniformLocation(whichID, "offset_x");
-	glUniform1f(loc, offset_x);
-	loc = glGetUniformLocation(whichID, "offset_y");
-	glUniform1f(loc, offset_y);
-
-	mesh->Draw();
-}
-
 void Renderer::Draw(Mesh* mesh)
 {
 	if (mesh == nullptr)
@@ -95,6 +73,8 @@ void Renderer::Draw(Mesh* mesh)
 
 void Renderer::Draw(Entity entity)
 {
+//	Framebuffer::UnbindAll();
+
 	// check if the required components are there, otherwise skip the function body
 	if (entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
 	{

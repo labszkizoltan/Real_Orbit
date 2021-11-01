@@ -22,6 +22,12 @@ void TestLayer4::OnAttach()
 {
 	LOG_INFO("TestLayer4 attached");
 
+	// Create the framebuffer:
+	FrameBufferSpecification fbspec;
+	fbspec.Width = 256;
+	fbspec.Height = 256;
+	m_Framebuffer = std::shared_ptr<Framebuffer>(new Framebuffer(fbspec));
+
 	// Hello Tetrahedron //
 	// Vertices with their own color:
 	std::vector<Vec3D> vertices = {
@@ -57,10 +63,10 @@ void TestLayer4::OnAttach()
 
 	// textured rectangle
 	std::vector<float> vertices_textured = {
-		-0.05f, -0.05f, 0.0f, 0.0f, 0.0f,
-		-0.05f,  0.05f, 0.0f, 0.0f, 1.0f,
-		 0.05f, -0.05f, 0.0f, 1.0f, 0.0f,
-		 0.05f,  0.05f, 0.0f, 1.0f, 1.0f
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f
 	};
 
 	std::vector<uint32_t> indices_textured = {
@@ -69,7 +75,9 @@ void TestLayer4::OnAttach()
 	};
 	
 //	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/saucer_texture.png"));
-	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/all_in_one.png"));
+//	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/all_in_one.png"));
+//	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, m_Framebuffer->GetColorAttachment()));
+	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, m_Framebuffer->GetDepthAttachment()));
 
 	// construct the scene and the entities
 	TransformComponent cam_trf;
@@ -78,17 +86,17 @@ void TestLayer4::OnAttach()
 	//cam_trf.scale = 1.0f;
 
 	TransformComponent tetrahedron_trf;
-	tetrahedron_trf.location = Vec3D({ 0,0,0 });
+	tetrahedron_trf.location = Vec3D({ -0.2f, 0.0f, -0.5f });
 	tetrahedron_trf.orientation = Identity(1.0f);
 	tetrahedron_trf.scale = 1.0f;
 
 	TransformComponent rect_trf;
-	rect_trf.location = Vec3D({ 0.5,0,0 });
+	rect_trf.location = Vec3D({ 0.3f, 0.0f, -0.3f });
 	rect_trf.orientation = Identity(1.0f);
 	rect_trf.scale = 1.0f;
 
 	TransformComponent textured_trf;
-	textured_trf.location = Vec3D({ 0.25,0.5,0 });
+	textured_trf.location = Vec3D({ 0.0f, 0.0f, 0.0f });
 	textured_trf.orientation = Identity(1.0f);
 	textured_trf.scale = 1.0f;
 
@@ -111,6 +119,7 @@ void TestLayer4::OnAttach()
 	m_RectangleEntity.AddComponent<MeshComponent>(rectangle_mesh_component);
 	m_TexturedEntity.AddComponent<MeshComponent>(textured_mesh_component);
 
+
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -124,6 +133,35 @@ void TestLayer4::OnUpdate(Timestep ts)
 	//	LOG_INFO("TestLayer4 updated");
 
 	HandleUserInput(ts);
+
+	// render into the frame buffer
+	{
+//		TransformComponent& cam_trf = m_CameraEntity.GetComponent<TransformComponent>();
+//		TransformComponent mirrored_cam_trf = cam_trf;
+//		mirrored_cam_trf.location.z = -cam_trf.location.z;
+//		mirrored_cam_trf.orientation.f1.z = -cam_trf.orientation.f1.z;
+//		mirrored_cam_trf.orientation.f2.z = -cam_trf.orientation.f2.z;
+//		mirrored_cam_trf.orientation.f3.z = -cam_trf.orientation.f3.z;
+//
+//		Renderer::SetCamera(mirrored_cam_trf);
+
+		m_Framebuffer->Bind();
+		glClearColor(0.9f, 0.05f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		TransformComponent& tetr_trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
+		tetr_trf.orientation = tetr_trf.orientation * Rotation(0.001f * ts, Vec3D({ 1.0f, 0.0f, 0.0f }));
+		Renderer::Draw(m_TetrahedronEntity);
+
+		TransformComponent& rect_trf = m_RectangleEntity.GetComponent<TransformComponent>();
+		rect_trf.orientation = rect_trf.orientation * Rotation(0.001f * ts, Vec3D({ 0.0f, -1.0f, 0.0f }));
+		rect_trf.location = Vec3D({ 0.5f, 0.2f * sin(0.005f * m_ElapsedTime), 0.0f });
+		Renderer::Draw(m_RectangleEntity);
+
+		m_Framebuffer->Unbind();
+
+//		Renderer::SetCamera(cam_trf);
+	}
 
 	// Render
 	glClearColor(0.0f, 0.05f, 0.3f, 1.0f);

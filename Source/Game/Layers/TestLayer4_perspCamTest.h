@@ -8,6 +8,7 @@
 #include <core/scene/Scene.h>
 #include <core/scene/Entity.h>
 #include <core/rendering/Shader.h>
+#include <core/rendering/Framebuffer.h>
 #include <core/rendering/drawables/Mesh.h>
 
 class TestLayer4 : public Layer
@@ -43,6 +44,7 @@ private:
 	std::shared_ptr<Mesh> m_Rectangle = nullptr;
 	std::shared_ptr<Mesh> m_Textured  = nullptr;
 
+	std::shared_ptr<Framebuffer> m_Framebuffer = nullptr;
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	Entity m_CameraEntity;
 	Entity m_TetrahedronEntity;
