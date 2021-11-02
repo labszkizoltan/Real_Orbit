@@ -41,8 +41,6 @@ public:
 private:
 	GLint m_ViewPortBefore[4];
 	uint32_t m_RendererID = 0;
-//	uint32_t m_ColorAttachment = 0;
-//	uint32_t m_DepthAttachment = 0;
 	FrameBufferSpecification m_Specification;
 	std::shared_ptr<Texture> m_ColorAttachment;
 	std::shared_ptr<Texture> m_DepthAttachment;

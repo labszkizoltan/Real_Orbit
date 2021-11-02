@@ -45,11 +45,12 @@ public:
 	static void Draw(Mesh* mesh);
 
 	static void Draw(Entity entity);
+	static void DrawToShadowMap(Entity entity);
 //	static void DrawToTexture(Entity entity, Framebuffer fbo);
 	static void SetAspectRatio(float aspect_ratio);
 	static void SetCamera(TransformComponent camera_transform);
 	static void SetZoomLevel(float zoom_level);
-
+	static void SetLightPosition(Vec3D light_pos);
 
 	// a few helper function could go here, like something that uploads various uniform combinations into the shaders
 private:

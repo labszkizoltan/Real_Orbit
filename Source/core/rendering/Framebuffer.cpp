@@ -59,7 +59,7 @@ void Framebuffer::Invalidate()
 
 	GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_DepthAttachment->m_RendererID));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_DepthAttachment->m_RendererID));
-	GLCall(glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, m_Specification.Width, m_Specification.Height));
+	GLCall(glTexStorage2D(GL_TEXTURE_2D, 1, depthSpec.InternalFormat, m_Specification.Width, m_Specification.Height));
 	GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_DepthAttachment->m_RendererID, 0));
 
 	GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0)); // it's important to unbind the frambuffer, because if a random framebuffer remains boud, it can interfere with the rendering

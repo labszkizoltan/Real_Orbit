@@ -28,7 +28,8 @@ void ShaderLibrary::AddShader(const std::string& vertexSrc, const std::string& f
 
 void ShaderLibrary::SetAspectRatio(float aspectRatio)
 {
-	for (int i = 0; i < m_Shaders.size(); i++)
+	// for (int i = 0; i < m_Shaders.size(); i++)
+	for (int i = 0; i < 2; i++)
 	{
 		m_Shaders[i]->Bind();
 		m_Shaders[i]->UploadUniformFloat("aspect_ratio", aspectRatio);
@@ -38,21 +39,34 @@ void ShaderLibrary::SetAspectRatio(float aspectRatio)
 
 void ShaderLibrary::SetCamera(TransformComponent camera_transform)
 {
-	for (int i = 0; i < m_Shaders.size(); i++)
+	// for (int i = 0; i < m_Shaders.size(); i++)
+	for (int i = 0; i < 2; i++)
 	{
 		m_Shaders[i]->Bind();
 		m_Shaders[i]->UploadUniformFloat3("camera_location", camera_transform.location.Glm());
 		m_Shaders[i]->UploadUniformMat3("camera_orientation", camera_transform.orientation.Glm());
 	}
-	m_LastBoundShader = m_Shaders[m_Shaders.size()-1];
+//	m_LastBoundShader = m_Shaders[m_Shaders.size()-1];
 }
 
 void ShaderLibrary::SetZoomLevel(float zoom_level)
 {
-	for (int i = 0; i < m_Shaders.size(); i++)
+	// for (int i = 0; i < m_Shaders.size(); i++)
+	for (int i = 0; i < 2; i++)
 	{
 		m_Shaders[i]->Bind();
 		m_Shaders[i]->UploadUniformFloat("zoom_level", zoom_level);
+	}
+	// m_LastBoundShader = m_Shaders[m_Shaders.size() - 1];
+}
+
+void ShaderLibrary::SetLightPosition(Vec3D light_pos)
+{
+	// for (int i = 0; i < m_Shaders.size(); i++)
+	for (int i = 3; i < m_Shaders.size(); i++)
+	{
+		m_Shaders[i]->Bind();
+		m_Shaders[i]->UploadUniformFloat3("light_location", light_pos.Glm());
 	}
 	m_LastBoundShader = m_Shaders[m_Shaders.size() - 1];
 }
@@ -63,6 +77,8 @@ std::shared_ptr<Shader> ShaderLibrary::BindShader(MeshType meshType)
 	{
 	case MeshType::COLOURED_MESH:	m_Shaders[0]->Bind(); m_LastBoundShader = m_Shaders[0]; return m_LastBoundShader;
 	case MeshType::TEXTURED_MESH:	m_Shaders[1]->Bind(); m_LastBoundShader = m_Shaders[1]; return m_LastBoundShader;
+	case MeshType::SKYBOX:			m_Shaders[2]->Bind(); m_LastBoundShader = m_Shaders[2]; return m_LastBoundShader;
+	case MeshType::SHADOW_MAP:		m_Shaders[3]->Bind(); m_LastBoundShader = m_Shaders[3]; return m_LastBoundShader;
 	}
 
 	LOG_CORE_INFO("MeshType not recognized, cannot bind shader");

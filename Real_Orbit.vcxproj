@@ -204,6 +204,7 @@
     <ClInclude Include="Source\core\rendering\Renderer.h" />
     <ClInclude Include="Source\core\rendering\Shader.h" />
     <ClInclude Include="Source\core\rendering\ShaderLibrary.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\shadow_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\textured_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\basic_3D_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\ShaderSourceCollection.h" />

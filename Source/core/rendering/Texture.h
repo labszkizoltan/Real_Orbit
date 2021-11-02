@@ -38,7 +38,7 @@ private:
 
 
 	friend class Framebuffer;
-
+	friend class Depthbuffer;
 };
 
 #endif // TEXTURE_H

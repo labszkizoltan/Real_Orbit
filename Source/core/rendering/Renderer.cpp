@@ -35,11 +35,19 @@ int Renderer::Init()
 		std::string(textured_3d_shader_fragmentSrc)
 	);
 
-//	// MeshType::SKYBOX
-//	s_ShaderLibrary.AddShader(
-//		ParseShader("Source/core/rendering/shader_source_files/other_3D_vertex_shd.glsl"),
-//		ParseShader("Source/core/rendering/shader_source_files/other_3D_fragment_shd.glsl")
-//	);
+	// MeshType::SKYBOX
+	s_ShaderLibrary.AddShader(
+		std::string(),
+		std::string()
+	);
+
+
+	// Shadow mapper
+	s_ShaderLibrary.AddShader(
+		std::string(shadow_mapper_vertexSrc),
+		std::string(shadow_mapper_fragmentSrc)
+	);
+
 
 	
 //	// Add subsequent shader here:
@@ -57,6 +65,7 @@ int Renderer::Init()
 	camera_trf.orientation = Identity(1.0f);
 	SetCamera(camera_trf);
 	SetZoomLevel(1.0f);
+	SetLightPosition(Vec3D(0.0f, 0.0f, -1.0f));
 
 	return result;
 }
@@ -91,6 +100,24 @@ void Renderer::Draw(Entity entity)
 	}
 }
 
+void Renderer::DrawToShadowMap(Entity entity)
+{
+	// check if the required components are there, otherwise skip the function body
+	if (entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
+	{
+		TransformComponent& trf = entity.GetComponent<TransformComponent>();
+		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
+
+		std::shared_ptr<Shader> shader = s_ShaderLibrary.BindShader(MeshType::SHADOW_MAP);
+		shader->UploadUniformFloat3("body_location", trf.location.Glm());
+		shader->UploadUniformMat3("body_orientation", trf.orientation.Glm());
+		shader->UploadUniformFloat("body_scale", trf.scale);
+
+		mesh.meshPtr->Draw();
+	}
+
+}
+
 void Renderer::SetAspectRatio(float aspect_ratio)
 {
 	s_AspectRatio = aspect_ratio;
@@ -106,3 +133,9 @@ void Renderer::SetZoomLevel(float zoom_level)
 {
 	s_ShaderLibrary.SetZoomLevel(zoom_level);
 }
+
+void Renderer::SetLightPosition(Vec3D light_pos)
+{
+	s_ShaderLibrary.SetLightPosition(light_pos);
+}
+
