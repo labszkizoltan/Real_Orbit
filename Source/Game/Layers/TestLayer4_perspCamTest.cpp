@@ -88,7 +88,7 @@ void TestLayer4::OnAttach()
 	//cam_trf.scale = 1.0f;
 
 	TransformComponent tetrahedron_trf;
-	tetrahedron_trf.location = Vec3D({ -0.2f, 0.0f, -0.5f });
+	tetrahedron_trf.location = Vec3D({ -0.2f, 0.2f, -0.3f });
 	tetrahedron_trf.orientation = Identity(1.0f);
 	tetrahedron_trf.scale = 1.0f;
 
@@ -172,7 +172,8 @@ void TestLayer4::OnUpdate(Timestep ts)
 
 		TransformComponent& rect_trf = m_RectangleEntity.GetComponent<TransformComponent>();
 		rect_trf.orientation = rect_trf.orientation * Rotation(0.001f * ts, Vec3D({ 0.0f, -1.0f, 0.0f }));
-		rect_trf.location = Vec3D({ 0.0f, 0.2f * sin(0.001f * m_ElapsedTime), 0.0f });
+		//	rect_trf.location = Vec3D({ 0.0f, 0.7f*cos(0.001f * m_ElapsedTime), 0.0f });
+		rect_trf.location = Vec3D({ 0.1f, 1.7f * cos(0.001f * m_ElapsedTime), 0.7f * sin(0.001f * m_ElapsedTime) - 1.0f });
 		Renderer::DrawToShadowMap(m_RectangleEntity);
 
 		m_Depthbuffer->Unbind();
@@ -188,7 +189,8 @@ void TestLayer4::OnUpdate(Timestep ts)
 
 	TransformComponent& rect_trf = m_RectangleEntity.GetComponent<TransformComponent>();
 	rect_trf.orientation = rect_trf.orientation * Rotation(0.001f * ts, Vec3D({ 0.0f, -1.0f, 0.0f }));
-	rect_trf.location = Vec3D({ 0.0f, 0.2f*cos(0.001f * m_ElapsedTime), 0.0f });
+//	rect_trf.location = Vec3D({ 0.0f, 0.7f*cos(0.001f * m_ElapsedTime), 0.0f });
+	rect_trf.location = Vec3D({ 0.1f, 1.7f*cos(0.001f * m_ElapsedTime), 0.7f * sin(0.001f * m_ElapsedTime)-1.0f });
 	Renderer::Draw(m_RectangleEntity);
 
 	Renderer::Draw(m_TexturedEntity);

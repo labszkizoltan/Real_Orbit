@@ -27,18 +27,18 @@ const char* shadow_mapper_vertexSrc =
 
 "	float r = length(position_tmp); \n"
 "	float rho = length(vec2(position_tmp.x, position_tmp.y)); \n"
-//	float theta = acos(position_tmp.z / r);
+"	float theta = acos(position_tmp.z/r); \n" // acos returns values between 0 and pi
 //"	float theta = rho / position_tmp.z < 0.1 ? asin(rho / position_tmp.z) : acos(position_tmp.z / r); \n"
-"	float theta = asin(position_tmp.z/r); \n"
-// 60 degrees
-"	float theta_max = 1.0471955;\n"
 "	float r_max = 20.0f; \n"
 "	float r_min = 0.05; \n"
 
 "	gl_Position = vec4(\n"
-"		atan(position_tmp.y, position_tmp.x)/(2*3.1415926535), \n"
-"		theta/(3.1415926535/2), \n"
-"		2.0 * (sign(position_tmp[2]) * r - r_min) / r_max - 1, \n"
+"		atan(position_tmp.y, position_tmp.x)/(3.1415926535), \n" // this atan returns values between -pi and pi
+//"		2*theta/(3.1415926535)-1, \n"
+"		position_tmp.z/r, \n"
+"		2.0 * (r - r_min) / r_max - 1, \n"
+//"		atan(r)/(3.1415926535/2), \n"
+//"		2.0 * (sign(position_tmp.z) * r - r_min) / r_max - 1, \n"
 "		1.0f\n"
 "); \n"
 
