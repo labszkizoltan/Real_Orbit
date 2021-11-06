@@ -17,6 +17,8 @@ const char* textured_3d_shader_vertexSrc =
 "uniform mat3 body_orientation; \n"
 "uniform float body_scale; \n"
 
+"uniform vec3 light_location; \n"
+
 "uniform float zoom_level; \n"
 //uniform float scale;
 
@@ -26,6 +28,7 @@ const char* textured_3d_shader_vertexSrc =
 "uniform float aspect_ratio; \n"
 
 "out vec2 texCoord; \n"
+"out vec3 lightCoordinates; \n"
 
 "void main()\n"
 "{\n"
@@ -57,6 +60,19 @@ const char* textured_3d_shader_vertexSrc =
 "		1.0f\n"
 "); \n"
 
+// light space coordinate calculation
+"	vec3 light_position_tmp = body_location - light_location + body_scale * (aPos[0] * body_orientation[0] + aPos[1] * body_orientation[1] + aPos[2] * body_orientation[2]); \n"
+
+"	float light_r = length(light_position_tmp); \n"
+
+"	lightCoordinates = vec3(\n"
+"		atan(light_position_tmp.y, light_position_tmp.x)/(3.1415926535), \n" // this atan returns values between -pi and pi
+//"		2*theta/(3.1415926535)-1, \n"
+"		light_position_tmp.z/light_r, \n"
+"		2.0 * (light_r - r_min) / r_max - 1 \n"
+//"		atan(r)/(3.1415926535/2) \n" // this atan returns values between -pi/2 and pi/2
+"); \n"
+
 "	texCoord = aTexCoord; \n"
 "}\0";
 
@@ -66,16 +82,30 @@ const char* textured_3d_shader_fragmentSrc =
 "#version 460 core\n"
 "layout(location = 0) out vec4 FragColor; \n"
 "in vec2 texCoord; \n"
+"in vec3 lightCoordinates; \n"
 "uniform sampler2D u_Textures[32]; \n"
 "uniform float alpha; \n"
 "void main()\n"
 "{\n"
-"	FragColor = texture(u_Textures[0], texCoord); \n"
+//"	float shadowMultiplier = texture(u_Textures[1], (lightCoordinates.xy+1)/2); \n"
+"	vec3 color = texture(u_Textures[0], texCoord).rgb; \n"
+"	vec3 depthSample = texture(u_Textures[1], (lightCoordinates.xy+1)/2).rgb; \n"
+"	float closestDepth = depthSample.r; \n"
+"	float currentDepth = (lightCoordinates.z+1)/2; \n"
+"	float bias = 0.005; \n"
+"	float shadow = (currentDepth - bias) > closestDepth ? 1.0 : 0.0; \n"
+"	FragColor = vec4(color*(1-shadow/2), 1.0); \n"
+//"	FragColor = vec4((color+depthSample)/2, 1.0); \n"
+//"	FragColor = vec4(vec3(shadow), 1.0); \n"
+//"	FragColor = vec4(vec3(lightCoordinates), 1.0); \n"
+//"	FragColor = vec4(vec3(closestDepth), 1.0); \n"
+//"	FragColor = vec4(vec3(depthSample), 1.0); \n"
+//"	FragColor = vec4(color, 1.0); \n"
+//"	FragColor = vec4(vec3(lightCoordinates.z/2+0.5), 1.0); \n"
+//"	FragColor = texture(u_Textures[0], texCoord); \n"
 //"	FragColor = vec4(texCoord, 0.0, 1.0); \n"
 //"	FragColor = vec4(vec3(gl_FragCoord.z), 1.0); \n"
 "}\0";
-
-
 
 
 

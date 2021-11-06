@@ -1,5 +1,7 @@
 #include "Depthbuffer.h"
 
+#include "Renderer.h" // included for opengl error checks
+
 #include "glad/glad.h"
 
 static const uint32_t s_MaxDepthbufferSize = 8192;
@@ -12,8 +14,8 @@ Depthbuffer::Depthbuffer(const FrameBufferSpecification& spec)
 
 Depthbuffer::~Depthbuffer()
 {
-	glDeleteFramebuffers(1, &m_RendererID);
-	glDeleteTextures(1, &m_DepthAttachment->m_RendererID);
+	GLCall( glDeleteFramebuffers(1, &m_RendererID) );
+	GLCall( glDeleteTextures(1, &m_DepthAttachment->m_RendererID) );
 }
 
 void Depthbuffer::Invalidate()
@@ -22,7 +24,6 @@ void Depthbuffer::Invalidate()
 	if (m_RendererID)
 	{
 		glDeleteFramebuffers(1, &m_RendererID);
-//		glDeleteTextures(1, &m_ColorAttachment);
 		glDeleteTextures(1, &m_DepthAttachment->m_RendererID);
 	}
 
@@ -30,27 +31,19 @@ void Depthbuffer::Invalidate()
 	glCreateFramebuffers(1, &m_RendererID);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 
-//	glCreateTextures(GL_TEXTURE_2D, 1, &m_ColorAttachment);
-//	glBindTexture(GL_TEXTURE_2D, m_ColorAttachment);
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Specification.Width, m_Specification.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//
-//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorAttachment, 0);
-
 	// create the depth attachment
 	TextureSpecifications depthSpec;
 	depthSpec.Width = m_Specification.Width;
 	depthSpec.Height = m_Specification.Height;
-	depthSpec.InternalFormat = GL_DEPTH24_STENCIL8; // GL_DEPTH_COMPONENT32F;
-	depthSpec.DataFormat = GL_DEPTH24_STENCIL8; // i think this is not used
+	depthSpec.InternalFormat = GL_DEPTH_COMPONENT32F; // GL_DEPTH24_STENCIL8;
+//	depthSpec.DataFormat = GL_DEPTH24_STENCIL8; // i think this is not used
 	m_DepthAttachment = std::shared_ptr<Texture>(new Texture(depthSpec));
 
 
 	glCreateTextures(GL_TEXTURE_2D, 1, &m_DepthAttachment->m_RendererID);
 	glBindTexture(GL_TEXTURE_2D, m_DepthAttachment->m_RendererID);
 	glTexStorage2D(GL_TEXTURE_2D, 1, depthSpec.InternalFormat, m_Specification.Width, m_Specification.Height);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_DepthAttachment->m_RendererID, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DepthAttachment->m_RendererID, 0);
 	
 	// we explicitly tell OpenGL we're not going to render any color data
 	glDrawBuffer(GL_NONE);

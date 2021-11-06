@@ -342,3 +342,4 @@ healthchecksdb
 
 # Exclude folders
 assets/**
+/Source/core/rendering/shader_source_files/textured_shaders_FAILSAVE.h

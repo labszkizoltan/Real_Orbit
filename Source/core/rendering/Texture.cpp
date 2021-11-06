@@ -87,6 +87,7 @@ void Texture::SetData(void* data, uint32_t size)
 
 void Texture::Bind() const
 {
+	glActiveTexture(GL_TEXTURE0 + m_Slot);
 	glBindTextureUnit(m_Slot, m_RendererID);
 }
 

@@ -20,6 +20,7 @@ public:
 	void SetCamera(TransformComponent camera_transform);
 	void SetZoomLevel(float zoom_level);
 	void SetLightPosition(Vec3D light_pos);
+	void SetTextureSlots();
 
 	std::shared_ptr<Shader> BindShader(MeshType meshType);
 	std::shared_ptr<Shader> GetLastBoundShader();
@@ -28,6 +29,9 @@ public:
 private:
 	std::vector<std::shared_ptr<Shader>> m_Shaders; // this may need to be changed to a map, or unordered map, where the shader can be selected based on MeshType
 	std::shared_ptr<Shader> m_LastBoundShader = nullptr;
+
+
+friend class Renderer;
 
 };
 

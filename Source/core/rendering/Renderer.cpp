@@ -65,7 +65,8 @@ int Renderer::Init()
 	camera_trf.orientation = Identity(1.0f);
 	SetCamera(camera_trf);
 	SetZoomLevel(1.0f);
-	SetLightPosition(Vec3D(0.0f, 0.0f, -1.0f));
+	SetLightPosition(Vec3D(0.0f, 0.0f, -3.0f));
+	s_ShaderLibrary.SetTextureSlots();
 
 	return result;
 }

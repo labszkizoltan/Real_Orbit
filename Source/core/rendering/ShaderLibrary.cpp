@@ -62,11 +62,23 @@ void ShaderLibrary::SetZoomLevel(float zoom_level)
 
 void ShaderLibrary::SetLightPosition(Vec3D light_pos)
 {
-	// for (int i = 0; i < m_Shaders.size(); i++)
-	for (int i = 3; i < m_Shaders.size(); i++)
+	for (int i = 0; i < m_Shaders.size(); i++)
+	// for (int i = 3; i < m_Shaders.size(); i++)
 	{
 		m_Shaders[i]->Bind();
 		m_Shaders[i]->UploadUniformFloat3("light_location", light_pos.Glm());
+	}
+	m_LastBoundShader = m_Shaders[m_Shaders.size() - 1];
+}
+
+void ShaderLibrary::SetTextureSlots()
+{
+	int samplers[32];
+	for (uint32_t i = 0; i < 32; i++) { samplers[i] = i; }
+	for (int i = 0; i < m_Shaders.size(); i++)
+	{
+		m_Shaders[i]->Bind();
+		m_Shaders[i]->UploadUniformIntArray("u_Textures", samplers, 32);
 	}
 	m_LastBoundShader = m_Shaders[m_Shaders.size() - 1];
 }
