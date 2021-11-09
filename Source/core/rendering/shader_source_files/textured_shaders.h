@@ -95,16 +95,6 @@ const char* textured_3d_shader_fragmentSrc =
 "	float bias = 0.005; \n"
 "	float shadow = (currentDepth - bias) > closestDepth ? 1.0 : 0.0; \n"
 "	FragColor = vec4(color*(1-shadow/2), 1.0); \n"
-//"	FragColor = vec4((color+depthSample)/2, 1.0); \n"
-//"	FragColor = vec4(vec3(shadow), 1.0); \n"
-//"	FragColor = vec4(vec3(lightCoordinates), 1.0); \n"
-//"	FragColor = vec4(vec3(closestDepth), 1.0); \n"
-//"	FragColor = vec4(vec3(depthSample), 1.0); \n"
-//"	FragColor = vec4(color, 1.0); \n"
-//"	FragColor = vec4(vec3(lightCoordinates.z/2+0.5), 1.0); \n"
-//"	FragColor = texture(u_Textures[0], texCoord); \n"
-//"	FragColor = vec4(texCoord, 0.0, 1.0); \n"
-//"	FragColor = vec4(vec3(gl_FragCoord.z), 1.0); \n"
 "}\0";
 
 

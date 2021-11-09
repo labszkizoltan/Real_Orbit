@@ -3,7 +3,7 @@
 #define RENDERER_H
 
 #include <core/rendering/ShaderLibrary.h>
-#include <core/rendering/Framebuffer.h>
+#include <core/rendering/Depthbuffer.h>
 #include <core/rendering/drawables/Mesh.h>
 #include <core/scene/Entity.h>
 #include <core/scene/Components.h>
@@ -16,6 +16,13 @@
 
 static void GLClearError()
 {
+//	int error_counter = 0;
+//	while (GLenum error = glGetError())
+//	{
+//		std::cout << "[OpenGL Error] (" << error << ")\n";
+//		if (error == 1282) { error_counter++; }
+//		if (error_counter > 10) { return; }
+//	}
 	while (glGetError() != GL_NO_ERROR);
 }
 
@@ -52,12 +59,15 @@ public:
 	static void SetZoomLevel(float zoom_level);
 	static void SetLightPosition(Vec3D light_pos);
 
+	static void Refresh();
+
 	// a few helper function could go here, like something that uploads various uniform combinations into the shaders
 private:
 
 
 private:
 	static float s_AspectRatio;
+	static std::shared_ptr<Depthbuffer> s_DepthBuffer;
 	static ShaderLibrary s_ShaderLibrary;
 
 };

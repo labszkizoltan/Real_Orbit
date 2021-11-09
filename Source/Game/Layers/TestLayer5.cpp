@@ -1,5 +1,5 @@
 
-#include "TestLayer4_perspCamTest.h"
+#include "TestLayer5.h"
 #include <core/Application.h>
 #include <SFML/Window/Event.hpp>
 #include <core/rendering/Renderer.h>
@@ -10,26 +10,17 @@
 #include <utils/Vector_3D.h>
 #include <glad/glad.h>
 
-#define BIND_EVENT_FN(x) std::bind(&TestLayer4::x, this, std::placeholders::_1)
+#define BIND_EVENT_FN(x) std::bind(&TestLayer5::x, this, std::placeholders::_1)
 
-TestLayer4::TestLayer4()
-	: Layer("TestLayer4")
+TestLayer5::TestLayer5()
+	: Layer("TestLayer5")
 {
-	LOG_INFO("TestLayer4 constructed");
+	LOG_INFO("TestLayer5 constructed");
 }
 
-void TestLayer4::OnAttach()
+void TestLayer5::OnAttach()
 {
-	LOG_INFO("TestLayer4 attached");
-
-	// Create the framebuffer:
-	FrameBufferSpecification fbspec;
-	fbspec.Width = 1024;
-	fbspec.Height = 1024;
-	m_Framebuffer = std::shared_ptr<Framebuffer>(new Framebuffer(fbspec));
-	m_Depthbuffer = std::shared_ptr<Depthbuffer>(new Depthbuffer(fbspec));
-	m_Depthbuffer->GetDepthAttachment()->SetSlot(1);
-	m_Depthbuffer->GetDepthAttachment()->Bind();
+	LOG_INFO("TestLayer5 attached");
 
 	// Hello Tetrahedron //
 	// Vertices with their own color:
@@ -164,24 +155,22 @@ void TestLayer4::OnAttach()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void TestLayer4::OnDetach()
+void TestLayer5::OnDetach()
 {
-	LOG_INFO("TestLayer4 detached");
+	LOG_INFO("TestLayer5 detached");
 }
 
-void TestLayer4::OnUpdate(Timestep ts)
+void TestLayer5::OnUpdate(Timestep ts)
 {
-	//	LOG_INFO("TestLayer4 updated");
+	//	LOG_INFO("TestLayer5 updated");
 
 	HandleUserInput(ts);
+	
+	Renderer::Refresh();
 
 	// render into the depth buffer
 	{
 		Renderer::SetLightPosition(Vec3D(sin(0.001f * m_ElapsedTime), 0.0f, 0.0f));
-
-		m_Depthbuffer->Bind();
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//TransformComponent& tetr_trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
 		//tetr_trf.location = Vec3D(-0.1f, 1.1f, 0.1f);
@@ -210,45 +199,44 @@ void TestLayer4::OnUpdate(Timestep ts)
 		Renderer::DrawToShadowMap(m_TexturedEntity);
 
 		textured_trf.location = Vec3D({ 0.0f, 3.0f, 0.0f });
-		m_Depthbuffer->Unbind();
+		// m_Depthbuffer->Unbind();
 	}
 
-	// Render
-	glClearColor(0.0f, 0.05f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	TransformComponent& tetr_trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
-	tetr_trf.location = Vec3D(sin(0.001f * m_ElapsedTime), 0.0f, 0.0f);
-	tetr_trf.orientation = tetr_trf.orientation * Rotation(0.001f * ts, Vec3D({ 1.0f, 0.0f, 0.0f }));
-	Renderer::Draw(m_TetrahedronEntity);
-
-	TransformComponent& rect_trf = m_RectangleEntity.GetComponent<TransformComponent>();
-	rect_trf.orientation = rect_trf.orientation * Rotation(0.001f * ts, Vec3D({ 0.0f, -1.0f, 0.0f }));
-//	rect_trf.location = Vec3D({ 0.0f, 0.7f*cos(0.001f * m_ElapsedTime), 0.0f });
-	rect_trf.location = Vec3D({ 0.1f, 0.7f*cos(0.001f * m_ElapsedTime), 0.7f * sin(0.001f * m_ElapsedTime)-0.0f });
-	Renderer::Draw(m_RectangleEntity);
-
-	for (int i = 0; i < 3; i++)
+	// render the scene
 	{
-		rect_trf.location = Vec3D(-0.1f, 2.1f, i * 0.2f + 0.1f);
+		TransformComponent& tetr_trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
+		tetr_trf.location = Vec3D(sin(0.001f * m_ElapsedTime), 0.0f, 0.0f);
+		tetr_trf.orientation = tetr_trf.orientation * Rotation(0.001f * ts, Vec3D({ 1.0f, 0.0f, 0.0f }));
+		Renderer::Draw(m_TetrahedronEntity);
+
+		TransformComponent& rect_trf = m_RectangleEntity.GetComponent<TransformComponent>();
+		rect_trf.orientation = rect_trf.orientation * Rotation(0.001f * ts, Vec3D({ 0.0f, -1.0f, 0.0f }));
+		//	rect_trf.location = Vec3D({ 0.0f, 0.7f*cos(0.001f * m_ElapsedTime), 0.0f });
+		rect_trf.location = Vec3D({ 0.1f, 0.7f * cos(0.001f * m_ElapsedTime), 0.7f * sin(0.001f * m_ElapsedTime) - 0.0f });
 		Renderer::Draw(m_RectangleEntity);
+
+		for (int i = 0; i < 3; i++)
+		{
+			rect_trf.location = Vec3D(-0.1f, 2.1f, i * 0.2f + 0.1f);
+			Renderer::Draw(m_RectangleEntity);
+		}
+
+		TransformComponent& textured_trf = m_TexturedEntity.GetComponent<TransformComponent>();
+		textured_trf.orientation = Rotation(1.57079633f, Vec3D({ -1.0f, 0.0f, 0.0f }));
+		textured_trf.location = Vec3D({ 0.0f, 3.0f, 0.0f });
+		Renderer::Draw(m_TexturedEntity);
+
+		textured_trf.orientation = Rotation(0.0002f * m_ElapsedTime, Vec3D({ 0.0f, 1.0f, 0.0f })) * Rotation(1.7f, Vec3D({ -1.0f, 0.0f, 0.0f }));
+		textured_trf.location = Vec3D({ 3.0f, 1.5f, 2.5f });
+		Renderer::Draw(m_TexturedEntity);
 	}
-
-	TransformComponent& textured_trf = m_TexturedEntity.GetComponent<TransformComponent>();
-	textured_trf.orientation = Rotation(1.57079633f, Vec3D({ -1.0f, 0.0f, 0.0f }));
-	textured_trf.location = Vec3D({ 0.0f, 3.0f, 0.0f });
-	Renderer::Draw(m_TexturedEntity);
-
-	textured_trf.orientation = Rotation(0.0002f * m_ElapsedTime, Vec3D({ 0.0f, 1.0f, 0.0f })) * Rotation(1.7f, Vec3D({ -1.0f, 0.0f, 0.0f }));
-	textured_trf.location = Vec3D({ 3.0f, 1.5f, 2.5f });
-	Renderer::Draw(m_TexturedEntity);
 
 	m_ElapsedTime += ts;
 }
 
-void TestLayer4::OnEvent(Event& event)
+void TestLayer5::OnEvent(Event& event)
 {
-	LOG_INFO("TestLayer4 event received");
+	LOG_INFO("TestLayer5 event received");
 
 //	event.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
 	event.Dispatch<sf::Event::EventType::LostFocus>				(BIND_EVENT_FN(OnLoosingFocus));
@@ -265,32 +253,32 @@ void TestLayer4::OnEvent(Event& event)
 ***** Private member functions *****
 ************************************/
 
-bool TestLayer4::OnWindowResize(Event& e)
+bool TestLayer5::OnWindowResize(Event& e)
 {
 	sf::Event& event = e.GetEvent();
-	LOG_CORE_INFO("Window Resize event captured in TestLayer4: width - {0}, height - {1}", event.size.width, event.size.height);
+	LOG_CORE_INFO("Window Resize event captured in TestLayer5: width - {0}, height - {1}", event.size.width, event.size.height);
 	return false;
 }
 
-bool TestLayer4::OnLoosingFocus(Event& e)
+bool TestLayer5::OnLoosingFocus(Event& e)
 {
-	LOG_INFO("TestLayer4 received LostFocus event");
+	LOG_INFO("TestLayer5 received LostFocus event");
 	return false;
 }
 
-bool TestLayer4::OnGainingFocus(Event& e)
+bool TestLayer5::OnGainingFocus(Event& e)
 {
-	LOG_INFO("TestLayer4 received GainFocus event");
+	LOG_INFO("TestLayer5 received GainFocus event");
 	return false;
 }
 
-bool TestLayer4::OnTextEntered(Event& e)
+bool TestLayer5::OnTextEntered(Event& e)
 {
-	LOG_INFO("TestLayer4 received OnTextEntered event");
+	LOG_INFO("TestLayer5 received OnTextEntered event");
 	return false;
 }
 
-bool TestLayer4::OnKeyPressed(Event& e)
+bool TestLayer5::OnKeyPressed(Event& e)
 {
 	sf::Event& event = e.GetEvent();
 
@@ -309,13 +297,13 @@ bool TestLayer4::OnKeyPressed(Event& e)
 	return false;
 }
 
-bool TestLayer4::OnKeyReleased(Event& e)
+bool TestLayer5::OnKeyReleased(Event& e)
 {
-	LOG_INFO("TestLayer4 received OnKeyReleased event");
+	LOG_INFO("TestLayer5 received OnKeyReleased event");
 	return false;
 }
 
-bool TestLayer4::MouseWheelScrolled(Event& e)
+bool TestLayer5::MouseWheelScrolled(Event& e)
 {
 	static float zoom_level = 1.0f;
 
@@ -327,41 +315,41 @@ bool TestLayer4::MouseWheelScrolled(Event& e)
 
 	Renderer::SetZoomLevel(zoom_level);
 
-	LOG_INFO("TestLayer4 received MouseWheelScrolled evet: delta: {0}, x: {1}, y: {2}", event.mouseWheelScroll.delta, event.mouseWheelScroll.x, event.mouseWheelScroll.y);
+	LOG_INFO("TestLayer5 received MouseWheelScrolled evet: delta: {0}, x: {1}, y: {2}", event.mouseWheelScroll.delta, event.mouseWheelScroll.x, event.mouseWheelScroll.y);
 	return false;
 }
 
-bool TestLayer4::OnMouseButtonPressed(Event& e)
+bool TestLayer5::OnMouseButtonPressed(Event& e)
 {
-	LOG_INFO("TestLayer4 received OnMouseButtonPressed event");
+	LOG_INFO("TestLayer5 received OnMouseButtonPressed event");
 	return false;
 }
 
-bool TestLayer4::OnMouseButtonReleased(Event& e)
+bool TestLayer5::OnMouseButtonReleased(Event& e)
 {
-	LOG_INFO("TestLayer4 received OnMouseButtonReleased event");
+	LOG_INFO("TestLayer5 received OnMouseButtonReleased event");
 	return false;
 }
 
-bool TestLayer4::OnMouseMoved(Event& e)
+bool TestLayer5::OnMouseMoved(Event& e)
 {
-	LOG_INFO("TestLayer4 received OnMouseMoved event");
+	LOG_INFO("TestLayer5 received OnMouseMoved event");
 	return false;
 }
 
-bool TestLayer4::OnMouseEntered(Event& e)
+bool TestLayer5::OnMouseEntered(Event& e)
 {
-	LOG_INFO("TestLayer4 received OnMouseEntered event");
+	LOG_INFO("TestLayer5 received OnMouseEntered event");
 	return false;
 }
 
-bool TestLayer4::OnMouseLeft(Event& e)
+bool TestLayer5::OnMouseLeft(Event& e)
 {
-	LOG_INFO("TestLayer4 received OnMouseLeft event");
+	LOG_INFO("TestLayer5 received OnMouseLeft event");
 	return false;
 }
 
-void TestLayer4::HandleUserInput(Timestep ts)
+void TestLayer5::HandleUserInput(Timestep ts)
 {
 	TransformComponent& cam_trf = m_CameraEntity.GetComponent<TransformComponent>();
 

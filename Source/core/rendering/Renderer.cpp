@@ -5,6 +5,7 @@
 #include <core/scene/Components.h>
 
 float Renderer::s_AspectRatio = 1.0f;
+std::shared_ptr<Depthbuffer> Renderer::s_DepthBuffer = nullptr;
 ShaderLibrary Renderer::s_ShaderLibrary;
 
 Renderer::~Renderer()
@@ -13,18 +14,23 @@ Renderer::~Renderer()
 
 int Renderer::Init()
 {
+	// initialize GLAD
 	int result = gladLoadGL();
 	if (!result)
 		std::cout << "Failed to initialize OpenGL context\n";
 
+	// Create the framebuffer for the shadow map:
+	FrameBufferSpecification fbspec;
+	fbspec.Width = 1024;
+	fbspec.Height = 1024;
+	s_DepthBuffer = std::shared_ptr<Depthbuffer>(new Depthbuffer(fbspec));
+	s_DepthBuffer->GetDepthAttachment()->SetSlot(1);
+	s_DepthBuffer->GetDepthAttachment()->Bind();
+
+	// Add the shaders to the shader library
+
 	// MeshType::COLOURED_MESH
 	s_ShaderLibrary.AddShader(
-//		ParseShader("Source/core/rendering/shader_source_files/basic_3D_vertex_shd.glsl"),
-//		ParseShader("Source/core/rendering/shader_source_files/basic_3D_fragment_shd.glsl")
-
-//		std::string(basic_3d_shader_vertexSrc),
-//		std::string(basic_3d_shader_fragmentSrc)
-
 		std::string(perspective_3d_shader_vertexSrc),
 		std::string(perspective_3d_shader_fragmentSrc)
 	);
@@ -103,6 +109,8 @@ void Renderer::Draw(Entity entity)
 
 void Renderer::DrawToShadowMap(Entity entity)
 {
+	s_DepthBuffer->Bind();
+
 	// check if the required components are there, otherwise skip the function body
 	if (entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
 	{
@@ -117,6 +125,7 @@ void Renderer::DrawToShadowMap(Entity entity)
 		mesh.meshPtr->Draw();
 	}
 
+	s_DepthBuffer->Unbind();
 }
 
 void Renderer::SetAspectRatio(float aspect_ratio)
@@ -138,5 +147,17 @@ void Renderer::SetZoomLevel(float zoom_level)
 void Renderer::SetLightPosition(Vec3D light_pos)
 {
 	s_ShaderLibrary.SetLightPosition(light_pos);
+}
+
+void Renderer::Refresh()
+{
+
+	glClearColor(0.0f, 0.05f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	s_DepthBuffer->Bind();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	s_DepthBuffer->Unbind();
 }
 
