@@ -5,6 +5,7 @@
 #include <core/rendering/Renderer.h>
 #include <core/rendering/drawables/ColouredMesh.h>
 #include <core/rendering/drawables/TexturedMesh.h>
+#include <core/rendering/drawables/NormalMesh.h>
 #include <core/scene/Components.h>
 
 #include <utils/Vector_3D.h>
@@ -55,6 +56,57 @@ void TestLayer5::OnAttach()
 
 	m_Rectangle = std::shared_ptr<Mesh>(new ColouredMesh(vertices_rect, indices_rect));
 
+	// cube
+	std::vector<float> vertices_cube = {
+		-0.707107,	-0.707107,	-0.707107,	0,	-1,	0,	1.000,	0.0,
+		 0.707107,	-0.707107,	-0.707107,	0,	-1,	0,	0.666,	0.0,
+		-0.707107,	-0.707107,	 0.707107,	0,	-1,	0,	1.000,	0.5,
+		 0.707107,	-0.707107,	 0.707107,	0,	-1,	0,	0.666,	0.5,
+
+		-0.707107,	0.707107,	-0.707107,	0,	1,	0,	1.000,	1.0,
+		0.707107,	0.707107,	-0.707107,	0,	1,	0,	0.666,	1.0,
+		-0.707107,	0.707107,	 0.707107,	0,	1,	0,	1.000,	0.5,
+		0.707107,	0.707107,	 0.707107,	0,	1,	0,	0.666,	0.5,
+
+		-0.707107,	-0.707107,	 0.707107,	-1,	0,	0,	0.333,	0.5,
+		-0.707107,	-0.707107,	-0.707107,	-1,	0,	0,	0.666,	0.5,
+		-0.707107,	0.707107,	 0.707107,	-1,	0,	0,	0.333,	1.0,
+		-0.707107,	0.707107,	-0.707107,	-1,	0,	0,	0.666,	1.0,
+
+		0.707107,	-0.707107,	 0.707107,	1,	0,	0,	0.666,	0.0,
+		0.707107,	-0.707107,	-0.707107,	1,	0,	0,	0.333,	0.0,
+		0.707107,	0.707107,	 0.707107,	1,	0,	0,	0.666,	0.5,
+		0.707107,	0.707107,	-0.707107,	1,	0,	0,	0.333,	0.5,
+
+		-0.707107,	-0.707107,	0.707107,	0,	0,	1,	0.333,	0.5,
+		0.707107,	-0.707107,	0.707107,	0,	0,	1,	0.000,	0.5,
+		-0.707107,	0.707107,	0.707107,	0,	0,	1,	0.333,	1.0,
+		0.707107,	0.707107,	0.707107,	0,	0,	1,	0.000,	1.0,
+
+		-0.707107,	-0.707107,	-0.707107,	0,	0,	-1,	0.000,	0.0,
+		0.707107,	-0.707107,	-0.707107,	0,	0,	-1,	0.333,	0.0,
+		-0.707107,	0.707107,	-0.707107,	0,	0,	-1,	0.000,	0.5,
+		0.707107,	0.707107,	-0.707107,	0,	0,	-1,	0.333,	0.5
+	};
+
+	std::vector<uint32_t> indices_cube = {
+		0,	1,	2,
+		1,	3,	2,
+		4,	6,	5,
+		5,	6,	7,
+		8,	10,	9,
+		9,	10,	11,
+		12,	13,	14,
+		13,	15,	14,
+		16,	17,	18,
+		17,	19,	18,
+		20,	22,	21,
+		21,	22,	23
+	};
+
+	m_Cube = std::shared_ptr<Mesh>(new NormalMesh(vertices_cube, indices_cube, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/all_in_one.png"));
+
+	// textured
 	std::vector<float> vertices_textured = {
 		-0.3f, -0.3f, 0.0f, 0.00f, 0.0f,
 		-0.1f, -0.3f, 0.0f, 0.33f, 0.0f,
@@ -76,7 +128,6 @@ void TestLayer5::OnAttach()
 		 0.1f,  0.3f, 0.0f, 0.67f, 1.0f,
 		 0.3f,  0.3f, 0.0f, 1.00f, 1.0f
 	};
-
 
 	std::vector<uint32_t> indices_textured = {
 		0, 1, 4,   // first quad
@@ -126,6 +177,12 @@ void TestLayer5::OnAttach()
 	rect_trf.orientation = Identity(1.0f);
 	rect_trf.scale = 1.0f;
 
+	TransformComponent cube_trf;
+	cube_trf.location = Vec3D({ 0.3f, 0.4f, -0.1f });
+//	cube_trf.location = Vec3D(-0.3f, 2.1f, 0.3f);
+	cube_trf.orientation = Identity(1.0f);
+	cube_trf.scale = 0.2f;
+
 	TransformComponent textured_trf;
 	textured_trf.location = Vec3D({ 0.0f, 3.0f, 0.0f });
 //	textured_trf.orientation = Identity(1.0f);
@@ -137,18 +194,22 @@ void TestLayer5::OnAttach()
 	m_CameraEntity = m_Scene->CreateEntity("Camera");
 	m_TetrahedronEntity = m_Scene->CreateEntity("Tetrahedron");
 	m_RectangleEntity = m_Scene->CreateEntity("Rectangle");
+	m_CubeEntity = m_Scene->CreateEntity("Cube");
 	m_TexturedEntity = m_Scene->CreateEntity("Textured");
 
 	m_CameraEntity.AddComponent<TransformComponent>(cam_trf);
 	m_TetrahedronEntity.AddComponent<TransformComponent>(tetrahedron_trf);
 	m_RectangleEntity.AddComponent<TransformComponent>(rect_trf);
+	m_CubeEntity.AddComponent<TransformComponent>(cube_trf);
 	m_TexturedEntity.AddComponent<TransformComponent>(textured_trf);
 
 	MeshComponent tetrahedron_mesh_component; tetrahedron_mesh_component.meshPtr = m_Tetrahedron;
 	MeshComponent rectangle_mesh_component; rectangle_mesh_component.meshPtr = m_Rectangle;
+	MeshComponent normal_mesh_component; normal_mesh_component.meshPtr = m_Cube;
 	MeshComponent textured_mesh_component; textured_mesh_component.meshPtr = m_Textured;
 	m_TetrahedronEntity.AddComponent<MeshComponent>(tetrahedron_mesh_component);
 	m_RectangleEntity.AddComponent<MeshComponent>(rectangle_mesh_component);
+	m_CubeEntity.AddComponent<MeshComponent>(normal_mesh_component);
 	m_TexturedEntity.AddComponent<MeshComponent>(textured_mesh_component);
 
 	Renderer::SetLightPosition(tetrahedron_trf.location);
@@ -198,6 +259,8 @@ void TestLayer5::OnUpdate(Timestep ts)
 		textured_trf.location = Vec3D({ 3.0f, 1.5f, 2.5f });
 		Renderer::DrawToShadowMap(m_TexturedEntity);
 
+		Renderer::DrawToShadowMap(m_CubeEntity);
+
 		textured_trf.location = Vec3D({ 0.0f, 3.0f, 0.0f });
 		// m_Depthbuffer->Unbind();
 	}
@@ -229,6 +292,8 @@ void TestLayer5::OnUpdate(Timestep ts)
 		textured_trf.orientation = Rotation(0.0002f * m_ElapsedTime, Vec3D({ 0.0f, 1.0f, 0.0f })) * Rotation(1.7f, Vec3D({ -1.0f, 0.0f, 0.0f }));
 		textured_trf.location = Vec3D({ 3.0f, 1.5f, 2.5f });
 		Renderer::Draw(m_TexturedEntity);
+
+		Renderer::Draw(m_CubeEntity);
 	}
 
 	m_ElapsedTime += ts;

@@ -165,6 +165,7 @@
     <ClCompile Include="Source\core\rendering\Depthbuffer.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\ColouredMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\Mesh.cpp" />
+    <ClCompile Include="Source\core\rendering\drawables\NormalMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\TexturedMesh.cpp" />
     <ClCompile Include="Source\core\rendering\Framebuffer.cpp" />
     <ClCompile Include="Source\core\rendering\Renderer.cpp" />
@@ -198,12 +199,14 @@
     <ClInclude Include="Source\core\rendering\Depthbuffer.h" />
     <ClInclude Include="Source\core\rendering\drawables\ColouredMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Mesh.h" />
+    <ClInclude Include="Source\core\rendering\drawables\NormalMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Skybox.h" />
     <ClInclude Include="Source\core\rendering\drawables\TexturedMesh.h" />
     <ClInclude Include="Source\core\rendering\Framebuffer.h" />
     <ClInclude Include="Source\core\rendering\Renderer.h" />
     <ClInclude Include="Source\core\rendering\Shader.h" />
     <ClInclude Include="Source\core\rendering\ShaderLibrary.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\normal_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\shadow_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\textured_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\basic_3D_shaders.h" />

@@ -41,6 +41,12 @@ int Renderer::Init()
 		std::string(textured_3d_shader_fragmentSrc)
 	);
 
+	// MeshType::NORMAL_MESH
+	s_ShaderLibrary.AddShader(
+		std::string(normal_shader_vertexSrc),
+		std::string(normal_shader_fragmentSrc)
+	);
+
 	// MeshType::SKYBOX
 	s_ShaderLibrary.AddShader(
 		std::string(),

@@ -14,10 +14,10 @@ Depthbuffer::Depthbuffer(const FrameBufferSpecification& spec)
 
 Depthbuffer::~Depthbuffer()
 {
-	// (glDeleteFramebuffers(1, &m_RendererID));
-	// (glDeleteTextures(1, &m_DepthAttachment->m_RendererID));
-	GLCall(glDeleteFramebuffers(1, &m_RendererID));
-	GLCall(glDeleteTextures(1, &m_DepthAttachment->m_RendererID));
+	glDeleteFramebuffers(1, &m_RendererID);
+	glDeleteTextures(1, &m_DepthAttachment->m_RendererID);
+	// GLCall(glDeleteFramebuffers(1, &m_RendererID));
+	// GLCall(glDeleteTextures(1, &m_DepthAttachment->m_RendererID));
 }
 
 void Depthbuffer::Invalidate()

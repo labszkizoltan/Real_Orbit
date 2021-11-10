@@ -31,7 +31,6 @@ private:
 	VertexBuffer m_VertexBuffer;
 	IndexBuffer m_IndexBuffer;
 	std::shared_ptr<Texture> m_Texture;
-//	uint32_t m_Texture;
 
 private:
 	static BufferLayout s_Layout;

@@ -126,6 +126,12 @@
     <ClInclude Include="Source\Game\Layers\TestLayer5.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\core\rendering\drawables\NormalMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\rendering\shader_source_files\normal_shaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Game\GameApp.cpp">
@@ -216,6 +222,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Game\Layers\TestLayer5.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\rendering\drawables\NormalMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

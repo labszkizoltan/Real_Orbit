@@ -10,20 +10,18 @@
 #include <glad/glad.h>
 #include <iostream>
 
+#include <wingdi.h>
+
+
 // this is compiler specific, gcc probably cant recognize this
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearError(); x; ASSERT(GLLogCall(#x, __FILE__, __LINE__))
 
 static void GLClearError()
 {
-//	int error_counter = 0;
-//	while (GLenum error = glGetError())
-//	{
-//		std::cout << "[OpenGL Error] (" << error << ")\n";
-//		if (error == 1282) { error_counter++; }
-//		if (error_counter > 10) { return; }
-//	}
-	while (glGetError() != GL_NO_ERROR);
+	bool has_opengl_context = wglGetCurrentContext();
+	if(has_opengl_context)
+		while (glGetError() != GL_NO_ERROR);
 }
 
 static bool GLLogCall(const char* function, const char* file, int line)
