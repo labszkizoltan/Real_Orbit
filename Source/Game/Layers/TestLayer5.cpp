@@ -244,12 +244,6 @@ void TestLayer5::OnUpdate(Timestep ts)
 		rect_trf.location = Vec3D({ 0.1f, 0.7f * cos(0.001f * m_ElapsedTime), 0.7f * sin(0.001f * m_ElapsedTime) - 0.0f });
 		Renderer::DrawToShadowMap(m_RectangleEntity);
 
-		for (int i = 0; i < 3; i++)
-		{
-			rect_trf.location = Vec3D(-0.1f, 2.1f, i * 0.2f + 0.1f);
-			Renderer::DrawToShadowMap(m_RectangleEntity);
-		}
-
 		TransformComponent& textured_trf = m_TexturedEntity.GetComponent<TransformComponent>();
 		textured_trf.orientation = Rotation(1.57079633f, Vec3D({ -1.0f, 0.0f, 0.0f }));
 		textured_trf.location = Vec3D({ 0.0f, 3.0f, 0.0f });
@@ -259,7 +253,15 @@ void TestLayer5::OnUpdate(Timestep ts)
 		textured_trf.location = Vec3D({ 3.0f, 1.5f, 2.5f });
 		Renderer::DrawToShadowMap(m_TexturedEntity);
 
-		Renderer::DrawToShadowMap(m_CubeEntity);
+		TransformComponent& cube_trf = m_CubeEntity.GetComponent<TransformComponent>();
+		for (int i = 0; i < 3; i++)
+		{
+			cube_trf.orientation = Rotation(0.0002f * m_ElapsedTime, Vec3D({ 0.0f, 1.0f, -1.0f }));
+			cube_trf.location = Vec3D(-0.1f, 1.1f + i * 0.3, i * 0.1f + 0.1f);
+			cube_trf.scale = 0.1f + 0.1f * i;
+			Renderer::DrawToShadowMap(m_CubeEntity);
+		}
+		// Renderer::DrawToShadowMap(m_CubeEntity);
 
 		textured_trf.location = Vec3D({ 0.0f, 3.0f, 0.0f });
 		// m_Depthbuffer->Unbind();
@@ -278,11 +280,11 @@ void TestLayer5::OnUpdate(Timestep ts)
 		rect_trf.location = Vec3D({ 0.1f, 0.7f * cos(0.001f * m_ElapsedTime), 0.7f * sin(0.001f * m_ElapsedTime) - 0.0f });
 		Renderer::Draw(m_RectangleEntity);
 
-		for (int i = 0; i < 3; i++)
-		{
-			rect_trf.location = Vec3D(-0.1f, 2.1f, i * 0.2f + 0.1f);
-			Renderer::Draw(m_RectangleEntity);
-		}
+//		for (int i = 0; i < 3; i++)
+//		{
+//			rect_trf.location = Vec3D(-0.1f, 2.1f, i * 0.2f + 0.1f);
+//			Renderer::Draw(m_RectangleEntity);
+//		}
 
 		TransformComponent& textured_trf = m_TexturedEntity.GetComponent<TransformComponent>();
 		textured_trf.orientation = Rotation(1.57079633f, Vec3D({ -1.0f, 0.0f, 0.0f }));
@@ -293,7 +295,15 @@ void TestLayer5::OnUpdate(Timestep ts)
 		textured_trf.location = Vec3D({ 3.0f, 1.5f, 2.5f });
 		Renderer::Draw(m_TexturedEntity);
 
-		Renderer::Draw(m_CubeEntity);
+		TransformComponent& cube_trf = m_CubeEntity.GetComponent<TransformComponent>();
+		for (int i = 0; i < 3; i++)
+		{
+			cube_trf.orientation = Rotation(0.0002f * m_ElapsedTime, Vec3D({ 0.0f, 1.0f, -1.0f }));
+			cube_trf.location = Vec3D(-0.1f, 1.1f + i * 0.3, i * 0.1f + 0.1f);
+			cube_trf.scale = 0.1f + 0.1f * i;
+			Renderer::Draw(m_CubeEntity);
+		}
+		// Renderer::Draw(m_CubeEntity);
 	}
 
 	m_ElapsedTime += ts;
