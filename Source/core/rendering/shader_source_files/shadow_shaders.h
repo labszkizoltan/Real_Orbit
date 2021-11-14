@@ -17,6 +17,9 @@ const char* shadow_mapper_vertexSrc =
 "uniform mat3 body_orientation; \n"
 "uniform float body_scale; \n"
 
+"uniform float r_max; \n"
+"uniform float r_min; \n"
+
 "uniform vec3 light_location; \n"
 
 "void main()\n"
@@ -25,8 +28,6 @@ const char* shadow_mapper_vertexSrc =
 "	vec3 position_tmp = body_location - light_location + body_scale * (aPos[0] * body_orientation[0] + aPos[1] * body_orientation[1] + aPos[2] * body_orientation[2]); \n"
 
 "	float r = length(position_tmp); \n"
-"	float r_max = 20.0f; \n"
-"	float r_min = 0.05; \n"
 
 "	gl_Position = vec4(\n"
 "		atan(position_tmp.y, position_tmp.x)/(3.1415926535), \n" // this atan returns values between -pi and pi

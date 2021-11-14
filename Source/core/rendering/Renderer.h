@@ -55,6 +55,7 @@ public:
 	static void SetAspectRatio(float aspect_ratio);
 	static void SetCamera(TransformComponent camera_transform);
 	static void SetZoomLevel(float zoom_level);
+	static void SetMinMaxRange(float min, float max);
 	static void SetLightPosition(Vec3D light_pos);
 
 	static void Refresh();

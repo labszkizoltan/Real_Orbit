@@ -20,6 +20,7 @@ public:
 	void SetCamera(TransformComponent camera_transform);
 	void SetZoomLevel(float zoom_level);
 	void SetLightPosition(Vec3D light_pos);
+	void SetMinMaxRange(float min, float max);
 	void SetTextureSlots();
 
 	std::shared_ptr<Shader> BindShader(MeshType meshType);

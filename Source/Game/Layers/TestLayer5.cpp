@@ -9,6 +9,8 @@
 #include <core/rendering/drawables/NormalMesh.h>
 #include <core/scene/Components.h>
 
+#include <core/GlobalConstants.h>
+
 #include <utils/Vector_3D.h>
 #include <glad/glad.h>
 
@@ -164,12 +166,26 @@ void TestLayer5::OnAttach()
 	auto skybox_vertices = Skybox::CreateSkyboxVertexData(10);
 	auto skybox_indices = Skybox::CreateSkyboxIndexData(10);
 	std::vector<std::string> textureFilenames = {
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_front.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_back.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_left.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_right.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_up.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_down.png"
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_front.png",
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_back.png",
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_left.png",
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_right.png",
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_up.png",
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_down.png"
+
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_front.png",
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_back.png",
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_left.png",
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_right.png",
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_up.png",
+//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_down.png"
+
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_front.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_back.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_left.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_right.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_up.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_down.png"
 	};
 
 	m_Skybox = std::shared_ptr<Mesh>(new Skybox(skybox_vertices, skybox_indices, textureFilenames));
@@ -255,6 +271,8 @@ void TestLayer5::OnUpdate(Timestep ts)
 	// render into the depth buffer
 	{
 		glCullFace(GL_FRONT);
+		// TransformComponent& camera_trf = m_CameraEntity.GetComponent<TransformComponent>();
+		// Renderer::SetLightPosition(camera_trf.location);
 		Renderer::SetLightPosition(Vec3D(sin(0.001f * m_ElapsedTime), 0.0f, 0.0f));
 
 		//TransformComponent& tetr_trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
@@ -408,12 +426,12 @@ bool TestLayer5::OnKeyReleased(Event& e)
 
 bool TestLayer5::MouseWheelScrolled(Event& e)
 {
-	static float zoom_level = 1.0f;
+	static float zoom_level = g_InitialZoomLevel;
 
 	sf::Event& event = e.GetEvent();
 
-	zoom_level *= event.mouseWheelScroll.delta > 0 ? 2.0f : 0.5f;
-	zoom_level = zoom_level < 1.0f ? 1.0f : zoom_level;
+	zoom_level *= event.mouseWheelScroll.delta > 0 ? 1.25f : 0.8f;
+	zoom_level = zoom_level < g_InitialZoomLevel ? g_InitialZoomLevel : zoom_level;
 	zoom_level = zoom_level > 128.0f ? 128.0f : zoom_level;
 
 	Renderer::SetZoomLevel(zoom_level);

@@ -3,6 +3,7 @@
 #include <core/rendering/shader_source_files/ShaderSourceCollection.h>
 //#include <core/rendering/shader_source_files/basic_3D_shaders.h>
 #include <core/scene/Components.h>
+#include <core/GlobalConstants.h>
 
 float Renderer::s_AspectRatio = 1.0f;
 std::shared_ptr<Depthbuffer> Renderer::s_DepthBuffer = nullptr;
@@ -76,8 +77,9 @@ int Renderer::Init()
 	camera_trf.location = Vec3D({ 0,0,-1 });
 	camera_trf.orientation = Identity(1.0f);
 	SetCamera(camera_trf);
-	SetZoomLevel(1.0f);
+	SetZoomLevel(g_InitialZoomLevel);
 	SetLightPosition(Vec3D(0.0f, 0.0f, -3.0f));
+	SetMinMaxRange(0.05f, 200.0f);
 	s_ShaderLibrary.SetTextureSlots();
 
 	return result;
@@ -148,6 +150,11 @@ void Renderer::SetCamera(TransformComponent camera_transform)
 void Renderer::SetZoomLevel(float zoom_level)
 {
 	s_ShaderLibrary.SetZoomLevel(zoom_level);
+}
+
+void Renderer::SetMinMaxRange(float min, float max)
+{
+	s_ShaderLibrary.SetMinMaxRange(min, max);
 }
 
 void Renderer::SetLightPosition(Vec3D light_pos)

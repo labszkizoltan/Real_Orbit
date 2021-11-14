@@ -71,6 +71,17 @@ void ShaderLibrary::SetLightPosition(Vec3D light_pos)
 	m_LastBoundShader = m_Shaders[m_Shaders.size() - 1];
 }
 
+void ShaderLibrary::SetMinMaxRange(float min, float max)
+{
+	for (int i = 0; i < m_Shaders.size(); i++)
+	{
+		m_Shaders[i]->Bind();
+		m_Shaders[i]->UploadUniformFloat("r_min", min);
+		m_Shaders[i]->UploadUniformFloat("r_max", max);
+	}
+	m_LastBoundShader = m_Shaders[m_Shaders.size() - 1];
+}
+
 void ShaderLibrary::SetTextureSlots()
 {
 	int samplers[32];

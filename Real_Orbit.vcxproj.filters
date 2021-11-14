@@ -135,6 +135,9 @@
     <ClInclude Include="Source\core\rendering\shader_source_files\skybox_shaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\core\GlobalConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Game\GameApp.cpp">

@@ -17,6 +17,9 @@ const char* textured_3d_shader_vertexSrc =
 "uniform mat3 body_orientation; \n"
 "uniform float body_scale; \n"
 
+"uniform float r_max; \n"
+"uniform float r_min; \n"
+
 "uniform vec3 light_location; \n"
 
 "uniform float zoom_level; \n"
@@ -48,8 +51,6 @@ const char* textured_3d_shader_vertexSrc =
 "	float theta = rho / position_tmp.z < 0.1 ? asin(rho / position_tmp.z) : acos(position_tmp.z / r); \n"
 // 60 degrees
 "	float theta_max = 1.0471955;\n"
-"	float r_max = 20.0f; \n"
-"	float r_min = 0.05; \n"
 
 "	float new_r = zoom_level * theta / theta_max; \n"
 

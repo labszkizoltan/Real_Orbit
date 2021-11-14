@@ -22,6 +22,9 @@ const char* normal_shader_vertexSrc =
 "uniform vec3 camera_location; \n"
 "uniform mat3 camera_orientation; \n"
 
+"uniform float r_max; \n"
+"uniform float r_min; \n"
+
 "uniform float aspect_ratio; \n"
 
 "out vec2 texCoord; \n"
@@ -47,8 +50,6 @@ const char* normal_shader_vertexSrc =
 "	float theta = rho / position_tmp.z < 0.1 ? asin(rho / position_tmp.z) : acos(position_tmp.z / r); \n"
 // 60 degrees
 "	float theta_max = 1.0471955;\n"
-"	float r_max = 20.0f; \n"
-"	float r_min = 0.05; \n"
 
 "	float new_r = zoom_level * theta / theta_max; \n"
 
