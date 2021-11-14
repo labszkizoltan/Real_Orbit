@@ -5,6 +5,7 @@
 #include <core/rendering/Renderer.h>
 #include <core/rendering/drawables/ColouredMesh.h>
 #include <core/rendering/drawables/TexturedMesh.h>
+#include <core/rendering/drawables/Skybox.h>
 #include <core/rendering/drawables/NormalMesh.h>
 #include <core/scene/Components.h>
 
@@ -152,13 +153,26 @@ void TestLayer5::OnAttach()
 		15, 14, 11   // 
 	};
 
-
-	
 //	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/saucer_texture.png"));
 	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/all_in_one.png"));
+//	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_front.png"));
 //	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, m_Framebuffer->GetColorAttachment()));
 //	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, m_Framebuffer->GetDepthAttachment()));
 //	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, m_Depthbuffer->GetDepthAttachment()));
+
+	// skybox
+	auto skybox_vertices = Skybox::CreateSkyboxVertexData(10);
+	auto skybox_indices = Skybox::CreateSkyboxIndexData(10);
+	std::vector<std::string> textureFilenames = {
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_front.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_back.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_left.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_right.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_up.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_down.png"
+	};
+
+	m_Skybox = std::shared_ptr<Mesh>(new Skybox(skybox_vertices, skybox_indices, textureFilenames));
 
 	// construct the scene and the entities
 	TransformComponent cam_trf;
@@ -189,6 +203,11 @@ void TestLayer5::OnAttach()
 	textured_trf.orientation = Rotation(1.57079633f, Vec3D({ 1.0f, 0.0f, 0.0f }));
 	textured_trf.scale = 10.0f;
 
+	TransformComponent skybox_trf;
+	skybox_trf.location = Vec3D({ 0.0f, 0.0f, 0.0f });
+	skybox_trf.orientation = Identity(1.0f);
+	skybox_trf.scale = 1.0f;
+
 	m_Scene = std::shared_ptr<Scene>(new Scene());
 
 	m_CameraEntity = m_Scene->CreateEntity("Camera");
@@ -196,21 +215,25 @@ void TestLayer5::OnAttach()
 	m_RectangleEntity = m_Scene->CreateEntity("Rectangle");
 	m_CubeEntity = m_Scene->CreateEntity("Cube");
 	m_TexturedEntity = m_Scene->CreateEntity("Textured");
+	m_SkyboxEntity = m_Scene->CreateEntity("Skybox");
 
 	m_CameraEntity.AddComponent<TransformComponent>(cam_trf);
 	m_TetrahedronEntity.AddComponent<TransformComponent>(tetrahedron_trf);
 	m_RectangleEntity.AddComponent<TransformComponent>(rect_trf);
 	m_CubeEntity.AddComponent<TransformComponent>(cube_trf);
 	m_TexturedEntity.AddComponent<TransformComponent>(textured_trf);
+	m_SkyboxEntity.AddComponent<TransformComponent>(skybox_trf);
 
 	MeshComponent tetrahedron_mesh_component; tetrahedron_mesh_component.meshPtr = m_Tetrahedron;
 	MeshComponent rectangle_mesh_component; rectangle_mesh_component.meshPtr = m_Rectangle;
 	MeshComponent normal_mesh_component; normal_mesh_component.meshPtr = m_Cube;
 	MeshComponent textured_mesh_component; textured_mesh_component.meshPtr = m_Textured;
+	MeshComponent skybox_mesh_component; skybox_mesh_component.meshPtr = m_Skybox;
 	m_TetrahedronEntity.AddComponent<MeshComponent>(tetrahedron_mesh_component);
 	m_RectangleEntity.AddComponent<MeshComponent>(rectangle_mesh_component);
 	m_CubeEntity.AddComponent<MeshComponent>(normal_mesh_component);
 	m_TexturedEntity.AddComponent<MeshComponent>(textured_mesh_component);
+	m_SkyboxEntity.AddComponent<MeshComponent>(skybox_mesh_component);
 
 	Renderer::SetLightPosition(tetrahedron_trf.location);
 	glEnable(GL_DEPTH_TEST);
@@ -231,6 +254,7 @@ void TestLayer5::OnUpdate(Timestep ts)
 
 	// render into the depth buffer
 	{
+		glCullFace(GL_FRONT);
 		Renderer::SetLightPosition(Vec3D(sin(0.001f * m_ElapsedTime), 0.0f, 0.0f));
 
 		//TransformComponent& tetr_trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
@@ -265,10 +289,14 @@ void TestLayer5::OnUpdate(Timestep ts)
 
 		textured_trf.location = Vec3D({ 0.0f, 3.0f, 0.0f });
 		// m_Depthbuffer->Unbind();
+
+		glCullFace(GL_BACK);
 	}
 
 	// render the scene
 	{
+		Renderer::Draw(m_SkyboxEntity);
+
 		TransformComponent& tetr_trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
 		tetr_trf.location = Vec3D(sin(0.001f * m_ElapsedTime), 0.0f, 0.0f);
 		tetr_trf.orientation = tetr_trf.orientation * Rotation(0.001f * ts, Vec3D({ 1.0f, 0.0f, 0.0f }));

@@ -45,6 +45,7 @@ private:
 	std::shared_ptr<Mesh> m_Rectangle = nullptr;
 	std::shared_ptr<Mesh> m_Cube = nullptr;
 	std::shared_ptr<Mesh> m_Textured  = nullptr;
+	std::shared_ptr<Mesh> m_Skybox = nullptr;
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	Entity m_CameraEntity;
@@ -52,6 +53,7 @@ private:
 	Entity m_RectangleEntity;
 	Entity m_CubeEntity;
 	Entity m_TexturedEntity;
+	Entity m_SkyboxEntity;
 };
 
 

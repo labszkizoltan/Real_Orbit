@@ -29,7 +29,7 @@ void ShaderLibrary::AddShader(const std::string& vertexSrc, const std::string& f
 void ShaderLibrary::SetAspectRatio(float aspectRatio)
 {
 	// for (int i = 0; i < m_Shaders.size(); i++)
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		m_Shaders[i]->Bind();
 		m_Shaders[i]->UploadUniformFloat("aspect_ratio", aspectRatio);
@@ -40,7 +40,7 @@ void ShaderLibrary::SetAspectRatio(float aspectRatio)
 void ShaderLibrary::SetCamera(TransformComponent camera_transform)
 {
 	// for (int i = 0; i < m_Shaders.size(); i++)
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		m_Shaders[i]->Bind();
 		m_Shaders[i]->UploadUniformFloat3("camera_location", camera_transform.location.Glm());
@@ -52,7 +52,7 @@ void ShaderLibrary::SetCamera(TransformComponent camera_transform)
 void ShaderLibrary::SetZoomLevel(float zoom_level)
 {
 	// for (int i = 0; i < m_Shaders.size(); i++)
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		m_Shaders[i]->Bind();
 		m_Shaders[i]->UploadUniformFloat("zoom_level", zoom_level);

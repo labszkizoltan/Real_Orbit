@@ -5,13 +5,14 @@
 #include <core/rendering/drawables/Mesh.h>
 #include <core/rendering/Buffer.h>
 #include <core/rendering/VertexArray.h>
-#include <utils/Vector_3D.h>
+#include <core/rendering/Texture.h>
 
 class Skybox : public Mesh
 {
 public:
 	Skybox();
-	Skybox(const std::vector<Vec3D>& vertexAndColorData, const std::vector<uint32_t>& indexData);
+	Skybox(const std::vector<float>& vertexData, const std::vector<uint32_t>& indexData, std::vector<std::shared_ptr<Texture>> textures);
+	Skybox(const std::vector<float>& vertexData, const std::vector<uint32_t>& indexData, const std::vector<std::string>& textureFilenames);
 	//	ColouredMesh(const std::string& filename);
 	~Skybox();
 
@@ -21,14 +22,25 @@ public:
 
 	static MeshType GetStaticMeshType();
 
+	//---------------------------------//
+	//----- some helper functions -----//
+	//---------------------------------//
+
+	static std::vector<float> CreateSkyboxVertexData(int resolution);
+	static std::vector<uint32_t> CreateSkyboxIndexData(int resolution);
+
+
 private:
 	VertexArray m_VertexArray;
 	VertexBuffer m_VertexBuffer;
 	IndexBuffer m_IndexBuffer;
 
+	std::vector<std::shared_ptr<Texture>> m_Textures;
+
 private:
 	static BufferLayout s_Layout;
 
 };
+
 
 #endif // SKYBOX_H

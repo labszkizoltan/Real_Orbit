@@ -21,8 +21,8 @@ int Renderer::Init()
 
 	// Create the framebuffer for the shadow map:
 	FrameBufferSpecification fbspec;
-	fbspec.Width = 1024;
-	fbspec.Height = 1024;
+	fbspec.Width = 4096;
+	fbspec.Height = 4096;
 	s_DepthBuffer = std::shared_ptr<Depthbuffer>(new Depthbuffer(fbspec));
 	s_DepthBuffer->GetDepthAttachment()->SetSlot(1);
 	s_DepthBuffer->GetDepthAttachment()->Bind();
@@ -49,8 +49,8 @@ int Renderer::Init()
 
 	// MeshType::SKYBOX
 	s_ShaderLibrary.AddShader(
-		std::string(),
-		std::string()
+		std::string(skybox_shader_vertexSrc),
+		std::string(skybox_shader_fragmentSrc)
 	);
 
 
