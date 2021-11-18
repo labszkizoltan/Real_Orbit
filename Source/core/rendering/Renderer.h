@@ -69,6 +69,10 @@ private:
 	static std::shared_ptr<Depthbuffer> s_DepthBuffer;
 	static ShaderLibrary s_ShaderLibrary;
 
+
+
+	friend class SceneRenderer;
+
 };
 
 

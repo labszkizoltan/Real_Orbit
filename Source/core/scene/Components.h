@@ -40,15 +40,29 @@ struct MeshComponent
 	std::shared_ptr<Mesh> meshPtr;
 };
 
-//struct CameraComponent
-//{
-//	SceneCamera Camera;
-//	bool Primary = true;
-//	bool FixedAspectRatio = false;
-//
-//	CameraComponent() = default;
-//	CameraComponent(const CameraComponent&) = default;
-//};
+template <MeshType Type>
+struct TypedMeshComponent
+{
+	std::shared_ptr<Mesh> meshPtr;
+
+	// for some reason this has to be constant, but Im fine with it
+	static const MeshType s_Type = Type;
+	static MeshType GetStaticType() { return s_Type; }
+};
+
+// identical to the transform component... I just use it to be able to query the scene registry for the camera
+struct CameraComponent
+{
+	TransformComponent camera_transform;
+//	Vec3D location = Vec3D(0.0f, 0.0f, 0.0f);
+//	Mat_3D orientation = Identity(1.0f);
+//	float scale = 1.0f;
+};
+
+struct LightComponent
+{
+	Vec3D location = Vec3D(0.0f, 0.0f, 0.0f);
+};
 
 
 

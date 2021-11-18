@@ -24,7 +24,11 @@ entities material. In this case it would already have access to the appropriate 
 
 
 Next things to do (as of 2021.11.14.):
-- scene serialization
+- scene serialization: This is not going to be that easy. After the scene is created, it should be rendered somehow. The camera should be separated from the
+	rest of the entities, since it shouldnt be drawn, but its location and orientation has to be set before any other object is rendered. Maybe I could create
+	a separate component just for the camera...
+	For the rest, I could retrieve all entities that have transform and mesh components (or rather retrive the trf+mesh component pairs - with EnTT's group 
+	function), since only these two are used for rendering.
 - mouse picking
 
 

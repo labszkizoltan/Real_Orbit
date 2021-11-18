@@ -98,9 +98,9 @@ const char* normal_shader_fragmentSrc =
 "	vec3 depthSample = texture(u_Textures[1], (lightCoordinates.xy+1)/2).rgb; \n"
 "	float closestDepth = depthSample.r; \n"
 "	float currentDepth = (lightCoordinates.z+1)/2; \n"
-"	float bias = 0.005; \n"
+"	float bias = 0.0005; \n"
 "	float shadow = (currentDepth - bias) > closestDepth ? 1.0 : 0.0; \n"
-"	FragColor = light_normal_dot < 0.0 ? vec4(color/2, 1.0) : vec4(color*(1-shadow/2)*(1+light_normal_dot)/2, 1.0); \n"
+"	FragColor = light_normal_dot < 0.0 ? vec4(color/2, 1.0) : vec4(color*min((1-shadow/2),(1+light_normal_dot)/2), 1.0); \n"
 "}\0";
 
 

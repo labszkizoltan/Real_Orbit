@@ -122,14 +122,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC ;NOMINMAX;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\stb_image;$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)vendor\yaml-cpp-yaml-cpp-0.7.0\include;$(SolutionDir)vendor\stb_image;$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\src\glad_compile\x64\Debug;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\lib;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glad_compile.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;sfml-audio-s-d.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;sfml-network-s-d.lib;ws2_32.lib;spdlogd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)vendor\yaml-cpp-yaml-cpp-0.7.0\Debug;$(SolutionDir)vendor\GLAD\src\glad_compile\x64\Debug;$(SolutionDir)vendor\SFML\lib;$(SolutionDir)vendor\spdlog\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>yaml-cppd.lib;glad_compile.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;sfml-audio-s-d.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;sfml-network-s-d.lib;ws2_32.lib;spdlogd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -140,7 +140,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC ;NOMINMAX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\stb_image;$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)vendor\yaml-cpp-yaml-cpp-0.7.0\include;$(SolutionDir)vendor\stb_image;$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -148,8 +148,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\GLAD\src\glad_compile\x64\Release;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\SFML\lib;D:\cpp_codes\37_RealOrbit\Real_Orbit\vendor\spdlog\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glad_compile.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;freetype.lib;sfml-window-s.lib	;winmm.lib;sfml-audio-s.lib	;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;sfml-network-s.lib	;ws2_32.lib;spdlog.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)vendor\yaml-cpp-yaml-cpp-0.7.0\Release;$(SolutionDir)vendor\GLAD\src\glad_compile\x64\Release;$(SolutionDir)vendor\SFML\lib;$(SolutionDir)vendor\spdlog\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>yaml-cpp.lib;glad_compile.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;opengl32.lib;freetype.lib;sfml-window-s.lib	;winmm.lib;sfml-audio-s.lib	;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;sfml-network-s.lib	;ws2_32.lib;spdlog.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -170,16 +170,16 @@
     <ClCompile Include="Source\core\rendering\drawables\TexturedMesh.cpp" />
     <ClCompile Include="Source\core\rendering\Framebuffer.cpp" />
     <ClCompile Include="Source\core\rendering\Renderer.cpp" />
+    <ClCompile Include="Source\core\rendering\SceneRenderer.cpp" />
     <ClCompile Include="Source\core\rendering\Shader.cpp" />
     <ClCompile Include="Source\core\rendering\ShaderLibrary.cpp" />
     <ClCompile Include="Source\core\rendering\Texture.cpp" />
     <ClCompile Include="Source\core\rendering\VertexArray.cpp" />
     <ClCompile Include="Source\core\scene\Entity.cpp" />
     <ClCompile Include="Source\core\scene\Scene.cpp" />
+    <ClCompile Include="Source\core\scene\SceneSerializer.cpp" />
     <ClCompile Include="Source\core\Window.cpp" />
     <ClCompile Include="Source\Game\GameApp.cpp" />
-    <ClCompile Include="Source\Game\Layers\TestLayer.cpp" />
-    <ClCompile Include="Source\Game\Layers\TestLayer2.cpp" />
     <ClCompile Include="Source\Game\Layers\TestLayer5.cpp" />
     <ClCompile Include="Source\utils\Matrix_3D.cpp" />
     <ClCompile Include="Source\utils\shape_creator.cpp" />
@@ -206,6 +206,7 @@
     <ClInclude Include="Source\core\rendering\drawables\TexturedMesh.h" />
     <ClInclude Include="Source\core\rendering\Framebuffer.h" />
     <ClInclude Include="Source\core\rendering\Renderer.h" />
+    <ClInclude Include="Source\core\rendering\SceneRenderer.h" />
     <ClInclude Include="Source\core\rendering\Shader.h" />
     <ClInclude Include="Source\core\rendering\ShaderLibrary.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\normal_shaders.h" />
@@ -219,10 +220,9 @@
     <ClInclude Include="Source\core\scene\Components.h" />
     <ClInclude Include="Source\core\scene\Entity.h" />
     <ClInclude Include="Source\core\scene\Scene.h" />
+    <ClInclude Include="Source\core\scene\SceneSerializer.h" />
     <ClInclude Include="Source\core\Timestep.h" />
     <ClInclude Include="Source\core\Window.h" />
-    <ClInclude Include="Source\Game\Layers\TestLayer.h" />
-    <ClInclude Include="Source\Game\Layers\TestLayer2.h" />
     <ClInclude Include="Source\Game\Layers\TestLayer5.h" />
     <ClInclude Include="Source\utils\Matrix_3D.h" />
     <ClInclude Include="Source\utils\shape_creator.h" />

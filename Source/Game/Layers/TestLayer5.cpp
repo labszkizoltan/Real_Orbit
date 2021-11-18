@@ -2,11 +2,14 @@
 #include "TestLayer5.h"
 #include <core/Application.h>
 #include <SFML/Window/Event.hpp>
+
 #include <core/rendering/Renderer.h>
 #include <core/rendering/drawables/ColouredMesh.h>
 #include <core/rendering/drawables/TexturedMesh.h>
 #include <core/rendering/drawables/Skybox.h>
 #include <core/rendering/drawables/NormalMesh.h>
+
+#include <core/scene/SceneSerializer.h>
 #include <core/scene/Components.h>
 
 #include <core/GlobalConstants.h>
@@ -25,6 +28,10 @@ TestLayer5::TestLayer5()
 void TestLayer5::OnAttach()
 {
 	LOG_INFO("TestLayer5 attached");
+
+	// okay, library linking was succesful, this is working
+	// SceneSerializer serializer;
+	// serializer.Serialize("blabla");
 
 	// Hello Tetrahedron //
 	// Vertices with their own color:
@@ -180,12 +187,12 @@ void TestLayer5::OnAttach()
 //		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_up.png",
 //		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_down.png"
 
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_front.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_back.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_left.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_right.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_up.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space_down.png"
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_front.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_back.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_left.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_right.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_up.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_down.png"
 	};
 
 	m_Skybox = std::shared_ptr<Mesh>(new Skybox(skybox_vertices, skybox_indices, textureFilenames));
@@ -225,6 +232,10 @@ void TestLayer5::OnAttach()
 	skybox_trf.scale = 1.0f;
 
 	m_Scene = std::shared_ptr<Scene>(new Scene());
+
+	SceneSerializer serializer(m_Scene);
+	serializer.DeSerialize("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
+
 
 	m_CameraEntity = m_Scene->CreateEntity("Camera");
 	m_TetrahedronEntity = m_Scene->CreateEntity("Tetrahedron");
