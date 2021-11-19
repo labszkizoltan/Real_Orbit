@@ -9,13 +9,13 @@ class SceneRenderer
 public:
 
 	SceneRenderer() = default;
-	SceneRenderer(std::shared_ptr<Scene> scene);
+//	SceneRenderer(std::shared_ptr<Scene> scene);
 	~SceneRenderer() = default;
 
-	void RenderScene();
+	static void RenderScene(std::shared_ptr<Scene> scene);
 
-private:
-	std::shared_ptr<Scene> m_Scene = nullptr;
+public:
+//	std::shared_ptr<Scene> m_Scene = nullptr;
 
 };
 

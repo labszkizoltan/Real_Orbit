@@ -61,7 +61,7 @@ struct CameraComponent
 
 struct LightComponent
 {
-	Vec3D location = Vec3D(0.0f, 0.0f, 0.0f);
+	TransformComponent light_transform;
 };
 
 
