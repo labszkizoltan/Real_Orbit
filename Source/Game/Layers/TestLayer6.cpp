@@ -283,6 +283,8 @@ void TestLayer6::OnAttach()
 	Renderer::SetLightPosition(tetrahedron_trf.location);
 	glEnable(GL_DEPTH_TEST);
 
+	m_SceneRenderer.SetScene(m_Scene);
+
 }
 
 void TestLayer6::OnDetach()
@@ -298,7 +300,17 @@ void TestLayer6::OnUpdate(Timestep ts)
 	
 	Renderer::Refresh();
 
-	SceneRenderer::RenderScene(m_Scene);
+//	SceneRenderer::RenderScene(m_Scene);
+	m_SceneRenderer.RenderScene();
+
+	// something like this could be next
+//	SceneUpdater::UpdateScene(m_Scene, updateFunction);
+
+	auto& light_comp = m_LightEntity.GetComponent<LightComponent>();
+	light_comp.light_transform.location = light_comp.light_transform.location + Vec3D(0.1f*sin(0.0005f * m_ElapsedTime), 0.0f, 0.0f);
+
+	auto& tex_trf = m_TexturedEntity.GetComponent<TransformComponent>();
+	tex_trf.orientation = Rotation(0.002f, Vec3D({ 0.0f, 1.0f, 0.0f })) * tex_trf.orientation;
 
 	m_ElapsedTime += ts;
 }

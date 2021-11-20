@@ -14,6 +14,8 @@
 #include <core/rendering/Depthbuffer.h>
 #include <core/rendering/drawables/Mesh.h>
 
+#include <core/rendering/SceneRenderer.h>
+
 class TestLayer6 : public Layer
 {
 public:
@@ -50,6 +52,7 @@ private:
 	std::shared_ptr<Mesh> m_Skybox = nullptr;
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
+	SceneRenderer m_SceneRenderer;
 	Entity m_CameraEntity;
 	Entity m_LightEntity;
 	Entity m_TetrahedronEntity;
