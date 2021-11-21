@@ -152,6 +152,8 @@ public:
 	void Bind() const;
 	void Unbind() const;
 
+	void SetData(const void* data, uint32_t size);
+
 	uint32_t GetCount() const { return m_Count; };
 
 public:

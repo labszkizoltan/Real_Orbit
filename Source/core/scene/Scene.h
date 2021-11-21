@@ -4,6 +4,7 @@
 
 #include <core/Timestep.h>
 #include <entt/entt.hpp>
+#include <core/rendering/drawables/MeshLibrary.h>
 //#include <entt/entity/registry.hpp>
 
 class Entity;
@@ -22,6 +23,7 @@ public:
 private:
 	entt::registry m_Registry;
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
+	MeshLibrary m_MeshLibrary;
 
 	friend class Entity;
 	friend class SceneSerializer;

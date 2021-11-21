@@ -171,6 +171,13 @@ void IndexBuffer::Unbind() const
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+// I havent tried using this, dont know if it works
+void IndexBuffer::SetData(const void* data, uint32_t size)
+{
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, size, data);
+}
+
 
 
 

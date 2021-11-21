@@ -12,7 +12,9 @@ class ColouredMesh : public Mesh
 public:
 	ColouredMesh();
 	ColouredMesh(const std::vector<Vec3D>& vertexAndColorData, const std::vector<uint32_t>& indexData);
-	//	ColouredMesh(const std::string& filename);
+	ColouredMesh(const std::vector<float>& vertexAndColorData, const std::vector<uint32_t>& indexData);
+
+//	ColouredMesh(const std::string& filename);
 	~ColouredMesh();
 
 	virtual void Draw() override;

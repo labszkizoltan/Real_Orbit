@@ -7,8 +7,11 @@
 // each mesh type has a fixed layout, and a corresponding shader that can draw it
 enum class MeshType
 {
-	COLOURED_MESH, TEXTURED_MESH, NORMAL_MESH, SKYBOX, SHADOW_MAP
+	COLOURED_MESH, TEXTURED_MESH, NORMAL_MESH, SKYBOX, SHADOW_MAP, UNKOWN
 };
+
+std::string MeshType_to_String(MeshType type);
+MeshType String_to_MeshType(std::string s);
 
 class Mesh
 {

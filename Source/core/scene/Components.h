@@ -54,11 +54,9 @@ struct TypedMeshComponent
 struct CameraComponent
 {
 	TransformComponent camera_transform;
-//	Vec3D location = Vec3D(0.0f, 0.0f, 0.0f);
-//	Mat_3D orientation = Identity(1.0f);
-//	float scale = 1.0f;
 };
 
+// identical to the transform component... I just use it to be able to query the scene registry for the light position
 struct LightComponent
 {
 	TransformComponent light_transform;

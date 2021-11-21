@@ -242,7 +242,6 @@ void TestLayer6::OnAttach()
 	SceneSerializer serializer(m_Scene);
 	serializer.DeSerialize("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
 
-
 	m_CameraEntity = m_Scene->CreateEntity("Camera");
 	m_LightEntity = m_Scene->CreateEntity("Lamp");
 	m_TetrahedronEntity = m_Scene->CreateEntity("Tetrahedron");
@@ -259,26 +258,17 @@ void TestLayer6::OnAttach()
 	m_TexturedEntity.AddComponent<TransformComponent>(textured_trf);
 	m_SkyboxEntity.AddComponent<TransformComponent>(skybox_trf);
 
-	MeshComponent tetrahedron_mesh_component; tetrahedron_mesh_component.meshPtr = m_Tetrahedron;
 	TypedMeshComponent<MeshType::COLOURED_MESH> tmc; tmc.meshPtr = m_Tetrahedron;
-
-	MeshComponent rectangle_mesh_component; rectangle_mesh_component.meshPtr = m_Rectangle;
 	TypedMeshComponent<MeshType::COLOURED_MESH> rmc; rmc.meshPtr = m_Rectangle;
-
-	MeshComponent normal_mesh_component; normal_mesh_component.meshPtr = m_Cube;
 	TypedMeshComponent<MeshType::NORMAL_MESH> nmc; nmc.meshPtr = m_Cube;
-
-	MeshComponent textured_mesh_component; textured_mesh_component.meshPtr = m_Textured;
 	TypedMeshComponent<MeshType::TEXTURED_MESH> texmc; texmc.meshPtr = m_Textured;
-
-	MeshComponent skybox_mesh_component; skybox_mesh_component.meshPtr = m_Skybox;
 	TypedMeshComponent<MeshType::SKYBOX> smc; smc.meshPtr = m_Skybox;
 
-	m_TetrahedronEntity.AddComponent<MeshComponent>(tetrahedron_mesh_component); m_TetrahedronEntity.AddComponent<TypedMeshComponent<MeshType::COLOURED_MESH>>(tmc);
-	m_RectangleEntity.AddComponent<MeshComponent>(rectangle_mesh_component); m_RectangleEntity.AddComponent<TypedMeshComponent<MeshType::COLOURED_MESH>>(rmc);
-	m_CubeEntity.AddComponent<MeshComponent>(normal_mesh_component); m_CubeEntity.AddComponent<TypedMeshComponent<MeshType::NORMAL_MESH>>(nmc);
-	m_TexturedEntity.AddComponent<MeshComponent>(textured_mesh_component); m_TexturedEntity.AddComponent<TypedMeshComponent<MeshType::TEXTURED_MESH>>(texmc);
-	m_SkyboxEntity.AddComponent<MeshComponent>(skybox_mesh_component); m_SkyboxEntity.AddComponent<TypedMeshComponent<MeshType::SKYBOX>>(smc);
+	m_TetrahedronEntity.AddComponent<TypedMeshComponent<MeshType::COLOURED_MESH>>(tmc);
+	m_RectangleEntity.AddComponent<TypedMeshComponent<MeshType::COLOURED_MESH>>(rmc);
+	m_CubeEntity.AddComponent<TypedMeshComponent<MeshType::NORMAL_MESH>>(nmc);
+	m_TexturedEntity.AddComponent<TypedMeshComponent<MeshType::TEXTURED_MESH>>(texmc);
+	m_SkyboxEntity.AddComponent<TypedMeshComponent<MeshType::SKYBOX>>(smc);
 
 	Renderer::SetLightPosition(tetrahedron_trf.location);
 	glEnable(GL_DEPTH_TEST);

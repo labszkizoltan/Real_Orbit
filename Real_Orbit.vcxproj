@@ -202,6 +202,7 @@
     <ClInclude Include="Source\core\rendering\Depthbuffer.h" />
     <ClInclude Include="Source\core\rendering\drawables\ColouredMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Mesh.h" />
+    <ClInclude Include="Source\core\rendering\drawables\MeshLibrary.h" />
     <ClInclude Include="Source\core\rendering\drawables\NormalMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Skybox.h" />
     <ClInclude Include="Source\core\rendering\drawables\TexturedMesh.h" />

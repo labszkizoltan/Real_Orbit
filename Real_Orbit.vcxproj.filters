@@ -141,6 +141,9 @@
     <ClInclude Include="Source\Game\Layers\TestLayer6.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\core\rendering\drawables\MeshLibrary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Game\GameApp.cpp">
