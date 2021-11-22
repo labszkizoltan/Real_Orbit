@@ -53,13 +53,12 @@ private:
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
-	Entity m_CameraEntity;
+//	Entity m_CameraEntity;
 	Entity m_LightEntity;
 	Entity m_TetrahedronEntity;
 	Entity m_RectangleEntity;
 	Entity m_CubeEntity;
 	Entity m_TexturedEntity;
-	Entity m_SkyboxEntity;
 };
 
 

@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <core/GlobalConstants.h>
+
 #include <utils/Vector_3D.h>
 #include <utils/Matrix_3D.h>
 #include <core/scene/Entity.h>
@@ -65,18 +67,54 @@ void SceneSerializer::Serialize(const std::string& output_file)
 void SceneSerializer::DeSerialize(const std::string& input_file)
 {
 	std::ifstream stream(input_file);
+	if (!stream.is_open())
+		LOG_CORE_WARN("SceneSerializer::DeSerialize() was unable to open scene file: {0}", input_file);
+
 	std::stringstream strStream;
 	strStream << stream.rdbuf();
 
 	YAML::Node data = YAML::Load(strStream.str());
 	FillMeshLibrary(data);
 
+	int camera_counter = 0, light_counter = 0;
 	auto entities = data["Entities"];
 	for (auto entity : entities)
 	{
 		std::string name = entity["Entity"].as<std::string>();
 		Entity deserializedEntity = m_Scene->CreateEntity(name);
-		
+
+		//----- CameraComponent -----//
+		auto cam_com = entity["CameraComponent"];
+		if (cam_com)
+		{
+			if (camera_counter > 0) { LOG_CORE_WARN("SceneSerializer::DeSerialize() encountered more than one CameraComponent!"); continue; }
+
+			camera_counter++;
+			CameraComponent& result = m_Scene->GetCamera();
+			result.camera_transform.location = cam_com["location"].as<Vec3D>();
+			result.camera_transform.orientation = Mat_3D(cam_com["orientation"]["f1"].as<Vec3D>(), cam_com["orientation"]["f2"].as<Vec3D>(), cam_com["orientation"]["f3"].as<Vec3D>());
+			result.camera_transform.scale = cam_com["scale"].as<float>();
+//			deserializedEntity.AddComponent<CameraComponent>(result);
+
+//			m_Scene->m_Camera = result;
+		}
+
+		//----- LightComponent -----//
+		auto light_com = entity["LightComponent"];
+		if (light_com)
+		{
+			if (light_counter > 0) { LOG_CORE_WARN("SceneSerializer::DeSerialize() encountered more than one LightComponent!"); continue; }
+
+			light_counter++;
+			LightComponent& result = m_Scene->GetLight();
+			result.light_transform.location = light_com["location"].as<Vec3D>();
+			result.light_transform.orientation = Mat_3D(light_com["orientation"]["f1"].as<Vec3D>(), light_com["orientation"]["f2"].as<Vec3D>(), light_com["orientation"]["f3"].as<Vec3D>());
+			result.light_transform.scale = light_com["scale"].as<float>();
+			// deserializedEntity.AddComponent<LightComponent>(result);
+		}
+
+
+		//----- TransformComponent -----//
 		auto trf_com = entity["TransformComponent"];
 		if (trf_com)
 		{
@@ -88,6 +126,7 @@ void SceneSerializer::DeSerialize(const std::string& input_file)
 			deserializedEntity.AddComponent<TransformComponent>(result);
 		}
 
+		//----- MeshComponent -----//
 		auto mesh_com = entity["MeshComponent"];
 		if (mesh_com)
 		{
@@ -109,6 +148,11 @@ void SceneSerializer::DeSerialize(const std::string& input_file)
 			{
 				TypedMeshComponent<MeshType::NORMAL_MESH> result; result.meshPtr = meshPtr;
 				deserializedEntity.AddComponent<TypedMeshComponent<MeshType::NORMAL_MESH>>(result);
+			}
+			else if (type == MeshType::SKYBOX)
+			{
+				TypedMeshComponent<MeshType::SKYBOX> result; result.meshPtr = meshPtr;
+				deserializedEntity.AddComponent<TypedMeshComponent<MeshType::SKYBOX>>(result);
 			}
 			else
 				LOG_CORE_INFO("MeshType not recognized, cannot add component");
@@ -151,8 +195,8 @@ void SceneSerializer::FillMeshLibrary(const YAML::Node& data)
 		}
 		else if (type == MeshType::SKYBOX)
 		{
-			std::vector<float> vertex_data = Skybox::CreateSkyboxVertexData(10);
-			std::vector<uint32_t> index_data = Skybox::CreateSkyboxIndexData(10);
+			std::vector<float> vertex_data = Skybox::CreateSkyboxVertexData(g_SkyboxMeshResolution);
+			std::vector<uint32_t> index_data = Skybox::CreateSkyboxIndexData(g_SkyboxMeshResolution);
 			std::vector<std::string> textureFilenames = {
 				mesh["texture_file_f"].as<std::string>(),
 				mesh["texture_file_b"].as<std::string>(),
@@ -176,6 +220,12 @@ OGLBufferData SceneSerializer::ParseVertexFile(const std::string& filename)
 {
 	OGLBufferData result;
 	std::ifstream myfile(filename.c_str());
+	if(!myfile.is_open())
+	{
+		LOG_CORE_WARN("SceneSerializer::ParseVertexFile() was unable to open file: {0}", filename);
+		return result; 
+	}
+
 	int v_count = 0, i_count = 0;
 
 	myfile >> v_count;
@@ -191,6 +241,9 @@ OGLBufferData SceneSerializer::ParseVertexFile(const std::string& filename)
 		myfile >> result.index_data[i];
 
 	myfile.close();
+
+	if (result.vertex_data.size() == 0 || result.index_data.size() == 0)
+		LOG_CORE_WARN("SceneSerializer::ParseVertexFile(): vertex or index data missing from file: ", filename);
 
 	return result;
 }

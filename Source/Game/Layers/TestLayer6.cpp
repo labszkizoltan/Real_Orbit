@@ -171,32 +171,7 @@ void TestLayer6::OnAttach()
 //	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, m_Depthbuffer->GetDepthAttachment()));
 
 	// skybox
-	auto skybox_vertices = Skybox::CreateSkyboxVertexData(10);
-	auto skybox_indices = Skybox::CreateSkyboxIndexData(10);
-	std::vector<std::string> textureFilenames = {
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_front.png",
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_back.png",
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_left.png",
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_right.png",
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_up.png",
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_down.png"
-
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_front.png",
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_back.png",
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_left.png",
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_right.png",
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_up.png",
-//		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_down.png"
-
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_front.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_back.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_left.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_right.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_up.png",
-		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_down.png"
-	};
-
-	m_Skybox = std::shared_ptr<Mesh>(new Skybox(skybox_vertices, skybox_indices, textureFilenames));
+	// now created by the SceneSerializer
 
 	// construct the scene and the entities
 	CameraComponent cam_trf;
@@ -232,43 +207,35 @@ void TestLayer6::OnAttach()
 	textured_trf.orientation = Rotation(1.57079633f, Vec3D({ 1.0f, 0.0f, 0.0f }));
 	textured_trf.scale = 10.0f;
 
-	TransformComponent skybox_trf;
-	skybox_trf.location = Vec3D({ 0.0f, 0.0f, 0.0f });
-	skybox_trf.orientation = Identity(1.0f);
-	skybox_trf.scale = 1.0f;
-
 	m_Scene = std::shared_ptr<Scene>(new Scene());
 
 	SceneSerializer serializer(m_Scene);
-	serializer.DeSerialize("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
+//	serializer.DeSerialize("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
+	serializer.DeSerialize("assets/scenes/test_scene_2.yaml");
 
-	m_CameraEntity = m_Scene->CreateEntity("Camera");
+//	m_CameraEntity = m_Scene->CreateEntity("Camera");
 	m_LightEntity = m_Scene->CreateEntity("Lamp");
 	m_TetrahedronEntity = m_Scene->CreateEntity("Tetrahedron");
 	m_RectangleEntity = m_Scene->CreateEntity("Rectangle");
 	m_CubeEntity = m_Scene->CreateEntity("Cube");
 	m_TexturedEntity = m_Scene->CreateEntity("Textured");
-	m_SkyboxEntity = m_Scene->CreateEntity("Skybox");
 
-	m_CameraEntity.AddComponent<CameraComponent>(cam_trf);
+//	m_CameraEntity.AddComponent<CameraComponent>(cam_trf);
 	m_LightEntity.AddComponent<LightComponent>(light_trf);
 	m_TetrahedronEntity.AddComponent<TransformComponent>(tetrahedron_trf);
 	m_RectangleEntity.AddComponent<TransformComponent>(rect_trf);
 	m_CubeEntity.AddComponent<TransformComponent>(cube_trf);
 	m_TexturedEntity.AddComponent<TransformComponent>(textured_trf);
-	m_SkyboxEntity.AddComponent<TransformComponent>(skybox_trf);
 
 	TypedMeshComponent<MeshType::COLOURED_MESH> tmc; tmc.meshPtr = m_Tetrahedron;
 	TypedMeshComponent<MeshType::COLOURED_MESH> rmc; rmc.meshPtr = m_Rectangle;
 	TypedMeshComponent<MeshType::NORMAL_MESH> nmc; nmc.meshPtr = m_Cube;
 	TypedMeshComponent<MeshType::TEXTURED_MESH> texmc; texmc.meshPtr = m_Textured;
-	TypedMeshComponent<MeshType::SKYBOX> smc; smc.meshPtr = m_Skybox;
 
 	m_TetrahedronEntity.AddComponent<TypedMeshComponent<MeshType::COLOURED_MESH>>(tmc);
 	m_RectangleEntity.AddComponent<TypedMeshComponent<MeshType::COLOURED_MESH>>(rmc);
 	m_CubeEntity.AddComponent<TypedMeshComponent<MeshType::NORMAL_MESH>>(nmc);
 	m_TexturedEntity.AddComponent<TypedMeshComponent<MeshType::TEXTURED_MESH>>(texmc);
-	m_SkyboxEntity.AddComponent<TypedMeshComponent<MeshType::SKYBOX>>(smc);
 
 	Renderer::SetLightPosition(tetrahedron_trf.location);
 	glEnable(GL_DEPTH_TEST);
@@ -296,7 +263,7 @@ void TestLayer6::OnUpdate(Timestep ts)
 	// something like this could be next
 //	SceneUpdater::UpdateScene(m_Scene, updateFunction);
 
-	auto& light_comp = m_LightEntity.GetComponent<LightComponent>();
+	auto& light_comp = m_Scene->GetLight();
 	light_comp.light_transform.location = light_comp.light_transform.location + Vec3D(0.1f*sin(0.0005f * m_ElapsedTime), 0.0f, 0.0f);
 
 	auto& tex_trf = m_TexturedEntity.GetComponent<TransformComponent>();
@@ -422,7 +389,7 @@ bool TestLayer6::OnMouseLeft(Event& e)
 
 void TestLayer6::HandleUserInput(Timestep ts)
 {
-	TransformComponent& cam_trf = m_CameraEntity.GetComponent<CameraComponent>().camera_transform;
+	TransformComponent& cam_trf = m_Scene->GetCamera().camera_transform;
 
 	// moves
 	if (Input::IsKeyPressed(sf::Keyboard::Key::W)) { cam_trf.location += ts * 0.001f * cam_trf.orientation.f3; }

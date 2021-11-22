@@ -22,12 +22,14 @@ void SceneRenderer::RenderScene()
 	std::shared_ptr<Shader> shader = nullptr;
 
 	// set light
-	auto light_trf_view = m_Scene->m_Registry.view<LightComponent>();
-	for (auto entity : light_trf_view)
-	{
-		auto& trf = light_trf_view.get<LightComponent>(entity);
-		Renderer::SetLightPosition(trf.light_transform.location);
-	}
+	Renderer::SetLightPosition(m_Scene->GetLight().light_transform.location);
+
+//	auto light_trf_view = m_Scene->m_Registry.view<LightComponent>();
+//	for (auto entity : light_trf_view)
+//	{
+//		auto& trf = light_trf_view.get<LightComponent>(entity);
+//		Renderer::SetLightPosition(trf.light_transform.location);
+//	}
 
 	// render into the shadow map
 	//... create a view of all TransformComponents and loop over them, regardless of their mesh type
@@ -45,12 +47,15 @@ void SceneRenderer::RenderScene()
 	glCullFace(GL_BACK);
 
 	// set camera
-	auto camera_trf_view = m_Scene->m_Registry.view<CameraComponent>();
-	for (auto entity : camera_trf_view)
-	{
-		auto& trf = camera_trf_view.get<CameraComponent>(entity);
-		Renderer::SetCamera(trf.camera_transform);
-	}
+	Renderer::SetCamera(m_Scene->GetCamera().camera_transform);
+
+	// there should be only one camera in a scene
+//	auto camera_trf_view = m_Scene->m_Registry.view<CameraComponent>();
+//	for (auto entity : camera_trf_view)
+//	{
+//		auto& trf = camera_trf_view.get<CameraComponent>(entity);
+//		Renderer::SetCamera(trf.camera_transform);
+//	}
 
 	// draw the skybox
 	shader = Renderer::s_ShaderLibrary.BindShader(MeshType::SKYBOX);

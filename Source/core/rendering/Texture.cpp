@@ -1,7 +1,9 @@
 
 #include "Texture.h"
 #include <iostream>
+#include <core/Log.h>
 #include <vendor/stb_image/stb_image.h>
+
 
 Texture::Texture(uint32_t width, uint32_t height)
 {
@@ -42,7 +44,9 @@ Texture::Texture(const std::string path)
 	{
 		data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 	}
-	if (!data) { std::cout << "Failed to load image: " << path; }
+//	if (!data) { std::cout << "Failed to load image: " << path; }
+	if (!data){ LOG_CORE_WARN("Failed to create texture from file, unable to load image: {0}", path); }
+		
 
 	m_Specification.Height = height;
 	m_Specification.Width = width;

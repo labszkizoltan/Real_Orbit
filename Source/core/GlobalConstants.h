@@ -4,6 +4,7 @@
 
 const float g_InitialZoomLevel = 1.5f;
 
+const int g_SkyboxMeshResolution = 10; // used in the SceneSerializer
 
 
 

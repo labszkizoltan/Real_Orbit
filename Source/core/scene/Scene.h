@@ -5,6 +5,7 @@
 #include <core/Timestep.h>
 #include <entt/entt.hpp>
 #include <core/rendering/drawables/MeshLibrary.h>
+#include <core/scene/Components.h>
 //#include <entt/entity/registry.hpp>
 
 class Entity;
@@ -20,9 +21,14 @@ public:
 	void OnUpdate(Timestep ts);
 	void OnViewportResize(uint32_t width, uint32_t height);
 
+	CameraComponent& GetCamera();
+	LightComponent& GetLight();
+
 private:
 	entt::registry m_Registry;
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
+	CameraComponent m_Camera;
+	LightComponent m_Light;
 	MeshLibrary m_MeshLibrary;
 
 	friend class Entity;

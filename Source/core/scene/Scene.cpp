@@ -32,6 +32,16 @@ void Scene::OnViewportResize(uint32_t width, uint32_t height)
 {
 }
 
+CameraComponent& Scene::GetCamera()
+{
+	return m_Camera;
+}
+
+LightComponent& Scene::GetLight()
+{
+	return m_Light;
+}
+
 
 
 
