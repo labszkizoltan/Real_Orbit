@@ -4,7 +4,6 @@
 #include <SFML/Window/Event.hpp>
 
 #include <core/rendering/Renderer.h>
-#include <core/rendering/SceneRenderer.h>
 #include <core/rendering/drawables/ColouredMesh.h>
 #include <core/rendering/drawables/TexturedMesh.h>
 #include <core/rendering/drawables/Skybox.h>
@@ -18,6 +17,8 @@
 #include <utils/Vector_3D.h>
 #include <glad/glad.h>
 
+#include "scene_descriptions.h"
+
 #define BIND_EVENT_FN(x) std::bind(&TestLayer6::x, this, std::placeholders::_1)
 
 TestLayer6::TestLayer6()
@@ -29,10 +30,6 @@ TestLayer6::TestLayer6()
 void TestLayer6::OnAttach()
 {
 	LOG_INFO("TestLayer6 attached");
-
-	// okay, library linking was succesful, this is working
-	// SceneSerializer serializer;
-	// serializer.Serialize("blabla");
 
 	// Hello Tetrahedron //
 	// Vertices with their own color:
@@ -174,16 +171,6 @@ void TestLayer6::OnAttach()
 	// now created by the SceneSerializer
 
 	// construct the scene and the entities
-	CameraComponent cam_trf;
-	cam_trf.camera_transform.location = Vec3D({ 0.0f,0.0f,-1.0f });
-	cam_trf.camera_transform.orientation = Identity(1.0f);
-	//cam_trf.scale = 1.0f;
-
-	LightComponent light_trf;
-	light_trf.light_transform.location = Vec3D({ 0.0f, -1.0f, 0.0f });
-	//light_trf.camera_transform.orientation = Identity(1.0f);
-	//light_trf.scale = 1.0f;
-
 	TransformComponent tetrahedron_trf;
 //	tetrahedron_trf.location = Vec3D({ -0.2f, 0.2f, -0.3f });
 	tetrahedron_trf.location = Vec3D({ 0.0f, 0.0f, 0.0f });
@@ -210,18 +197,19 @@ void TestLayer6::OnAttach()
 	m_Scene = std::shared_ptr<Scene>(new Scene());
 
 	SceneSerializer serializer(m_Scene);
-//	serializer.DeSerialize("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
-	serializer.DeSerialize("assets/scenes/test_scene_2.yaml");
+	serializer.DeSerialize_text(scene_string);
+//	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
 
-//	m_CameraEntity = m_Scene->CreateEntity("Camera");
-	m_LightEntity = m_Scene->CreateEntity("Lamp");
+	
+//	serializer.DeSerialize("assets/scenes/test_scene_2.yaml");
+
+	m_SceneUpdater.SetScene(m_Scene);
+
 	m_TetrahedronEntity = m_Scene->CreateEntity("Tetrahedron");
 	m_RectangleEntity = m_Scene->CreateEntity("Rectangle");
 	m_CubeEntity = m_Scene->CreateEntity("Cube");
 	m_TexturedEntity = m_Scene->CreateEntity("Textured");
 
-//	m_CameraEntity.AddComponent<CameraComponent>(cam_trf);
-	m_LightEntity.AddComponent<LightComponent>(light_trf);
 	m_TetrahedronEntity.AddComponent<TransformComponent>(tetrahedron_trf);
 	m_RectangleEntity.AddComponent<TransformComponent>(rect_trf);
 	m_CubeEntity.AddComponent<TransformComponent>(cube_trf);
@@ -257,11 +245,10 @@ void TestLayer6::OnUpdate(Timestep ts)
 	
 	Renderer::Refresh();
 
-//	SceneRenderer::RenderScene(m_Scene);
 	m_SceneRenderer.RenderScene();
 
 	// something like this could be next
-//	SceneUpdater::UpdateScene(m_Scene, updateFunction);
+	m_SceneUpdater.UpdateScene(ts);
 
 	auto& light_comp = m_Scene->GetLight();
 	light_comp.light_transform.location = light_comp.light_transform.location + Vec3D(0.1f*sin(0.0005f * m_ElapsedTime), 0.0f, 0.0f);

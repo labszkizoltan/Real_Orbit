@@ -33,6 +33,7 @@ private:
 
 	friend class Entity;
 	friend class SceneSerializer;
+	friend class SceneUpdater;
 	friend class SceneRenderer;
 };
 

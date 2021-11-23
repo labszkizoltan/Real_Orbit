@@ -234,8 +234,8 @@ void TestLayer5::OnAttach()
 	m_Scene = std::shared_ptr<Scene>(new Scene());
 
 	SceneSerializer serializer(m_Scene);
-	serializer.DeSerialize("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
-
+//	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
+	serializer.DeSerialize_text("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
 
 	m_CameraEntity = m_Scene->CreateEntity("Camera");
 	m_TetrahedronEntity = m_Scene->CreateEntity("Tetrahedron");

@@ -15,6 +15,7 @@
 #include <core/rendering/drawables/Mesh.h>
 
 #include <core/rendering/SceneRenderer.h>
+#include <core/scene/SceneUpdater.h>
 
 class TestLayer6 : public Layer
 {
@@ -53,8 +54,7 @@ private:
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
-//	Entity m_CameraEntity;
-	Entity m_LightEntity;
+	SceneUpdater m_SceneUpdater;
 	Entity m_TetrahedronEntity;
 	Entity m_RectangleEntity;
 	Entity m_CubeEntity;

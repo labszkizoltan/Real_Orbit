@@ -20,7 +20,8 @@ public:
 	~SceneSerializer();
 
 	void Serialize(const std::string& output_file);
-	void DeSerialize(const std::string& input_file);
+	void DeSerialize_text(const std::string& scene_description);
+	void DeSerialize_file(const std::string& input_file);
 
 private:
 	void FillMeshLibrary(const YAML::Node& data);

@@ -64,16 +64,9 @@ void SceneSerializer::Serialize(const std::string& output_file)
 	std::cout << "Here's the output YAML:\n\n" << out.c_str() << "\n\n"; // prints "Hello, World!"
 }
 
-void SceneSerializer::DeSerialize(const std::string& input_file)
+void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 {
-	std::ifstream stream(input_file);
-	if (!stream.is_open())
-		LOG_CORE_WARN("SceneSerializer::DeSerialize() was unable to open scene file: {0}", input_file);
-
-	std::stringstream strStream;
-	strStream << stream.rdbuf();
-
-	YAML::Node data = YAML::Load(strStream.str());
+	YAML::Node data = YAML::Load(scene_description);
 	FillMeshLibrary(data);
 
 	int camera_counter = 0, light_counter = 0;
@@ -94,9 +87,6 @@ void SceneSerializer::DeSerialize(const std::string& input_file)
 			result.camera_transform.location = cam_com["location"].as<Vec3D>();
 			result.camera_transform.orientation = Mat_3D(cam_com["orientation"]["f1"].as<Vec3D>(), cam_com["orientation"]["f2"].as<Vec3D>(), cam_com["orientation"]["f3"].as<Vec3D>());
 			result.camera_transform.scale = cam_com["scale"].as<float>();
-//			deserializedEntity.AddComponent<CameraComponent>(result);
-
-//			m_Scene->m_Camera = result;
 		}
 
 		//----- LightComponent -----//
@@ -122,7 +112,6 @@ void SceneSerializer::DeSerialize(const std::string& input_file)
 			result.location = trf_com["location"].as<Vec3D>();
 			result.orientation = Mat_3D(trf_com["orientation"]["f1"].as<Vec3D>(), trf_com["orientation"]["f2"].as<Vec3D>(), trf_com["orientation"]["f3"].as<Vec3D>());
 			result.scale = trf_com["scale"].as<float>();
-
 			deserializedEntity.AddComponent<TransformComponent>(result);
 		}
 
@@ -157,7 +146,39 @@ void SceneSerializer::DeSerialize(const std::string& input_file)
 			else
 				LOG_CORE_INFO("MeshType not recognized, cannot add component");
 		}
+
+		//----- DynamicPropertiesComponent -----//
+		auto dynprop_com = entity["DynamicPropertiesComponent"];
+		if (dynprop_com)
+		{
+			DynamicPropertiesComponent result;
+			result.inertial_mass = dynprop_com["inertial_mass"].as<float>();
+			result.velocity = dynprop_com["velocity"].as<Vec3D>();
+			result.angular_velocity = dynprop_com["angular_velocity"].as<Vec3D>();
+			deserializedEntity.AddComponent<DynamicPropertiesComponent>(result);
+		}
+
+		//----- GravitationalMassComponent -----//
+		auto gravmass_com = entity["GravitationalMassComponent"];
+		if (gravmass_com)
+		{
+			GravitationalMassComponent result;
+			result.gravitational_mass = gravmass_com.as<float>();
+			deserializedEntity.AddComponent<GravitationalMassComponent>(result);
+		}
 	}
+}
+
+
+void SceneSerializer::DeSerialize_file(const std::string& input_file)
+{
+	std::ifstream stream(input_file);
+	if (!stream.is_open())
+		LOG_CORE_WARN("SceneSerializer::DeSerialize() was unable to open scene file: {0}", input_file);
+
+	std::stringstream strStream;
+	strStream << stream.rdbuf();
+	DeSerialize_text(strStream.str());
 }
 
 void SceneSerializer::FillMeshLibrary(const YAML::Node& data)

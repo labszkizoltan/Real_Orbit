@@ -28,11 +28,16 @@ struct TransformComponent
 
 struct DynamicPropertiesComponent
 {
-	float mass;
+	float inertial_mass;
 	Vec3D velocity;
 	Vec3D angular_velocity;
 
 //	Vec3D acceleration;
+};
+
+struct GravitationalMassComponent
+{
+	float gravitational_mass;
 };
 
 struct MeshComponent

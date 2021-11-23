@@ -178,6 +178,7 @@
     <ClCompile Include="Source\core\scene\Entity.cpp" />
     <ClCompile Include="Source\core\scene\Scene.cpp" />
     <ClCompile Include="Source\core\scene\SceneSerializer.cpp" />
+    <ClCompile Include="Source\core\scene\SceneUpdater.cpp" />
     <ClCompile Include="Source\core\Window.cpp" />
     <ClCompile Include="Source\Game\GameApp.cpp" />
     <ClCompile Include="Source\Game\Layers\TestLayer5.cpp" />
@@ -223,8 +224,10 @@
     <ClInclude Include="Source\core\scene\Entity.h" />
     <ClInclude Include="Source\core\scene\Scene.h" />
     <ClInclude Include="Source\core\scene\SceneSerializer.h" />
+    <ClInclude Include="Source\core\scene\SceneUpdater.h" />
     <ClInclude Include="Source\core\Timestep.h" />
     <ClInclude Include="Source\core\Window.h" />
+    <ClInclude Include="Source\Game\Layers\scene_descriptions.h" />
     <ClInclude Include="Source\Game\Layers\TestLayer5.h" />
     <ClInclude Include="Source\Game\Layers\TestLayer6.h" />
     <ClInclude Include="Source\utils\Matrix_3D.h" />
