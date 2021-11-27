@@ -29,6 +29,10 @@ Next things to do (as of 2021.11.14.):
 	a separate component just for the camera...
 	For the rest, I could retrieve all entities that have transform and mesh components (or rather retrive the trf+mesh component pairs - with EnTT's group 
 	function), since only these two are used for rendering.
+
+- Very important resource saving concept:
+	https://learnopengl.com/Advanced-OpenGL/Instancing
+
 - mouse picking
 
 

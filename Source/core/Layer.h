@@ -20,6 +20,7 @@ public:
 
 protected:
 	std::string m_DebugName;
+	bool m_IsActive = true;
 };
 
 

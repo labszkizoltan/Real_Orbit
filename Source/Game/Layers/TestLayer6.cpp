@@ -31,205 +31,16 @@ void TestLayer6::OnAttach()
 {
 	LOG_INFO("TestLayer6 attached");
 
-	// Hello Tetrahedron //
-	// Vertices with their own color:
-	std::vector<Vec3D> vertices = {
-		{-0.05f, -0.05f, 0.0f}, {1.0f, 0.0f, 0.0f},
-		{0.05f, -0.05f, 0.0f}, {0.0f, 1.0f, 0.0f},
-		{0.0f,  0.05f, 0.0f}, {0.0f, 0.0f, 1.0f},
-		{0.0f,  0.0f, -0.07f}, {1.0f, 1.0f, 0.0f}
-	};
-
-	std::vector<uint32_t> indices = {
-		0, 1, 2,   // first triangle
-		2, 1, 3,    // second triangle
-		0, 2, 3,	// ...
-		1, 0, 3
-	};
-
-	m_Tetrahedron = std::shared_ptr<Mesh>(new ColouredMesh(vertices, indices));
-
-	// rectangle
-	std::vector<Vec3D> vertices_rect = {
-		{-0.05f, -0.05f, 0.0f}, {1.0f, 0.0f, 0.0f},
-		{-0.05f,  0.05f, 0.0f}, {0.0f, 1.0f, 0.0f},
-		{ 0.05f, -0.05f, 0.0f}, {0.0f, 0.0f, 1.0f},
-		{ 0.05f,  0.05f, 0.0f}, {1.0f, 1.0f, 0.0f}
-	};
-
-	std::vector<uint32_t> indices_rect = {
-		0, 1, 2,   // first triangle
-		1, 2, 3    // second triangle
-	};
-
-	m_Rectangle = std::shared_ptr<Mesh>(new ColouredMesh(vertices_rect, indices_rect));
-
-	// cube
-	std::vector<float> vertices_cube = {
-		-0.707107,	-0.707107,	-0.707107,	0,	-1,	0,	1.000,	0.0,
-		 0.707107,	-0.707107,	-0.707107,	0,	-1,	0,	0.666,	0.0,
-		-0.707107,	-0.707107,	 0.707107,	0,	-1,	0,	1.000,	0.5,
-		 0.707107,	-0.707107,	 0.707107,	0,	-1,	0,	0.666,	0.5,
-
-		-0.707107,	0.707107,	-0.707107,	0,	1,	0,	1.000,	1.0,
-		0.707107,	0.707107,	-0.707107,	0,	1,	0,	0.666,	1.0,
-		-0.707107,	0.707107,	 0.707107,	0,	1,	0,	1.000,	0.5,
-		0.707107,	0.707107,	 0.707107,	0,	1,	0,	0.666,	0.5,
-
-		-0.707107,	-0.707107,	 0.707107,	-1,	0,	0,	0.333,	0.5,
-		-0.707107,	-0.707107,	-0.707107,	-1,	0,	0,	0.666,	0.5,
-		-0.707107,	0.707107,	 0.707107,	-1,	0,	0,	0.333,	1.0,
-		-0.707107,	0.707107,	-0.707107,	-1,	0,	0,	0.666,	1.0,
-
-		0.707107,	-0.707107,	 0.707107,	1,	0,	0,	0.666,	0.0,
-		0.707107,	-0.707107,	-0.707107,	1,	0,	0,	0.333,	0.0,
-		0.707107,	0.707107,	 0.707107,	1,	0,	0,	0.666,	0.5,
-		0.707107,	0.707107,	-0.707107,	1,	0,	0,	0.333,	0.5,
-
-		-0.707107,	-0.707107,	0.707107,	0,	0,	1,	0.333,	0.5,
-		0.707107,	-0.707107,	0.707107,	0,	0,	1,	0.000,	0.5,
-		-0.707107,	0.707107,	0.707107,	0,	0,	1,	0.333,	1.0,
-		0.707107,	0.707107,	0.707107,	0,	0,	1,	0.000,	1.0,
-
-		-0.707107,	-0.707107,	-0.707107,	0,	0,	-1,	0.000,	0.0,
-		0.707107,	-0.707107,	-0.707107,	0,	0,	-1,	0.333,	0.0,
-		-0.707107,	0.707107,	-0.707107,	0,	0,	-1,	0.000,	0.5,
-		0.707107,	0.707107,	-0.707107,	0,	0,	-1,	0.333,	0.5
-	};
-
-	std::vector<uint32_t> indices_cube = {
-		0,	1,	2,
-		1,	3,	2,
-		4,	6,	5,
-		5,	6,	7,
-		8,	10,	9,
-		9,	10,	11,
-		12,	13,	14,
-		13,	15,	14,
-		16,	17,	18,
-		17,	19,	18,
-		20,	22,	21,
-		21,	22,	23
-	};
-
-	m_Cube = std::shared_ptr<Mesh>(new NormalMesh(vertices_cube, indices_cube, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/all_in_one.png"));
-
-	// textured
-	std::vector<float> vertices_textured = {
-		-0.3f, -0.3f, 0.0f, 0.00f, 0.0f,
-		-0.1f, -0.3f, 0.0f, 0.33f, 0.0f,
-		 0.1f, -0.3f, 0.0f, 0.67f, 0.0f,
-		 0.3f, -0.3f, 0.0f, 1.00f, 0.0f,
-
-		-0.3f, -0.1f, 0.0f, 0.00f, 0.33f,
-		-0.1f, -0.1f, 0.0f, 0.33f, 0.33f,
-		 0.1f, -0.1f, 0.0f, 0.67f, 0.33f,
-		 0.3f, -0.1f, 0.0f, 1.00f, 0.33f,
-
-		-0.3f,  0.1f, 0.0f, 0.00f, 0.67f,
-		-0.1f,  0.1f, 0.0f, 0.33f, 0.67f,
-		 0.1f,  0.1f, 0.0f, 0.67f, 0.67f,
-		 0.3f,  0.1f, 0.0f, 1.00f, 0.67f,
-
-		-0.3f,  0.3f, 0.0f, 0.00f, 1.0f,
-		-0.1f,  0.3f, 0.0f, 0.33f, 1.0f,
-		 0.1f,  0.3f, 0.0f, 0.67f, 1.0f,
-		 0.3f,  0.3f, 0.0f, 1.00f, 1.0f
-	};
-
-	std::vector<uint32_t> indices_textured = {
-		0, 1, 4,   // first quad
-		5, 4, 1,   // 
-		1, 2, 5,   // second quad
-		6, 5, 2,   // 
-		2, 3, 6,   // third quad
-		7, 6, 3,   // 
-
-		4, 5, 8, // second line
-		9, 8, 5,  // 
-		5, 6, 9, // 
-		10, 9, 6,  // 
-		6, 7, 10,  // 
-		11, 10, 7,   // 
-
-		8, 9, 12, // third line
-		13, 12, 9,  // 
-		9, 10, 13, // 
-		14, 13, 10,  // 
-		10, 11, 14,  // 
-		15, 14, 11   // 
-	};
-
-//	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/saucer_texture.png"));
-	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/all_in_one.png"));
-//	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skybox_test_front.png"));
-//	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, m_Framebuffer->GetColorAttachment()));
-//	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, m_Framebuffer->GetDepthAttachment()));
-//	m_Textured = std::shared_ptr<Mesh>(new TexturedMesh(vertices_textured, indices_textured, m_Depthbuffer->GetDepthAttachment()));
-
-	// skybox
-	// now created by the SceneSerializer
-
-	// construct the scene and the entities
-	TransformComponent tetrahedron_trf;
-//	tetrahedron_trf.location = Vec3D({ -0.2f, 0.2f, -0.3f });
-	tetrahedron_trf.location = Vec3D({ 0.0f, 0.0f, 0.0f });
-	tetrahedron_trf.orientation = Identity(1.0f);
-	tetrahedron_trf.scale = 1.0f;
-
-	TransformComponent rect_trf;
-	rect_trf.location = Vec3D({ 0.1f, 0.0f, -0.3f });
-	rect_trf.orientation = Identity(1.0f);
-	rect_trf.scale = 1.0f;
-
-	TransformComponent cube_trf;
-	cube_trf.location = Vec3D({ 0.3f, 1.4f, -0.1f });
-//	cube_trf.location = Vec3D(-0.3f, 2.1f, 0.3f);
-	cube_trf.orientation = Identity(1.0f);
-	cube_trf.scale = 0.1f;
-
-	TransformComponent textured_trf;
-	textured_trf.location = Vec3D({ 0.0f, 3.0f, 0.0f });
-//	textured_trf.orientation = Identity(1.0f);
-	textured_trf.orientation = Rotation(1.57079633f, Vec3D({ 1.0f, 0.0f, 0.0f }));
-	textured_trf.scale = 10.0f;
-
 	m_Scene = std::shared_ptr<Scene>(new Scene());
 
 	SceneSerializer serializer(m_Scene);
-	serializer.DeSerialize_text(scene_string);
-//	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
-
-	
-//	serializer.DeSerialize("assets/scenes/test_scene_2.yaml");
+//	serializer.DeSerialize_text(scene_string);
+	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
 
 	m_SceneUpdater.SetScene(m_Scene);
-
-	m_TetrahedronEntity = m_Scene->CreateEntity("Tetrahedron");
-	m_RectangleEntity = m_Scene->CreateEntity("Rectangle");
-	m_CubeEntity = m_Scene->CreateEntity("Cube");
-	m_TexturedEntity = m_Scene->CreateEntity("Textured");
-
-	m_TetrahedronEntity.AddComponent<TransformComponent>(tetrahedron_trf);
-	m_RectangleEntity.AddComponent<TransformComponent>(rect_trf);
-	m_CubeEntity.AddComponent<TransformComponent>(cube_trf);
-	m_TexturedEntity.AddComponent<TransformComponent>(textured_trf);
-
-	TypedMeshComponent<MeshType::COLOURED_MESH> tmc; tmc.meshPtr = m_Tetrahedron;
-	TypedMeshComponent<MeshType::COLOURED_MESH> rmc; rmc.meshPtr = m_Rectangle;
-	TypedMeshComponent<MeshType::NORMAL_MESH> nmc; nmc.meshPtr = m_Cube;
-	TypedMeshComponent<MeshType::TEXTURED_MESH> texmc; texmc.meshPtr = m_Textured;
-
-	m_TetrahedronEntity.AddComponent<TypedMeshComponent<MeshType::COLOURED_MESH>>(tmc);
-	m_RectangleEntity.AddComponent<TypedMeshComponent<MeshType::COLOURED_MESH>>(rmc);
-	m_CubeEntity.AddComponent<TypedMeshComponent<MeshType::NORMAL_MESH>>(nmc);
-	m_TexturedEntity.AddComponent<TypedMeshComponent<MeshType::TEXTURED_MESH>>(texmc);
-
-	Renderer::SetLightPosition(tetrahedron_trf.location);
-	glEnable(GL_DEPTH_TEST);
-
 	m_SceneRenderer.SetScene(m_Scene);
 
+	glEnable(GL_DEPTH_TEST);
 }
 
 void TestLayer6::OnDetach()
@@ -252,9 +63,6 @@ void TestLayer6::OnUpdate(Timestep ts)
 
 	auto& light_comp = m_Scene->GetLight();
 	light_comp.light_transform.location = light_comp.light_transform.location + Vec3D(0.1f*sin(0.0005f * m_ElapsedTime), 0.0f, 0.0f);
-
-	auto& tex_trf = m_TexturedEntity.GetComponent<TransformComponent>();
-	tex_trf.orientation = Rotation(0.002f, Vec3D({ 0.0f, 1.0f, 0.0f })) * tex_trf.orientation;
 
 	m_ElapsedTime += ts;
 }
@@ -306,17 +114,6 @@ bool TestLayer6::OnTextEntered(Event& e)
 bool TestLayer6::OnKeyPressed(Event& e)
 {
 	sf::Event& event = e.GetEvent();
-
-	if(event.key.code == sf::Keyboard::Key::Add)
-	{
-		TransformComponent& trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
-		trf.scale *= 1.1f;
-	}
-	if (event.key.code == sf::Keyboard::Key::Subtract)
-	{
-		TransformComponent& trf = m_TetrahedronEntity.GetComponent<TransformComponent>();
-		trf.scale /= 1.1f;
-	}
 
 	LOG_INFO("TestLayer received KeyPressed evet: {0}", event.key.code);
 	return false;

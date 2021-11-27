@@ -46,19 +46,10 @@ private:
 
 private:
 	float m_ElapsedTime = 0.0f;
-	std::shared_ptr<Mesh> m_Tetrahedron = nullptr;
-	std::shared_ptr<Mesh> m_Rectangle = nullptr;
-	std::shared_ptr<Mesh> m_Cube = nullptr;
-	std::shared_ptr<Mesh> m_Textured  = nullptr;
-	std::shared_ptr<Mesh> m_Skybox = nullptr;
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
 	SceneUpdater m_SceneUpdater;
-	Entity m_TetrahedronEntity;
-	Entity m_RectangleEntity;
-	Entity m_CubeEntity;
-	Entity m_TexturedEntity;
 };
 
 

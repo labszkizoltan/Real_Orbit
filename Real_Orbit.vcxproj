@@ -184,6 +184,7 @@
     <ClCompile Include="Source\Game\Layers\TestLayer5.cpp" />
     <ClCompile Include="Source\Game\Layers\TestLayer6.cpp" />
     <ClCompile Include="Source\utils\Matrix_3D.cpp" />
+    <ClCompile Include="Source\utils\OctTree.cpp" />
     <ClCompile Include="Source\utils\shape_creator.cpp" />
     <ClCompile Include="Source\utils\Vector_2D.cpp" />
     <ClCompile Include="Source\utils\Vector_3D.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="Source\Game\Layers\TestLayer5.h" />
     <ClInclude Include="Source\Game\Layers\TestLayer6.h" />
     <ClInclude Include="Source\utils\Matrix_3D.h" />
+    <ClInclude Include="Source\utils\OctTree.h" />
     <ClInclude Include="Source\utils\shape_creator.h" />
     <ClInclude Include="Source\utils\Vector_2D.h" />
     <ClInclude Include="Source\utils\Vector_3D.h" />
