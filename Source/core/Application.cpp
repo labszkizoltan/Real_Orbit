@@ -18,6 +18,8 @@ Application::Application(const std::string& name)
 	properties.Title = name;
 	properties.Width = 800;
 	properties.Height = 800;
+//	properties.Style = sf::Style::Default;
+	properties.Style = sf::Style::Fullscreen;
 
 	// need to create an OpenGL context without a window to query OpenGL version, then destroy the context
 	int versionMajor = 4, versionMinor = 6;
@@ -36,7 +38,6 @@ Application::Application(const std::string& name)
 
 	int renderInitStatus = Renderer::Init();
 	LOG_CORE_INFO("Renderer Initialization status: {0}", renderInitStatus);
-
 }
 
 Application::~Application()

@@ -2,12 +2,20 @@
 #include "Window.h"
 
 Window::Window(const WindowProps& props, const sf::ContextSettings& settings)
-	: m_Window(sf::VideoMode(props.Width, props.Height), "OpenGL", sf::Style::Default, settings), m_Vsynced(true), m_Props(props)
+//	: m_Window(sf::VideoMode(props.Width, props.Height), "OpenGL", sf::Style::Default, settings), m_Vsynced(true), m_Props(props)
+//	: m_Window(sf::VideoMode(props.Width, props.Height), "OpenGL", sf::Style::Fullscreen, settings), m_Vsynced(true), m_Props(props)
+	: m_Window(sf::VideoMode(props.Width, props.Height), "OpenGL", props.Style, settings), m_Vsynced(true), m_Props(props)
 {
 	m_Window.setVerticalSyncEnabled(m_Vsynced);
 
 	// activate the window
 	m_Window.setActive(true);
+
+	// if the window is created in fullscreen mode, then update these to reflect the real sizes:
+//	m_Props.Width = (float)sf::VideoMode::getDesktopMode().width;
+//	m_Props.Height = (float)sf::VideoMode::getDesktopMode().height;
+	m_Props.Width = m_Window.getSize().x;
+	m_Props.Height = m_Window.getSize().y;
 }
 
 Window::~Window()

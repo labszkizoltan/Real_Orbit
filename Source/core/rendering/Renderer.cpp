@@ -1,5 +1,6 @@
 
 #include "Renderer.h"
+#include <core/Application.h>
 #include <core/rendering/shader_source_files/ShaderSourceCollection.h>
 //#include <core/rendering/shader_source_files/basic_3D_shaders.h>
 #include <core/scene/Components.h>
@@ -61,8 +62,6 @@ int Renderer::Init()
 		std::string(shadow_mapper_fragmentSrc)
 	);
 
-
-	
 //	// Add subsequent shader here:
 //	// MeshType::OTHER_MESH_TYPE
 //	s_ShaderLibrary.AddShader(
@@ -71,7 +70,9 @@ int Renderer::Init()
 //	);
 
 
-	SetAspectRatio(s_AspectRatio);
+	float w = Application::Get().GetWindow().GetWidth();
+	float h = Application::Get().GetWindow().GetHeight();
+	SetAspectRatio(w / h);
 
 	TransformComponent camera_trf;
 	camera_trf.location = Vec3D({ 0,0,-1 });

@@ -4,6 +4,9 @@
 
 #include <core/rendering/Buffer.h>
 
+// forward declaring TransformComponent:
+struct TransformComponent;
+
 // each mesh type has a fixed layout, and a corresponding shader that can draw it
 enum class MeshType
 {
@@ -19,6 +22,7 @@ public:
 	virtual ~Mesh() {};
 
 	virtual void Draw() = 0;
+//	virtual void DrawInstances(std::vector<TransformComponent> transforms) = 0;
 	virtual MeshType GetMeshType() = 0;
 	virtual BufferLayout GetBufferLayout() = 0;
 

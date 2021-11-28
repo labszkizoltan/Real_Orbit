@@ -32,6 +32,8 @@ Next things to do (as of 2021.11.14.):
 
 - Very important resource saving concept:
 	https://learnopengl.com/Advanced-OpenGL/Instancing
+	https://www.khronos.org/opengl/wiki/Vertex_Rendering#Instancing
+	https://www.youtube.com/watch?v=9F_lUPPS_pg
 
 - mouse picking
 

@@ -114,8 +114,13 @@ bool TestLayer6::OnTextEntered(Event& e)
 bool TestLayer6::OnKeyPressed(Event& e)
 {
 	sf::Event& event = e.GetEvent();
+	if (event.key.code == sf::Keyboard::Key::Escape)
+	{
+		Application::Get().Close();
+	}
 
 	LOG_INFO("TestLayer received KeyPressed evet: {0}", event.key.code);
+
 	return false;
 }
 
