@@ -153,6 +153,15 @@
     <ClInclude Include="Source\utils\OctTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\core\rendering\drawables\InstancedMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\rendering\drawables\InstancedNormalMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\rendering\InstanceBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Game\GameApp.cpp">
@@ -258,6 +267,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\utils\OctTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\rendering\drawables\InstancedNormalMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\rendering\InstanceBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

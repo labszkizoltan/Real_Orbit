@@ -20,6 +20,7 @@ Application::Application(const std::string& name)
 	properties.Height = 800;
 //	properties.Style = sf::Style::Default;
 	properties.Style = sf::Style::Fullscreen;
+	properties.ShowMouse = false;
 
 	// need to create an OpenGL context without a window to query OpenGL version, then destroy the context
 	int versionMajor = 4, versionMinor = 6;

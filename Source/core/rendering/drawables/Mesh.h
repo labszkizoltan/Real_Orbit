@@ -4,9 +4,6 @@
 
 #include <core/rendering/Buffer.h>
 
-// forward declaring TransformComponent:
-struct TransformComponent;
-
 // each mesh type has a fixed layout, and a corresponding shader that can draw it
 enum class MeshType
 {

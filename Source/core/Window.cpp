@@ -12,10 +12,10 @@ Window::Window(const WindowProps& props, const sf::ContextSettings& settings)
 	m_Window.setActive(true);
 
 	// if the window is created in fullscreen mode, then update these to reflect the real sizes:
-//	m_Props.Width = (float)sf::VideoMode::getDesktopMode().width;
-//	m_Props.Height = (float)sf::VideoMode::getDesktopMode().height;
 	m_Props.Width = m_Window.getSize().x;
 	m_Props.Height = m_Window.getSize().y;
+
+	m_Window.setMouseCursorVisible(m_Props.ShowMouse);
 }
 
 Window::~Window()
