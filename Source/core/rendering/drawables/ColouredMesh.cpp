@@ -60,7 +60,7 @@ ColouredMesh::~ColouredMesh()
 void ColouredMesh::Draw()
 {
 	m_VertexArray.Bind();
-	glDrawElements(GL_TRIANGLES, m_IndexBuffer.m_Count, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
 }
 
 MeshType ColouredMesh::GetMeshType()

@@ -9,6 +9,13 @@
 // forward declaring TransformComponent
 struct TransformComponent;
 
+// each mesh type has a fixed layout, and a corresponding shader that can draw it
+enum class InstancedMeshType
+{
+	INSTANCED_COLOURED_MESH, INSTANCED_NORMAL_MESH, INSTANCED_SHADOW_MAP, UNKOWN
+};
+
+
 class InstancedMesh
 {
 public:

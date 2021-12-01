@@ -131,7 +131,7 @@ public:
 	void SetLayout(const BufferLayout& layout);
 	void SetLayout();
 
-public:
+private:
 	uint32_t m_RendererID = 0;
 	BufferLayout m_Layout;
 };
@@ -156,7 +156,7 @@ public:
 
 	uint32_t GetCount() const { return m_Count; };
 
-public:
+private:
 	uint32_t m_RendererID = 0;
 	uint32_t m_Count;
 };

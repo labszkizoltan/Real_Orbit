@@ -9,13 +9,6 @@
 #include <core/rendering/Texture.h>
 #include <utils/Vector_3D.h>
 
-// each mesh type has a fixed layout, and a corresponding shader that can draw it
-enum class InstancedMeshType
-{
-	INSTANCED_NORMAL_MESH, UNKOWN
-};
-
-
 class InstancedNormalMesh : public InstancedMesh
 {
 public:

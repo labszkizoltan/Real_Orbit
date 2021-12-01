@@ -54,7 +54,7 @@ void Skybox::Draw()
 	for(int i=0; i< m_Textures.size(); i++)
 		m_Textures[i]->Bind();
 
-	glDrawElements(GL_TRIANGLES, m_IndexBuffer.m_Count, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
 
 	glEnable(GL_DEPTH_TEST);
 }

@@ -46,7 +46,7 @@ void TexturedMesh::Draw()
     m_VertexArray.Bind();
 	m_Texture->Bind();
 
-    glDrawElements(GL_TRIANGLES, m_IndexBuffer.m_Count, GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
 }
 
 MeshType TexturedMesh::GetMeshType()

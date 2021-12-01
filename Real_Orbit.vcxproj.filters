@@ -117,9 +117,6 @@
     <ClInclude Include="Source\core\rendering\shader_source_files\shadow_shaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Game\Layers\TestLayer5.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\core\rendering\drawables\NormalMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -136,9 +133,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\core\rendering\SceneRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Game\Layers\TestLayer6.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\core\rendering\drawables\MeshLibrary.h">
@@ -160,6 +154,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\core\rendering\InstanceBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Layers\TestLayer7.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\rendering\shader_source_files\instanced_normal_shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -245,9 +245,6 @@
     <ClCompile Include="Source\core\rendering\Depthbuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Game\Layers\TestLayer5.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\core\rendering\drawables\NormalMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -260,9 +257,6 @@
     <ClCompile Include="Source\core\rendering\SceneRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Game\Layers\TestLayer6.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\core\scene\SceneUpdater.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -273,6 +267,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\core\rendering\InstanceBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Layers\TestLayer7.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,8 +3,8 @@
 #include <core/rendering/Buffer.h>
 //#include <glad/glad.h>
 
-
-static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
+//static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
+GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
 {
 	switch (type)
 	{
@@ -23,7 +23,6 @@ static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
 
 	return 0;
 }
-
 
 //--------------------------------------------//
 //-------------- Vertex Buffer ---------------//

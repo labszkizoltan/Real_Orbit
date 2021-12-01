@@ -3,6 +3,8 @@
 
 #include <glad/glad.h>
 #include <vendor/stb_image/stb_image.h>
+#include <core/rendering/Renderer.h>
+#include <core/rendering/Buffer.h>
 #include <core/scene/Components.h>
 
 BufferLayout InstancedNormalMesh::s_VertexLayout = {
@@ -18,7 +20,7 @@ InstancedNormalMesh::InstancedNormalMesh()
 InstancedNormalMesh::InstancedNormalMesh(const std::vector<float>& vertexData, const std::vector<uint32_t>& indexData, std::shared_ptr<Texture> texture)
 	: m_VertexArray(),
 	m_VertexBuffer((float*)&vertexData[0], vertexData.size() * sizeof(float)),
-	m_InstanceBuffer(),
+	m_InstanceBuffer(0, 3),
 	m_IndexBuffer((uint32_t*)&indexData[0], indexData.size()),
 	m_Texture(texture)
 {
@@ -35,7 +37,7 @@ InstancedNormalMesh::InstancedNormalMesh(const std::vector<float>& vertexData, c
 InstancedNormalMesh::InstancedNormalMesh(const std::vector<float>& vertexData, const std::vector<uint32_t>& indexData, const std::string& texturePath)
 	: m_VertexArray(),
 	m_VertexBuffer((float*)&vertexData[0], vertexData.size() * sizeof(float)),
-	m_InstanceBuffer(),
+	m_InstanceBuffer(0, 3),
 	m_IndexBuffer((uint32_t*)&indexData[0], indexData.size()),
 	m_Texture(new Texture(texturePath))
 {
@@ -52,9 +54,24 @@ InstancedNormalMesh::InstancedNormalMesh(const std::vector<float>& vertexData, c
 
 void InstancedNormalMesh::DrawInstances(const std::vector<TransformComponent>& transforms)
 {
+	m_VertexArray.Bind();
+	m_Texture->Bind();
 	m_InstanceBuffer.SetData(transforms);
 
+	GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, 0, transforms.size()));
+
+	m_VertexArray.UnBind();
 }
+
+/*
+void NormalMesh::Draw()
+{
+	m_VertexArray.Bind();
+	m_Texture->Bind();
+
+	glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
+}
+*/
 
 InstancedMeshType InstancedNormalMesh::GetMeshType()
 {
