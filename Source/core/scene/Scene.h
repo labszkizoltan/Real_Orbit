@@ -30,6 +30,7 @@ private:
 	CameraComponent m_Camera;
 	LightComponent m_Light;
 	MeshLibrary m_MeshLibrary;
+	MeshLibrary_old m_MeshLibrary_old;
 
 	friend class Entity;
 	friend class SceneSerializer;

@@ -47,10 +47,10 @@ public:
 	~Renderer();
 
 	static int Init();
-	static void Draw(Mesh* mesh);
+//	static void Draw(Mesh* mesh);
 
-	static void Draw(Entity entity);
-	static void DrawToShadowMap(Entity entity);
+//	static void Draw(Entity entity);
+//	static void DrawToShadowMap(Entity entity);
 //	static void DrawToTexture(Entity entity, Framebuffer fbo);
 	static void SetAspectRatio(float aspect_ratio);
 	static void SetCamera(TransformComponent camera_transform);

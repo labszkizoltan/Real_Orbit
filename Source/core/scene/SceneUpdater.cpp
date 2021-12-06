@@ -18,7 +18,6 @@ SceneUpdater::~SceneUpdater()
 void SceneUpdater::UpdateScene(Timestep ts)
 {
 	/*
-	
 	auto grav_masses = m_Scene->m_Registry.view<TransformComponent, GravitationalMassComponent>();
 	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent>();
 	for (auto entity : view)
@@ -45,6 +44,8 @@ void SceneUpdater::UpdateScene(Timestep ts)
 	}
 	*/
 
+	/*
+	
 	Box3D box; box.center = Vec3D(0, 0, 0); box.radius = Vec3D(100, 100, 100);
 	OctTree<Vec3D> octtree(box);
 
@@ -86,7 +87,7 @@ void SceneUpdater::UpdateScene(Timestep ts)
 //			std::cout << next_trf.location - entity_trf.location << "\n";
 //		}
 	}
-
+	*/
 
 	std::cout << "Scene updated\n";
 

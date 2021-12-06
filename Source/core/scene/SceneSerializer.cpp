@@ -12,6 +12,8 @@
 #include <core/scene/Entity.h>
 #include <core/scene/Components.h>
 
+#include <core/rendering/drawables/InstancedMesh.h>
+#include <core/rendering/drawables/InstancedNormalMesh.h>
 #include <core/rendering/drawables/ColouredMesh.h>
 #include <core/rendering/drawables/TexturedMesh.h>
 #include <core/rendering/drawables/NormalMesh.h>
@@ -120,18 +122,13 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 		if (mesh_com)
 		{
 			std::string meshName = entity["MeshComponent"].as<std::string>();
-			std::shared_ptr<Mesh> meshPtr = m_Scene->m_MeshLibrary.m_Meshes[meshName];
+			std::shared_ptr<Mesh> meshPtr = m_Scene->m_MeshLibrary_old.m_Meshes[meshName];
 			MeshType type = meshPtr->GetMeshType();
 
 			if (type == MeshType::COLOURED_MESH)
 			{
 				TypedMeshComponent<MeshType::COLOURED_MESH> result; result.meshPtr = meshPtr;
 				deserializedEntity.AddComponent<TypedMeshComponent<MeshType::COLOURED_MESH>>(result);
-			}
-			else if (type == MeshType::TEXTURED_MESH)
-			{
-				TypedMeshComponent<MeshType::TEXTURED_MESH> result; result.meshPtr = meshPtr;
-				deserializedEntity.AddComponent<TypedMeshComponent<MeshType::TEXTURED_MESH>>(result);
 			}
 			else if (type == MeshType::NORMAL_MESH)
 			{
@@ -181,6 +178,88 @@ void SceneSerializer::DeSerialize_file(const std::string& input_file)
 	DeSerialize_text(strStream.str());
 }
 
+// this may be not necessary
+static bool contains_key(std::unordered_map<std::string, int> map, std::string key)
+{
+	// Key is not present
+	if (map.find(key) == map.end())
+		return false;
+
+	return true;
+
+
+	// Key is not present
+	if (map.count(key) == 0)
+		return "Not Present";
+
+	return "Present";
+}
+
+void SceneSerializer::FillMeshLibrary(const YAML::Node& data)
+{
+	auto meshes = data["Meshes"];
+	std::cout << "number of meshes defined in config: " << meshes.size() << "\n";
+
+	std::unordered_map<std::string, int> mesh_id_lookup;
+
+	for (auto mesh : meshes)
+	{
+		std::string mesh_name = mesh["Mesh"].as<std::string>();
+		MeshType type = mesh["MeshType"].as<MeshType>();
+
+		if (contains_key(mesh_id_lookup, mesh_name))
+		{
+
+			if (type == MeshType::COLOURED_MESH)
+			{
+			}
+			else if (type == MeshType::NORMAL_MESH)
+			{
+				std::string vertex_file = mesh["vertex_file"].as<std::string>();
+				OGLBufferData buffer_data = ParseVertexFile(vertex_file);
+				std::string texturePath = mesh["texture_file"].as<std::string>();
+
+
+				//	std::string vertex_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_16_corrected.txt");
+				OGLBufferData buffer_data = ParseVertexFile(vertex_file);
+				//	std::string texturePath("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/Earth_Realistic.png");
+				std::string texturePath("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/Earth_Realistic_lowres.png");
+				m_IMesh = std::make_shared<InstancedNormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
+
+
+
+				//			std::shared_ptr<Mesh> mesh_ptr = std::shared_ptr<Mesh>(new NormalMesh(buffer_data.vertex_data, buffer_data.index_data, texturePath));
+				std::shared_ptr<Mesh> mesh_ptr = std::make_shared<NormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
+				m_Scene->m_MeshLibrary_old.m_Meshes[mesh_name] = mesh_ptr;
+			}
+			else if (type == MeshType::SKYBOX)
+			{
+				std::vector<float> vertex_data = Skybox::CreateSkyboxVertexData(g_SkyboxMeshResolution);
+				std::vector<uint32_t> index_data = Skybox::CreateSkyboxIndexData(g_SkyboxMeshResolution);
+				std::vector<std::string> textureFilenames = {
+					mesh["texture_file_f"].as<std::string>(),
+					mesh["texture_file_b"].as<std::string>(),
+					mesh["texture_file_l"].as<std::string>(),
+					mesh["texture_file_r"].as<std::string>(),
+					mesh["texture_file_u"].as<std::string>(),
+					mesh["texture_file_d"].as<std::string>()
+				};
+
+				//			std::shared_ptr<Mesh> mesh_ptr = std::shared_ptr<Mesh>(new Skybox(vertex_data, index_data, textureFilenames));
+				std::shared_ptr<Mesh> mesh_ptr = std::make_shared<Skybox>(vertex_data, index_data, textureFilenames);
+				m_Scene->m_MeshLibrary_old.m_Meshes[mesh_name] = mesh_ptr;
+			}
+			else
+			{
+				LOG_CORE_WARN("Unidentified MeshType found when creating MeshLibrary!");
+			}
+		}
+
+	}
+
+}
+
+/*
 void SceneSerializer::FillMeshLibrary(const YAML::Node& data)
 {
 	auto meshes = data["Meshes"];
@@ -195,7 +274,7 @@ void SceneSerializer::FillMeshLibrary(const YAML::Node& data)
 			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
 //			std::shared_ptr<Mesh> mesh_ptr = std::shared_ptr<Mesh>(new ColouredMesh(buffer_data.vertex_data, buffer_data.index_data));
 			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<ColouredMesh>(buffer_data.vertex_data, buffer_data.index_data);
-			m_Scene->m_MeshLibrary.m_Meshes[mesh_name] = mesh_ptr;
+			m_Scene->m_MeshLibrary_old.m_Meshes[mesh_name] = mesh_ptr;
 		}
 		else if (type == MeshType::TEXTURED_MESH)
 		{
@@ -205,7 +284,7 @@ void SceneSerializer::FillMeshLibrary(const YAML::Node& data)
 
 //			std::shared_ptr<Mesh> mesh_ptr = std::shared_ptr<Mesh>(new TexturedMesh(buffer_data.vertex_data, buffer_data.index_data, texturePath));
 			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<TexturedMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
-			m_Scene->m_MeshLibrary.m_Meshes[mesh_name] = mesh_ptr;
+			m_Scene->m_MeshLibrary_old.m_Meshes[mesh_name] = mesh_ptr;
 		}
 		else if (type == MeshType::NORMAL_MESH)
 		{
@@ -215,7 +294,7 @@ void SceneSerializer::FillMeshLibrary(const YAML::Node& data)
 
 //			std::shared_ptr<Mesh> mesh_ptr = std::shared_ptr<Mesh>(new NormalMesh(buffer_data.vertex_data, buffer_data.index_data, texturePath));
 			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<NormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
-			m_Scene->m_MeshLibrary.m_Meshes[mesh_name] = mesh_ptr;
+			m_Scene->m_MeshLibrary_old.m_Meshes[mesh_name] = mesh_ptr;
 		}
 		else if (type == MeshType::SKYBOX)
 		{
@@ -232,7 +311,7 @@ void SceneSerializer::FillMeshLibrary(const YAML::Node& data)
 
 //			std::shared_ptr<Mesh> mesh_ptr = std::shared_ptr<Mesh>(new Skybox(vertex_data, index_data, textureFilenames));
 			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<Skybox>(vertex_data, index_data, textureFilenames);
-			m_Scene->m_MeshLibrary.m_Meshes[mesh_name] = mesh_ptr;
+			m_Scene->m_MeshLibrary_old.m_Meshes[mesh_name] = mesh_ptr;
 		}
 		else
 		{
@@ -240,6 +319,8 @@ void SceneSerializer::FillMeshLibrary(const YAML::Node& data)
 		}
 	}
 }
+*/
+
 
 OGLBufferData SceneSerializer::ParseVertexFile(const std::string& filename)
 {

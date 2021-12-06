@@ -17,9 +17,10 @@ public:
 
 	virtual void Draw() override;
 //	there will be no need to render more than one skybox at a time, this will not be implemented
-//	virtual void DrawInstances(std::vector<TransformComponent> transforms) override;
+	virtual void DrawInstances(std::vector<TransformComponent> transforms) override;
 	virtual MeshType GetMeshType() override;
-	virtual BufferLayout GetBufferLayout() override;
+	virtual BufferLayout GetVertexLayout() override;
+	virtual BufferLayout GetInstanceLayout() override;
 
 	static MeshType GetStaticMeshType();
 

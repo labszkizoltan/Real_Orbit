@@ -2,10 +2,9 @@
 #ifndef NORMAL_MESH_H
 #define NORMAL_MESH_H
 
-
-
 #include <core/rendering/drawables/Mesh.h>
 #include <core/rendering/Buffer.h>
+#include <core/rendering/InstanceBuffer.h>
 #include <core/rendering/VertexArray.h>
 #include <core/rendering/Texture.h>
 #include <utils/Vector_3D.h>
@@ -19,20 +18,22 @@ public:
 	~NormalMesh();
 
 	virtual void Draw() override;
-//	virtual void DrawInstances(std::vector<TransformComponent> transforms) override;
+	virtual void DrawInstances(std::vector<TransformComponent> transforms) override;
 	virtual MeshType GetMeshType() override;
-	virtual BufferLayout GetBufferLayout() override;
+	virtual BufferLayout GetVertexLayout() override;
+	virtual BufferLayout GetInstanceLayout() override;
 
 	static MeshType GetStaticMeshType();
 
 private:
 	VertexArray m_VertexArray;
 	VertexBuffer m_VertexBuffer;
+	InstanceBuffer m_InstanceBuffer;
 	IndexBuffer m_IndexBuffer;
 	std::shared_ptr<Texture> m_Texture;
 
 private:
-	static BufferLayout s_Layout;
+	static BufferLayout s_VertexLayout;
 
 };
 

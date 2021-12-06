@@ -13,10 +13,9 @@
 #include <core/rendering/Framebuffer.h>
 #include <core/rendering/Depthbuffer.h>
 #include <core/rendering/drawables/Mesh.h>
-#include <core/rendering/drawables/InstancedNormalMesh.h>
 
-#include <core/rendering/SceneRenderer.h>
-#include <core/scene/SceneUpdater.h>
+// #include <core/rendering/SceneRenderer.h>
+// #include <core/scene/SceneUpdater.h>
 
 class TestLayer7 : public Layer
 {
@@ -48,12 +47,12 @@ private:
 private:
 	float m_ElapsedTime = 0.0f;
 
-	std::shared_ptr<Scene> m_Scene = nullptr;
-	SceneRenderer m_SceneRenderer;
-	SceneUpdater m_SceneUpdater;
+//	std::shared_ptr<Scene> m_Scene = nullptr;
+//	SceneRenderer m_SceneRenderer;
+//	SceneUpdater m_SceneUpdater;
 
 	std::shared_ptr<Shader> m_IShader = nullptr;
-	std::shared_ptr<InstancedNormalMesh> m_IMesh = nullptr;
+	std::shared_ptr<Mesh> m_IMesh = nullptr;
 	std::vector<TransformComponent> m_Transforms;
 
 };

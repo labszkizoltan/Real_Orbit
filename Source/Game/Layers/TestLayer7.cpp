@@ -5,7 +5,6 @@
 
 #include <core/rendering/Renderer.h>
 #include <core/rendering/drawables/ColouredMesh.h>
-#include <core/rendering/drawables/TexturedMesh.h>
 #include <core/rendering/drawables/Skybox.h>
 #include <core/rendering/drawables/NormalMesh.h>
 
@@ -80,7 +79,6 @@ void TestLayer7::OnAttach()
 		float h = Application::Get().GetWindow().GetHeight();
 		m_IShader->UploadUniformFloat("aspect_ratio", w/h);
 
-
 		int samplers[32];
 		for (uint32_t i = 0; i < 32; i++) { samplers[i] = i; }
 		m_IShader->UploadUniformIntArray("u_Textures", samplers, 32);
@@ -88,34 +86,25 @@ void TestLayer7::OnAttach()
 
 	}
 
-
-	std::string vertex_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_16_corrected.txt");
+	std::string vertex_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_4.txt");
 	OGLBufferData buffer_data = ParseVertexFile(vertex_file);
-	std::string texturePath("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/Earth_Realistic.png");
-	m_IMesh = std::make_shared<InstancedNormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
+	std::string texturePath("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/Earth_Realistic_lowres.png");
+	m_IMesh = std::make_shared<NormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
 
-	for (int i = 0; i < 2000; i++)
+	for (int i = 0; i < 100000; i++)
 	{
 		TransformComponent tmp;
 		tmp.location = Vec3D(
 			2 * (float)(std::rand() % 1000) / 1000.0f - 1,
 			2 * (float)(std::rand() % 1000) / 1000.0f - 1,
 			2 * (float)(std::rand() % 1000) / 1000.0f - 1);
-		tmp.location *= 10.0f;
+		tmp.location *= 50.0f;
 		tmp.orientation = Rotation(3.141592f * (float)(std::rand() % 1000) / 1000.0f, tmp.location);
-		tmp.scale = 0.01f+0.2f * (float)(std::rand() % 1000) / 1000.0f;
+		tmp.scale = 0.05f+0.25f * (float)(std::rand() % 1000) / 1000.0f;
 		m_Transforms.push_back(tmp);
 	}
 	
-
-	m_Scene = std::shared_ptr<Scene>(new Scene());
-
-	SceneSerializer serializer(m_Scene);
-//	serializer.DeSerialize_text(scene_string);
-	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_2.yaml");
-
-	m_SceneUpdater.SetScene(m_Scene);
-	m_SceneRenderer.SetScene(m_Scene);
+//	m_Scene = std::shared_ptr<Scene>(new Scene());
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -129,21 +118,56 @@ void TestLayer7::OnUpdate(Timestep ts)
 {
 	//	LOG_INFO("TestLayer7 updated");
 
+	// testing the dynamic resizing of the instance buffer:
+	/*
+	static std::vector<TransformComponent> dyn_trf;
+	static bool isGrowing = true;
+	static int counter = 0;
+	if (isGrowing)
+	{
+		dyn_trf.push_back(m_Transforms[counter]);
+		counter++;
+		if (counter == m_Transforms.size())
+			isGrowing = !isGrowing;
+	}
+	else
+	{
+		dyn_trf.pop_back();
+		counter--;
+		if(counter == 0)
+			isGrowing = !isGrowing;
+	}
+	m_IMesh->DrawInstances(dyn_trf);
+	*/
+
+
 	HandleUserInput(ts);
 	
 	Renderer::Refresh();
 
-	m_SceneRenderer.RenderScene();
-
-	// something like this could be next
-	m_SceneUpdater.UpdateScene(ts);
-
-	auto& light_comp = m_Scene->GetLight();
-	light_comp.light_transform.location = light_comp.light_transform.location + Vec3D(0.1f*sin(0.0005f * m_ElapsedTime), 0.0f, 0.0f);
+//	auto& light_comp = m_Scene->GetLight();
+//	light_comp.light_transform.location = light_comp.light_transform.location + Vec3D(0.1f*sin(0.0005f * m_ElapsedTime), 0.0f, 0.0f);
 
 	m_IShader->Bind();
-	m_IShader->UploadUniformFloat3("light_location", light_comp.light_transform.location.Glm());
-	m_IMesh->DrawInstances(m_Transforms);
+//	m_IShader->UploadUniformFloat3("light_location", light_comp.light_transform.location.Glm());
+	m_IShader->UploadUniformFloat3("light_location", Vec3D().Glm());
+
+//	static int instanceCount = 0;
+//	static std::vector<TransformComponent> increasingTransforms;
+//	if (instanceCount % 2 == 0 && instanceCount/2< m_Transforms.size())
+//		increasingTransforms.push_back(m_Transforms[instanceCount / 2]);
+//	m_IMesh->DrawInstances(increasingTransforms);
+//	instanceCount++;
+	
+	// draw with this command once, to fill the instance buffer:
+	static bool first_time = true;
+	if (first_time)
+	{
+		m_IMesh->DrawInstances(m_Transforms);
+		first_time = false;
+	}
+	m_IMesh->Draw();
+
 
 	m_ElapsedTime += ts;
 }
@@ -152,7 +176,7 @@ void TestLayer7::OnEvent(Event& event)
 {
 	LOG_INFO("TestLayer7 event received");
 
-//	event.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
+	event.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
 	event.Dispatch<sf::Event::EventType::LostFocus>				(BIND_EVENT_FN(OnLoosingFocus));
 	event.Dispatch<sf::Event::EventType::GainedFocus>			(BIND_EVENT_FN(OnGainingFocus));
 	event.Dispatch<sf::Event::EventType::KeyPressed>			(BIND_EVENT_FN(OnKeyPressed));
@@ -170,6 +194,8 @@ void TestLayer7::OnEvent(Event& event)
 bool TestLayer7::OnWindowResize(Event& e)
 {
 	sf::Event& event = e.GetEvent();
+	m_IShader->Bind();
+	m_IShader->UploadUniformFloat("aspect_ratio", (float)event.size.width/(float)event.size.height);
 	LOG_CORE_INFO("Window Resize event captured in TestLayer7: width - {0}, height - {1}", event.size.width, event.size.height);
 	return false;
 }
@@ -261,15 +287,18 @@ bool TestLayer7::OnMouseLeft(Event& e)
 
 void TestLayer7::HandleUserInput(Timestep ts)
 {
-	TransformComponent& cam_trf = m_Scene->GetCamera().camera_transform;
+//	TransformComponent& cam_trf = m_Scene->GetCamera().camera_transform;
+	static TransformComponent cam_trf = { Vec3D(), Identity(1.0f), 1.0f };
+//	TransformComponent cam_trf; cam_trf.location = Vec3D(); cam_trf.orientation = Identity(1.0f); cam_trf.scale = 1.0f;
 
+	float cam_velocity = 0.01f;
 	// moves
-	if (Input::IsKeyPressed(sf::Keyboard::Key::W)) { cam_trf.location += ts * 0.001f * cam_trf.orientation.f3; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::S)) { cam_trf.location -= ts * 0.001f * cam_trf.orientation.f3; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::A)) { cam_trf.location -= ts * 0.001f * cam_trf.orientation.f1; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::D)) { cam_trf.location += ts * 0.001f * cam_trf.orientation.f1; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::R)) { cam_trf.location += ts * 0.001f * cam_trf.orientation.f2; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::F)) { cam_trf.location -= ts * 0.001f * cam_trf.orientation.f2; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::W)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f3; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::S)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f3; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::A)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f1; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::D)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f1; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::R)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f2; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::F)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f2; }
 	// rotations
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }

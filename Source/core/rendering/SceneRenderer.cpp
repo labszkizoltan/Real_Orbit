@@ -40,7 +40,6 @@ void SceneRenderer::RenderScene()
 
 	shader = Renderer::s_ShaderLibrary.BindShader(MeshType::SHADOW_MAP);
 	ShadowMapMeshType<MeshType::COLOURED_MESH>(shader);
-	ShadowMapMeshType<MeshType::TEXTURED_MESH>(shader);
 	ShadowMapMeshType<MeshType::NORMAL_MESH>(shader);
 
 	Renderer::s_DepthBuffer->Unbind();
@@ -63,10 +62,9 @@ void SceneRenderer::RenderScene()
 	for (auto entity : skybox_view)
 	{
 		auto& skyb_mesh = skybox_view.get<TypedMeshComponent<MeshType::SKYBOX>>(entity);
-		skyb_mesh.meshPtr->Draw(); // the draw function of the skybox will internally turn off, then on the depth testing
+//		skyb_mesh.meshPtr->Draw(); // the draw function of the skybox will internally turn off, then on the depth testing
 	}
 
 	DrawMeshType<MeshType::COLOURED_MESH>();
-	DrawMeshType<MeshType::TEXTURED_MESH>();
 	DrawMeshType<MeshType::NORMAL_MESH>();
 }

@@ -99,9 +99,6 @@
     <ClInclude Include="Source\core\rendering\drawables\Skybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\core\rendering\drawables\TexturedMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\core\rendering\shader_source_files\textured_shaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -129,28 +126,16 @@
     <ClInclude Include="Source\core\GlobalConstants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\core\scene\SceneSerializer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\core\rendering\SceneRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\core\rendering\drawables\MeshLibrary.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\core\scene\SceneUpdater.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Game\Layers\scene_descriptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\utils\OctTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\core\rendering\drawables\InstancedMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\core\rendering\drawables\InstancedNormalMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\core\rendering\InstanceBuffer.h">
@@ -233,9 +218,6 @@
     <ClCompile Include="Source\core\scene\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\core\rendering\drawables\TexturedMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\core\rendering\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -251,19 +233,10 @@
     <ClCompile Include="Source\core\rendering\drawables\Skybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\core\scene\SceneSerializer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\core\rendering\SceneRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\core\scene\SceneUpdater.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\utils\OctTree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\core\rendering\drawables\InstancedNormalMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\core\rendering\InstanceBuffer.cpp">

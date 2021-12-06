@@ -25,11 +25,13 @@ public:
 
 	void SetAttribStartIdx(uint32_t idx);
 	uint32_t GetCapacity();
+	uint32_t GetElementCount();
 
 private:
 	uint32_t m_RendererID = 0;
 	uint32_t m_AttribPtrStartIdx = 0;
-	uint32_t m_Capacity = 0;
+	size_t m_ElementCount = 0;
+	size_t m_Capacity = 0;
 
 private:
 	static BufferLayout s_Layout;

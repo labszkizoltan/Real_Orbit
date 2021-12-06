@@ -1,5 +1,6 @@
-#include "Skybox.h"
 
+#include "Skybox.h"
+#include <core/scene/Components.h> // needed for TransformComponent definition
 
 BufferLayout Skybox::s_Layout = {
 		{ShaderDataType::Float3, "aPos"},
@@ -51,7 +52,7 @@ void Skybox::Draw()
 	glDisable(GL_DEPTH_TEST);
 
 	m_VertexArray.Bind();
-	for(int i=0; i< m_Textures.size(); i++)
+	for (int i = 0; i < m_Textures.size(); i++)
 		m_Textures[i]->Bind();
 
 	glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
@@ -59,14 +60,34 @@ void Skybox::Draw()
 	glEnable(GL_DEPTH_TEST);
 }
 
+void Skybox::DrawInstances(std::vector<TransformComponent> transforms)
+{
+	/*
+	glDisable(GL_DEPTH_TEST);
+
+	m_VertexArray.Bind();
+	for(int i=0; i< m_Textures.size(); i++)
+		m_Textures[i]->Bind();
+
+	glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
+
+	glEnable(GL_DEPTH_TEST);
+	*/
+}
+
 MeshType Skybox::GetMeshType()
 {
 	return GetStaticMeshType();
 }
 
-BufferLayout Skybox::GetBufferLayout()
+BufferLayout Skybox::GetVertexLayout()
 {
 	return s_Layout;
+}
+
+BufferLayout Skybox::GetInstanceLayout()
+{
+	return BufferLayout();
 }
 
 MeshType Skybox::GetStaticMeshType()

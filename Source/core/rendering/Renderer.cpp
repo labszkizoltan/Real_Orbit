@@ -37,11 +37,13 @@ int Renderer::Init()
 		std::string(perspective_3d_shader_fragmentSrc)
 	);
 
+	/*
 	// MeshType::TEXTURED_MESH
 	s_ShaderLibrary.AddShader(
 		std::string(textured_3d_shader_vertexSrc),
 		std::string(textured_3d_shader_fragmentSrc)
 	);
+	*/
 
 	// MeshType::NORMAL_MESH
 	s_ShaderLibrary.AddShader(
@@ -86,6 +88,7 @@ int Renderer::Init()
 	return result;
 }
 
+/*
 void Renderer::Draw(Mesh* mesh)
 {
 	if (mesh == nullptr)
@@ -95,7 +98,9 @@ void Renderer::Draw(Mesh* mesh)
 	// shader uniforms should be uploaded here later on
 	mesh->Draw();
 }
+*/
 
+/*
 void Renderer::Draw(Entity entity)
 {
 //	Framebuffer::UnbindAll();
@@ -115,7 +120,9 @@ void Renderer::Draw(Entity entity)
 		mesh.meshPtr->Draw();
 	}
 }
+*/
 
+/*
 void Renderer::DrawToShadowMap(Entity entity)
 {
 	s_DepthBuffer->Bind();
@@ -136,6 +143,7 @@ void Renderer::DrawToShadowMap(Entity entity)
 
 	s_DepthBuffer->Unbind();
 }
+*/
 
 void Renderer::SetAspectRatio(float aspect_ratio)
 {
