@@ -33,22 +33,14 @@ int Renderer::Init()
 
 	// MeshType::COLOURED_MESH
 	s_ShaderLibrary.AddShader(
-		std::string(perspective_3d_shader_vertexSrc),
-		std::string(perspective_3d_shader_fragmentSrc)
+		std::string(instanced_colour_shader_vertexSrc),
+		std::string(instanced_colour_shader_fragmentSrc)
 	);
-
-	/*
-	// MeshType::TEXTURED_MESH
-	s_ShaderLibrary.AddShader(
-		std::string(textured_3d_shader_vertexSrc),
-		std::string(textured_3d_shader_fragmentSrc)
-	);
-	*/
 
 	// MeshType::NORMAL_MESH
 	s_ShaderLibrary.AddShader(
-		std::string(normal_shader_vertexSrc),
-		std::string(normal_shader_fragmentSrc)
+		std::string(instanced_normal_shader_vertexSrc),
+		std::string(instanced_normal_shader_fragmentSrc)
 	);
 
 	// MeshType::SKYBOX
@@ -57,12 +49,17 @@ int Renderer::Init()
 		std::string(skybox_shader_fragmentSrc)
 	);
 
-
 	// Shadow mapper
 	s_ShaderLibrary.AddShader(
 		std::string(shadow_mapper_vertexSrc),
 		std::string(shadow_mapper_fragmentSrc)
 	);
+
+//	// MeshType::MARKER_MESH
+//	s_ShaderLibrary.AddShader(
+//		std::string(shadow_mapper_vertexSrc),
+//		std::string(shadow_mapper_fragmentSrc)
+//	);
 
 //	// Add subsequent shader here:
 //	// MeshType::OTHER_MESH_TYPE
@@ -82,7 +79,7 @@ int Renderer::Init()
 	SetCamera(camera_trf);
 	SetZoomLevel(g_InitialZoomLevel);
 	SetLightPosition(Vec3D(0.0f, 0.0f, -3.0f));
-	SetMinMaxRange(0.05f, 200.0f);
+	SetMinMaxRange(0.05f, 300.0f);
 	s_ShaderLibrary.SetTextureSlots();
 
 	return result;
@@ -181,5 +178,10 @@ void Renderer::Refresh()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	s_DepthBuffer->Unbind();
+}
+
+std::shared_ptr<Shader> Renderer::BindShader(MeshType meshType)
+{
+	return s_ShaderLibrary.BindShader(meshType);
 }
 

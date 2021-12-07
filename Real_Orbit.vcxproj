@@ -211,6 +211,7 @@
     <ClInclude Include="Source\core\rendering\SceneRenderer.h" />
     <ClInclude Include="Source\core\rendering\Shader.h" />
     <ClInclude Include="Source\core\rendering\ShaderLibrary.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\instanced_colour_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_normal_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\normal_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\shadow_shaders.h" />

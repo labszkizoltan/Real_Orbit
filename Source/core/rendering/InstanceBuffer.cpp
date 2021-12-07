@@ -111,10 +111,10 @@ void InstanceBuffer::SetData(const std::vector<TransformComponent>& data)
 		{
 			GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, data.size() * sizeof(TransformComponent), (void*)&data[0]));
 		}
-		// when data cannot fit into the current capacity, double the size
+		// when data cannot fit into the current capacity, 1.5x the size
 		else
 		{
-			m_Capacity = std::min(g_MaxInstanceCount, 2 * data.size());
+			m_Capacity = std::min(g_MaxInstanceCount, 3 * data.size()/2);
 			GLCall(glBufferData(GL_ARRAY_BUFFER, m_Capacity * sizeof(TransformComponent), nullptr, GL_DYNAMIC_DRAW)); // GL_STREAM_DRAW, GL_STATIC_DRAW, GL_DYNAMIC_DRAW.
 			GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, data.size() * sizeof(TransformComponent), (void*)&data[0]));
 			//GLCall(glDeleteBuffers(1, &m_RendererID));

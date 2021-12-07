@@ -8,7 +8,8 @@
 #include <core/rendering/drawables/Skybox.h>
 #include <core/rendering/drawables/NormalMesh.h>
 
-#include <core/rendering/shader_source_files/instanced_normal_shader.h>
+//#include <core/rendering/shader_source_files/instanced_normal_shader.h>
+//#include <core/rendering/shader_source_files/instanced_colour_shader.h>
 
 #include <core/scene/SceneSerializer.h>
 #include <core/scene/Components.h>
@@ -64,48 +65,75 @@ TestLayer7::TestLayer7()
 void TestLayer7::OnAttach()
 {
 	LOG_INFO("TestLayer7 attached");
-	
-	m_IShader = std::make_shared<Shader>(std::string(instanced_normal_shader_vertexSrc), std::string(instanced_normal_shader_fragmentSrc));
-	{
-		m_IShader->Bind();
-		m_IShader->UploadUniformFloat3("light_location", Vec3D(0, 0, 0).Glm());
-		m_IShader->UploadUniformFloat("zoom_level", g_InitialZoomLevel);
-		m_IShader->UploadUniformFloat3("camera_location", Vec3D(0, 0, 0).Glm());
-		m_IShader->UploadUniformMat3("camera_orientation", Identity(1.0f).Glm());
-		m_IShader->UploadUniformFloat("r_min", 0.05f);
-		m_IShader->UploadUniformFloat("r_max", 200.0f);
 
-		float w = Application::Get().GetWindow().GetWidth();
-		float h = Application::Get().GetWindow().GetHeight();
-		m_IShader->UploadUniformFloat("aspect_ratio", w/h);
 
-		int samplers[32];
-		for (uint32_t i = 0; i < 32; i++) { samplers[i] = i; }
-		m_IShader->UploadUniformIntArray("u_Textures", samplers, 32);
-		m_IShader->UploadUniformFloat("alpha", 1.0f);
+	TransformComponent cam_trf_tmp = { Vec3D(), Identity(1.0f), 1.0f };
+	m_Camera = cam_trf_tmp;
 
-	}
-
-	std::string vertex_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_4.txt");
+//	std::string vertex_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_4.txt");
+	std::string vertex_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_16_corrected.txt");
 	OGLBufferData buffer_data = ParseVertexFile(vertex_file);
 	std::string texturePath("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/Earth_Realistic_lowres.png");
-	m_IMesh = std::make_shared<NormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
+	m_NormalMesh = std::make_shared<NormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
 
-	for (int i = 0; i < 100000; i++)
+	vertex_file = "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/01_colouredMeshes/tetrahedron.txt";
+	buffer_data = ParseVertexFile(vertex_file);
+	m_ColorMesh = std::make_shared<ColouredMesh>(buffer_data.vertex_data, buffer_data.index_data);
+
+	for (int i = 0; i < 500; i++)
 	{
 		TransformComponent tmp;
 		tmp.location = Vec3D(
 			2 * (float)(std::rand() % 1000) / 1000.0f - 1,
 			2 * (float)(std::rand() % 1000) / 1000.0f - 1,
 			2 * (float)(std::rand() % 1000) / 1000.0f - 1);
-		tmp.location *= 50.0f;
+		tmp.location *= 20.0f;
 		tmp.orientation = Rotation(3.141592f * (float)(std::rand() % 1000) / 1000.0f, tmp.location);
 		tmp.scale = 0.05f+0.25f * (float)(std::rand() % 1000) / 1000.0f;
-		m_Transforms.push_back(tmp);
+		m_NormalTransforms.push_back(tmp);
+	}
+//	m_NormalTransforms[0].location = Vec3D(0.0f, 00.0f, 0.0f);
+//	m_NormalTransforms[0].orientation = Identity(1.0f);
+//	m_NormalTransforms[0].scale = 2.0f;
+
+	m_NormalTransforms[1].location = Vec3D(30.0f, 0.0f, 0.0f);
+	m_NormalTransforms[1].orientation = Identity(1.0f);
+	m_NormalTransforms[1].scale = 10.0f;
+
+	m_NormalTransforms[2].location = Vec3D(-30.0f, 0.0f, 0.0f);
+	m_NormalTransforms[2].orientation = Identity(1.0f);
+	m_NormalTransforms[2].scale = 10.0f;
+
+	m_NormalTransforms[3].location = Vec3D(0.0f, 30.0f, 0.0f);
+	m_NormalTransforms[3].orientation = Identity(1.0f);
+	m_NormalTransforms[3].scale = 10.0f;
+
+	m_NormalTransforms[4].location = Vec3D(0.0f, -30.0f, 0.0f);
+	m_NormalTransforms[4].orientation = Identity(1.0f);
+	m_NormalTransforms[4].scale = 10.0f;
+
+	m_NormalTransforms[5].location = Vec3D(0.0f, 0.0f, 30.0f);
+	m_NormalTransforms[5].orientation = Identity(1.0f);
+	m_NormalTransforms[5].scale = 10.0f;
+
+	m_NormalTransforms[6].location = Vec3D(0.0f, 0.0f, -30.0f);
+	m_NormalTransforms[6].orientation = Identity(1.0f);
+	m_NormalTransforms[6].scale = 10.0f;
+
+
+	for (int i = 0; i < 500; i++)
+	{
+		TransformComponent tmp;
+		tmp.location = Vec3D(
+			2 * (float)(std::rand() % 1000) / 1000.0f - 1,
+			2 * (float)(std::rand() % 1000) / 1000.0f - 1,
+			2 * (float)(std::rand() % 1000) / 1000.0f - 1);
+		tmp.location *= 20.0f;
+		tmp.orientation = Rotation(3.141592f * (float)(std::rand() % 1000) / 1000.0f, tmp.location);
+		tmp.scale = 0.05f + 0.25f * (float)(std::rand() % 1000) / 1000.0f;
+		m_ColorTransforms.push_back(tmp);
 	}
 	
-//	m_Scene = std::shared_ptr<Scene>(new Scene());
-
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -118,56 +146,43 @@ void TestLayer7::OnUpdate(Timestep ts)
 {
 	//	LOG_INFO("TestLayer7 updated");
 
-	// testing the dynamic resizing of the instance buffer:
-	/*
-	static std::vector<TransformComponent> dyn_trf;
-	static bool isGrowing = true;
-	static int counter = 0;
-	if (isGrowing)
-	{
-		dyn_trf.push_back(m_Transforms[counter]);
-		counter++;
-		if (counter == m_Transforms.size())
-			isGrowing = !isGrowing;
-	}
-	else
-	{
-		dyn_trf.pop_back();
-		counter--;
-		if(counter == 0)
-			isGrowing = !isGrowing;
-	}
-	m_IMesh->DrawInstances(dyn_trf);
-	*/
-
-
 	HandleUserInput(ts);
-	
-	Renderer::Refresh();
 
-//	auto& light_comp = m_Scene->GetLight();
-//	light_comp.light_transform.location = light_comp.light_transform.location + Vec3D(0.1f*sin(0.0005f * m_ElapsedTime), 0.0f, 0.0f);
-
-	m_IShader->Bind();
-//	m_IShader->UploadUniformFloat3("light_location", light_comp.light_transform.location.Glm());
-	m_IShader->UploadUniformFloat3("light_location", Vec3D().Glm());
-
-//	static int instanceCount = 0;
-//	static std::vector<TransformComponent> increasingTransforms;
-//	if (instanceCount % 2 == 0 && instanceCount/2< m_Transforms.size())
-//		increasingTransforms.push_back(m_Transforms[instanceCount / 2]);
-//	m_IMesh->DrawInstances(increasingTransforms);
-//	instanceCount++;
-	
 	// draw with this command once, to fill the instance buffer:
 	static bool first_time = true;
 	if (first_time)
 	{
-		m_IMesh->DrawInstances(m_Transforms);
+		m_NormalMesh->DrawInstances(m_NormalTransforms);
+		m_ColorMesh->DrawInstances(m_ColorTransforms);
 		first_time = false;
 	}
-	m_IMesh->Draw();
 
+	Renderer::Refresh();
+
+//	Renderer::SetLightPosition(Vec3D(13.0f * sin(0.0005 * m_ElapsedTime), 0.0f, 0.0f));
+//	Renderer::SetLightPosition(m_Camera.location);
+//	m_NormalTransforms[0].location = Vec3D(13.0f * sin(0.0005 * m_ElapsedTime), 0.0f, 0.0f);
+
+	// render into the shadow map
+	Renderer::s_DepthBuffer->Bind();
+	glCullFace(GL_FRONT);
+
+	auto shadow_shader = Renderer::s_ShaderLibrary.BindShader(MeshType::SHADOW_MAP);
+	m_NormalMesh->Draw();
+	m_ColorMesh->Draw();
+
+	Renderer::s_DepthBuffer->Unbind();
+	glCullFace(GL_BACK);
+
+
+	// draw the mesh instances
+	Renderer::BindShader(m_NormalMesh->GetMeshType());
+//	m_NormalMesh->Draw();
+	m_NormalMesh->DrawInstances(m_NormalTransforms);
+
+	Renderer::BindShader(m_ColorMesh->GetMeshType());
+//	m_ColorMesh->Draw();
+	m_ColorMesh->DrawInstances(m_ColorTransforms);
 
 	m_ElapsedTime += ts;
 }
@@ -194,8 +209,6 @@ void TestLayer7::OnEvent(Event& event)
 bool TestLayer7::OnWindowResize(Event& e)
 {
 	sf::Event& event = e.GetEvent();
-	m_IShader->Bind();
-	m_IShader->UploadUniformFloat("aspect_ratio", (float)event.size.width/(float)event.size.height);
 	LOG_CORE_INFO("Window Resize event captured in TestLayer7: width - {0}, height - {1}", event.size.width, event.size.height);
 	return false;
 }
@@ -248,8 +261,6 @@ bool TestLayer7::MouseWheelScrolled(Event& e)
 	zoom_level = zoom_level > 128.0f ? 128.0f : zoom_level;
 
 	Renderer::SetZoomLevel(zoom_level);
-	m_IShader->Bind();
-	m_IShader->UploadUniformFloat("zoom_level", zoom_level);
 
 	LOG_INFO("TestLayer7 received MouseWheelScrolled evet: delta: {0}, x: {1}, y: {2}", event.mouseWheelScroll.delta, event.mouseWheelScroll.x, event.mouseWheelScroll.y);
 	return false;
@@ -288,8 +299,8 @@ bool TestLayer7::OnMouseLeft(Event& e)
 void TestLayer7::HandleUserInput(Timestep ts)
 {
 //	TransformComponent& cam_trf = m_Scene->GetCamera().camera_transform;
-	static TransformComponent cam_trf = { Vec3D(), Identity(1.0f), 1.0f };
-//	TransformComponent cam_trf; cam_trf.location = Vec3D(); cam_trf.orientation = Identity(1.0f); cam_trf.scale = 1.0f;
+//	static TransformComponent cam_trf = { Vec3D(), Identity(1.0f), 1.0f };
+	TransformComponent& cam_trf = m_Camera;
 
 	float cam_velocity = 0.01f;
 	// moves
@@ -307,10 +318,9 @@ void TestLayer7::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Left)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Right)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
 
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Space)) { Renderer::SetLightPosition(m_Camera.location); }
+
+	
+
 	Renderer::SetCamera(cam_trf);
-
-	m_IShader->Bind();
-	m_IShader->UploadUniformFloat3("camera_location", cam_trf.location.Glm());
-	m_IShader->UploadUniformMat3("camera_orientation", cam_trf.orientation.Glm());
-
 }

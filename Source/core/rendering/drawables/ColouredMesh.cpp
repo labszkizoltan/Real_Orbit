@@ -18,11 +18,11 @@ ColouredMesh::ColouredMesh()
 ColouredMesh::ColouredMesh(const std::vector<Vec3D>& vertexAndColorData, const std::vector<uint32_t>& indexData)
 	: m_VertexArray(),
 	m_VertexBuffer((float*)&vertexAndColorData[0], vertexAndColorData.size() * sizeof(Vec3D)),
-	m_InstanceBuffer(0, 2),
+	m_InstanceBuffer(0, 3),
 	m_IndexBuffer((uint32_t*)&indexData[0], indexData.size())
 {
 	// s_VertexLayout already uses 0/1 slots in the layout, so the instance buffer elements should continue from there
-	m_InstanceBuffer.SetAttribStartIdx(s_VertexLayout.m_Elements.size());
+//	m_InstanceBuffer.SetAttribStartIdx(s_VertexLayout.m_Elements.size());
 
 	m_VertexArray.Bind();
 	m_VertexBuffer.SetLayout(s_VertexLayout);
@@ -34,11 +34,11 @@ ColouredMesh::ColouredMesh(const std::vector<Vec3D>& vertexAndColorData, const s
 ColouredMesh::ColouredMesh(const std::vector<float>& vertexAndColorData, const std::vector<uint32_t>& indexData)
 	: m_VertexArray(),
 	m_VertexBuffer((float*)&vertexAndColorData[0], vertexAndColorData.size() * sizeof(float)),
-	m_InstanceBuffer(0, 2),
+	m_InstanceBuffer(0, 3),
 	m_IndexBuffer((uint32_t*)&indexData[0], indexData.size())
 {
 	// s_VertexLayout already uses 0/1 slots in the layout, so the instance buffer elements should continue from there
-	m_InstanceBuffer.SetAttribStartIdx(s_VertexLayout.m_Elements.size());
+//	m_InstanceBuffer.SetAttribStartIdx(s_VertexLayout.m_Elements.size());
 
 	m_VertexArray.Bind();
 	m_VertexBuffer.SetLayout(s_VertexLayout);

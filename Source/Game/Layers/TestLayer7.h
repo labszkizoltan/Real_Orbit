@@ -51,9 +51,11 @@ private:
 //	SceneRenderer m_SceneRenderer;
 //	SceneUpdater m_SceneUpdater;
 
-	std::shared_ptr<Shader> m_IShader = nullptr;
-	std::shared_ptr<Mesh> m_IMesh = nullptr;
-	std::vector<TransformComponent> m_Transforms;
+	TransformComponent m_Camera;
+	std::shared_ptr<Mesh> m_NormalMesh = nullptr;
+	std::shared_ptr<Mesh> m_ColorMesh = nullptr;
+	std::vector<TransformComponent> m_NormalTransforms;
+	std::vector<TransformComponent> m_ColorTransforms;
 
 };
 

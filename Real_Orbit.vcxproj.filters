@@ -147,6 +147,9 @@
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_normal_shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\core\rendering\shader_source_files\instanced_colour_shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Game\GameApp.cpp">

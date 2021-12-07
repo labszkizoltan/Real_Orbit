@@ -17,10 +17,6 @@ const char* instanced_normal_shader_vertexSrc =
 "layout(location = 6) in vec3 aInstanceOrientation_3; \n"
 "layout(location = 7) in float aInstanceScale; \n"
 
-"uniform vec3 body_location; \n"
-"uniform mat3 body_orientation; \n"
-"uniform float body_scale; \n"
-
 "uniform vec3 light_location; \n"
 
 "uniform float zoom_level; \n"
@@ -40,9 +36,7 @@ const char* instanced_normal_shader_vertexSrc =
 "void main()\n"
 "{\n"
 // point coordinate in the absolute coordinate system
-//"	vec3 position_abs = body_location + body_scale * (aPos[0] * body_orientation[0] + aPos[1] * body_orientation[1] + aPos[2] * body_orientation[2]); \n"
 "	vec3 position_abs = aInstancePos + aInstanceScale * (aPos[0] * aInstanceOrientation_1 + aPos[1] * aInstanceOrientation_2 + aPos[2] * aInstanceOrientation_3); \n"
-//"	vec3 position_abs = aPos; \n"
 
 // point coordinate in the observers coordinate system
 "	vec3 position_tmp = position_abs - camera_location; \n"
@@ -69,7 +63,7 @@ const char* instanced_normal_shader_vertexSrc =
 "); \n"
 
 // light space coordinate calculation
-"	vec3 light_position_tmp = aInstancePos - light_location + body_scale * (aPos[0] * aInstanceOrientation_1 + aPos[1] * aInstanceOrientation_2 + aPos[2] * aInstanceOrientation_3); \n"
+"	vec3 light_position_tmp = aInstancePos - light_location + aInstanceScale * (aPos[0] * aInstanceOrientation_1 + aPos[1] * aInstanceOrientation_2 + aPos[2] * aInstanceOrientation_3); \n"
 
 "	float light_r = length(light_position_tmp); \n"
 
@@ -106,11 +100,12 @@ const char* instanced_normal_shader_fragmentSrc =
 "	vec3 depthSample = texture(u_Textures[1], (lightCoordinates.xy+1)/2).rgb; \n"
 "	float closestDepth = depthSample.r; \n"
 "	float currentDepth = (lightCoordinates.z+1)/2; \n"
-"	float bias = 0.0005; \n"
+"	float bias = 0.001; \n"
 "	float shadow = (currentDepth - bias) > closestDepth ? 1.0 : 0.0; \n"
 "	FragColor = light_normal_dot < 0.0 ? vec4(color/2, 1.0) : vec4(color*min((1-shadow/2),(1+light_normal_dot)/2), 1.0); \n"
 //"	FragColor = vec4(1,1,1,1); \n"
 //"	FragColor = vec4(0.0, gl_FragCoord.z, 0.0, 1.0); \n"
+//"	FragColor = vec4(vec3((1+light_normal_dot)/2), 1.0); \n"
 "}\0";
 
 
