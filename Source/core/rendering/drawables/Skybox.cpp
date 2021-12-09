@@ -60,7 +60,11 @@ void Skybox::Draw()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void Skybox::DrawInstances(std::vector<TransformComponent> transforms)
+void Skybox::SetInstances(const std::vector<TransformComponent>& transforms)
+{
+}
+
+void Skybox::DrawInstances(const std::vector<TransformComponent>& transforms)
 {
 	/*
 	glDisable(GL_DEPTH_TEST);

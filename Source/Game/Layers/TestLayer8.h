@@ -1,8 +1,8 @@
 
-// in this layer I'd like to test the scene renderer, and perhaps the scene serializer
+// I test the rebuilt functionalities after switching to instance rendering
 
-#ifndef TEST_LAYER_7_H
-#define TEST_LAYER_7_H
+#ifndef TEST_LAYER_8_H
+#define TEST_LAYER_8_H
 
 #include <core/Core.h>
 #include <core/Layer.h>
@@ -14,14 +14,14 @@
 #include <core/rendering/Depthbuffer.h>
 #include <core/rendering/drawables/Mesh.h>
 
-// #include <core/rendering/SceneRenderer.h>
+#include <core/rendering/SceneRenderer.h>
 // #include <core/scene/SceneUpdater.h>
 
-class TestLayer7 : public Layer
+class TestLayer8 : public Layer
 {
 public:
-	TestLayer7();
-	virtual ~TestLayer7() = default;
+	TestLayer8();
+	virtual ~TestLayer8() = default;
 
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
@@ -47,19 +47,12 @@ private:
 private:
 	float m_ElapsedTime = 0.0f;
 
-//	std::shared_ptr<Scene> m_Scene = nullptr;
-//	SceneRenderer m_SceneRenderer;
+	std::shared_ptr<Scene> m_Scene = nullptr;
+	SceneRenderer m_SceneRenderer;
 //	SceneUpdater m_SceneUpdater;
-
-	TransformComponent m_Camera;
-	std::shared_ptr<Mesh> m_Skybox = nullptr;
-	std::shared_ptr<Mesh> m_NormalMesh = nullptr;
-	std::shared_ptr<Mesh> m_ColorMesh = nullptr;
-	std::vector<TransformComponent> m_NormalTransforms;
-	std::vector<TransformComponent> m_ColorTransforms;
 
 };
 
 
 
-#endif // TEST_LAYER_7_H
+#endif // TEST_LAYER_8_H

@@ -60,7 +60,12 @@ void ColouredMesh::Draw()
 	m_VertexArray.UnBind();
 }
 
-void ColouredMesh::DrawInstances(std::vector<TransformComponent> transforms)
+void ColouredMesh::SetInstances(const std::vector<TransformComponent>& transforms)
+{
+	m_InstanceBuffer.SetData(transforms);
+}
+
+void ColouredMesh::DrawInstances(const std::vector<TransformComponent>& transforms)
 {
 	m_VertexArray.Bind();
 	m_InstanceBuffer.SetData(transforms);

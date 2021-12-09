@@ -178,9 +178,10 @@
     <ClCompile Include="Source\core\rendering\VertexArray.cpp" />
     <ClCompile Include="Source\core\scene\Entity.cpp" />
     <ClCompile Include="Source\core\scene\Scene.cpp" />
+    <ClCompile Include="Source\core\scene\SceneSerializer.cpp" />
     <ClCompile Include="Source\core\Window.cpp" />
     <ClCompile Include="Source\Game\GameApp.cpp" />
-    <ClCompile Include="Source\Game\Layers\TestLayer7.cpp" />
+    <ClCompile Include="Source\Game\Layers\TestLayer8.cpp" />
     <ClCompile Include="Source\utils\Matrix_3D.cpp" />
     <ClCompile Include="Source\utils\OctTree.cpp" />
     <ClCompile Include="Source\utils\shape_creator.cpp" />
@@ -224,10 +225,11 @@
     <ClInclude Include="Source\core\scene\Components.h" />
     <ClInclude Include="Source\core\scene\Entity.h" />
     <ClInclude Include="Source\core\scene\Scene.h" />
+    <ClInclude Include="Source\core\scene\SceneSerializer.h" />
     <ClInclude Include="Source\core\Timestep.h" />
     <ClInclude Include="Source\core\Window.h" />
     <ClInclude Include="Source\Game\Layers\scene_descriptions.h" />
-    <ClInclude Include="Source\Game\Layers\TestLayer7.h" />
+    <ClInclude Include="Source\Game\Layers\TestLayer8.h" />
     <ClInclude Include="Source\utils\Matrix_3D.h" />
     <ClInclude Include="Source\utils\OctTree.h" />
     <ClInclude Include="Source\utils\shape_creator.h" />

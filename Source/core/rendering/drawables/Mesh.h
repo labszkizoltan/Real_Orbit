@@ -22,7 +22,8 @@ public:
 	virtual ~Mesh() {};
 
 	virtual void Draw() = 0;
-	virtual void DrawInstances(std::vector<TransformComponent> transforms) = 0;
+	virtual void SetInstances(const std::vector<TransformComponent>& transforms) = 0;
+	virtual void DrawInstances(const std::vector<TransformComponent>& transforms) = 0;
 	virtual MeshType GetMeshType() = 0;
 	virtual BufferLayout GetVertexLayout() = 0;
 	virtual BufferLayout GetInstanceLayout() = 0;

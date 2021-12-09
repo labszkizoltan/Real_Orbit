@@ -15,9 +15,10 @@ public:
 	Skybox(const std::vector<float>& vertexData, const std::vector<uint32_t>& indexData, const std::vector<std::string>& textureFilenames);
 	~Skybox();
 
+
 	virtual void Draw() override;
-//	there will be no need to render more than one skybox at a time, this will not be implemented
-	virtual void DrawInstances(std::vector<TransformComponent> transforms) override;
+	virtual void SetInstances(const std::vector<TransformComponent>& transforms) override;
+	virtual void DrawInstances(const std::vector<TransformComponent>& transforms) override;
 	virtual MeshType GetMeshType() override;
 	virtual BufferLayout GetVertexLayout() override;
 	virtual BufferLayout GetInstanceLayout() override;

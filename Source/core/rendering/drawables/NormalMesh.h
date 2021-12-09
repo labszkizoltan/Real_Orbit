@@ -18,7 +18,8 @@ public:
 	~NormalMesh();
 
 	virtual void Draw() override;
-	virtual void DrawInstances(std::vector<TransformComponent> transforms) override;
+	virtual void SetInstances(const std::vector<TransformComponent>& transforms) override;
+	virtual void DrawInstances(const std::vector<TransformComponent>& transforms) override;
 	virtual MeshType GetMeshType() override;
 	virtual BufferLayout GetVertexLayout() override;
 	virtual BufferLayout GetInstanceLayout() override;

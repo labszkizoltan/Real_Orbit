@@ -70,6 +70,21 @@ void TestLayer7::OnAttach()
 	TransformComponent cam_trf_tmp = { Vec3D(), Identity(1.0f), 1.0f };
 	m_Camera = cam_trf_tmp;
 
+	// skybox
+	auto skybox_vertices = Skybox::CreateSkyboxVertexData(10);
+	auto skybox_indices = Skybox::CreateSkyboxIndexData(10);
+	std::vector<std::string> textureFilenames = {
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_front.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_back.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_left.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_right.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_up.png",
+		"D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_down.png"
+	};
+
+	m_Skybox = std::make_shared<Skybox>(skybox_vertices, skybox_indices, textureFilenames);
+
+
 //	std::string vertex_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_4.txt");
 	std::string vertex_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_16_corrected.txt");
 	OGLBufferData buffer_data = ParseVertexFile(vertex_file);
@@ -174,7 +189,9 @@ void TestLayer7::OnUpdate(Timestep ts)
 	Renderer::s_DepthBuffer->Unbind();
 	glCullFace(GL_BACK);
 
-
+	Renderer::BindShader(m_Skybox->GetMeshType());
+	m_Skybox->Draw();
+	
 	// draw the mesh instances
 	Renderer::BindShader(m_NormalMesh->GetMeshType());
 //	m_NormalMesh->Draw();

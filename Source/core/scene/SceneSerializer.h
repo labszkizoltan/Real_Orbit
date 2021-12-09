@@ -24,7 +24,7 @@ public:
 	void DeSerialize_file(const std::string& input_file);
 
 private:
-	void FillMeshLibrary(const YAML::Node& data);
+	void InitMeshLibrary(const YAML::Node& data);
 	OGLBufferData ParseVertexFile(const std::string& filename);
 
 private:

@@ -141,13 +141,16 @@
     <ClInclude Include="Source\core\rendering\InstanceBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Game\Layers\TestLayer7.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_normal_shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_colour_shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Layers\TestLayer8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\scene\SceneSerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -245,7 +248,10 @@
     <ClCompile Include="Source\core\rendering\InstanceBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Game\Layers\TestLayer7.cpp">
+    <ClCompile Include="Source\Game\Layers\TestLayer8.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\scene\SceneSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

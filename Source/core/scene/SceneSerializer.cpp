@@ -12,10 +12,7 @@
 #include <core/scene/Entity.h>
 #include <core/scene/Components.h>
 
-#include <core/rendering/drawables/InstancedMesh.h>
-#include <core/rendering/drawables/InstancedNormalMesh.h>
 #include <core/rendering/drawables/ColouredMesh.h>
-#include <core/rendering/drawables/TexturedMesh.h>
 #include <core/rendering/drawables/NormalMesh.h>
 #include <core/rendering/drawables/Skybox.h>
 
@@ -69,14 +66,14 @@ void SceneSerializer::Serialize(const std::string& output_file)
 void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 {
 	YAML::Node data = YAML::Load(scene_description);
-	FillMeshLibrary(data);
+	InitMeshLibrary(data);
 
 	int camera_counter = 0, light_counter = 0;
 	auto entities = data["Entities"];
 	for (auto entity : entities)
 	{
-		std::string name = entity["Entity"].as<std::string>();
-		Entity deserializedEntity = m_Scene->CreateEntity(name);
+//		std::string name = entity["Entity"].as<std::string>();
+//		Entity deserializedEntity = m_Scene->CreateEntity(name);
 
 		//----- CameraComponent -----//
 		auto cam_com = entity["CameraComponent"];
@@ -85,10 +82,10 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			if (camera_counter > 0) { LOG_CORE_WARN("SceneSerializer::DeSerialize() encountered more than one CameraComponent!"); continue; }
 
 			camera_counter++;
-			CameraComponent& result = m_Scene->GetCamera();
-			result.camera_transform.location = cam_com["location"].as<Vec3D>();
-			result.camera_transform.orientation = Mat_3D(cam_com["orientation"]["f1"].as<Vec3D>(), cam_com["orientation"]["f2"].as<Vec3D>(), cam_com["orientation"]["f3"].as<Vec3D>());
-			result.camera_transform.scale = cam_com["scale"].as<float>();
+			TransformComponent& result = m_Scene->GetCamera();
+			result.location = cam_com["location"].as<Vec3D>();
+			result.orientation = Mat_3D(cam_com["orientation"]["f1"].as<Vec3D>(), cam_com["orientation"]["f2"].as<Vec3D>(), cam_com["orientation"]["f3"].as<Vec3D>());
+			result.scale = cam_com["scale"].as<float>();
 		}
 
 		//----- LightComponent -----//
@@ -98,23 +95,22 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			if (light_counter > 0) { LOG_CORE_WARN("SceneSerializer::DeSerialize() encountered more than one LightComponent!"); continue; }
 
 			light_counter++;
-			LightComponent& result = m_Scene->GetLight();
-			result.light_transform.location = light_com["location"].as<Vec3D>();
-			result.light_transform.orientation = Mat_3D(light_com["orientation"]["f1"].as<Vec3D>(), light_com["orientation"]["f2"].as<Vec3D>(), light_com["orientation"]["f3"].as<Vec3D>());
-			result.light_transform.scale = light_com["scale"].as<float>();
-			// deserializedEntity.AddComponent<LightComponent>(result);
+			TransformComponent& result = m_Scene->GetLight();
+			result.location = light_com["location"].as<Vec3D>();
+			result.orientation = Mat_3D(light_com["orientation"]["f1"].as<Vec3D>(), light_com["orientation"]["f2"].as<Vec3D>(), light_com["orientation"]["f3"].as<Vec3D>());
+			result.scale = light_com["scale"].as<float>();
 		}
 
 
 		//----- TransformComponent -----//
+		TransformComponent transformResult;
 		auto trf_com = entity["TransformComponent"];
 		if (trf_com)
 		{
-			TransformComponent result;
-			result.location = trf_com["location"].as<Vec3D>();
-			result.orientation = Mat_3D(trf_com["orientation"]["f1"].as<Vec3D>(), trf_com["orientation"]["f2"].as<Vec3D>(), trf_com["orientation"]["f3"].as<Vec3D>());
-			result.scale = trf_com["scale"].as<float>();
-			deserializedEntity.AddComponent<TransformComponent>(result);
+			transformResult.location = trf_com["location"].as<Vec3D>();
+			transformResult.orientation = Mat_3D(trf_com["orientation"]["f1"].as<Vec3D>(), trf_com["orientation"]["f2"].as<Vec3D>(), trf_com["orientation"]["f3"].as<Vec3D>());
+			transformResult.scale = trf_com["scale"].as<float>();
+//			deserializedEntity.AddComponent<TransformComponent>(result);
 		}
 
 		//----- MeshComponent -----//
@@ -122,26 +118,14 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 		if (mesh_com)
 		{
 			std::string meshName = entity["MeshComponent"].as<std::string>();
-			std::shared_ptr<Mesh> meshPtr = m_Scene->m_MeshLibrary_old.m_Meshes[meshName];
-			MeshType type = meshPtr->GetMeshType();
 
-			if (type == MeshType::COLOURED_MESH)
+			// check if key is present in the map
+			if (m_Scene->m_MeshLibrary.m_NameIndexLookup.count(meshName) != 0)
 			{
-				TypedMeshComponent<MeshType::COLOURED_MESH> result; result.meshPtr = meshPtr;
-				deserializedEntity.AddComponent<TypedMeshComponent<MeshType::COLOURED_MESH>>(result);
+				int meshIdx = m_Scene->m_MeshLibrary.m_NameIndexLookup[meshName];
+				std::shared_ptr<Mesh> meshPtr = m_Scene->m_MeshLibrary.m_Meshes[meshIdx];
+				m_Scene->m_MeshLibrary.m_MeshTransforms[meshIdx].push_back(transformResult);
 			}
-			else if (type == MeshType::NORMAL_MESH)
-			{
-				TypedMeshComponent<MeshType::NORMAL_MESH> result; result.meshPtr = meshPtr;
-				deserializedEntity.AddComponent<TypedMeshComponent<MeshType::NORMAL_MESH>>(result);
-			}
-			else if (type == MeshType::SKYBOX)
-			{
-				TypedMeshComponent<MeshType::SKYBOX> result; result.meshPtr = meshPtr;
-				deserializedEntity.AddComponent<TypedMeshComponent<MeshType::SKYBOX>>(result);
-			}
-			else
-				LOG_CORE_INFO("MeshType not recognized, cannot add component");
 		}
 
 		//----- DynamicPropertiesComponent -----//
@@ -152,7 +136,7 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			result.inertial_mass = dynprop_com["inertial_mass"].as<float>();
 			result.velocity = dynprop_com["velocity"].as<Vec3D>();
 			result.angular_velocity = dynprop_com["angular_velocity"].as<Vec3D>();
-			deserializedEntity.AddComponent<DynamicPropertiesComponent>(result);
+//			deserializedEntity.AddComponent<DynamicPropertiesComponent>(result);
 		}
 
 		//----- GravitationalMassComponent -----//
@@ -161,7 +145,7 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 		{
 			GravitationalMassComponent result;
 			result.gravitational_mass = gravmass_com.as<float>();
-			deserializedEntity.AddComponent<GravitationalMassComponent>(result);
+//			deserializedEntity.AddComponent<GravitationalMassComponent>(result);
 		}
 	}
 }
@@ -195,68 +179,55 @@ static bool contains_key(std::unordered_map<std::string, int> map, std::string k
 	return "Present";
 }
 
-void SceneSerializer::FillMeshLibrary(const YAML::Node& data)
+void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 {
-	auto meshes = data["Meshes"];
+	YAML::Node meshes = data["Meshes"];
 	std::cout << "number of meshes defined in config: " << meshes.size() << "\n";
 
-	std::unordered_map<std::string, int> mesh_id_lookup;
-
+	int mesh_idx = 0;
 	for (auto mesh : meshes)
 	{
 		std::string mesh_name = mesh["Mesh"].as<std::string>();
 		MeshType type = mesh["MeshType"].as<MeshType>();
+		std::cout << "mesh name and type: " << mesh_name << ", " << MeshType_to_String(type) << "\n";
 
-		if (contains_key(mesh_id_lookup, mesh_name))
+		if (type == MeshType::COLOURED_MESH)
 		{
+			std::string vertex_file = mesh["vertex_file"].as<std::string>();
+			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
+			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<ColouredMesh>(buffer_data.vertex_data, buffer_data.index_data);
 
-			if (type == MeshType::COLOURED_MESH)
-			{
-			}
-			else if (type == MeshType::NORMAL_MESH)
-			{
-				std::string vertex_file = mesh["vertex_file"].as<std::string>();
-				OGLBufferData buffer_data = ParseVertexFile(vertex_file);
-				std::string texturePath = mesh["texture_file"].as<std::string>();
-
-
-				//	std::string vertex_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_16_corrected.txt");
-				OGLBufferData buffer_data = ParseVertexFile(vertex_file);
-				//	std::string texturePath("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/Earth_Realistic.png");
-				std::string texturePath("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/Earth_Realistic_lowres.png");
-				m_IMesh = std::make_shared<InstancedNormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
-
-
-
-				//			std::shared_ptr<Mesh> mesh_ptr = std::shared_ptr<Mesh>(new NormalMesh(buffer_data.vertex_data, buffer_data.index_data, texturePath));
-				std::shared_ptr<Mesh> mesh_ptr = std::make_shared<NormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
-				m_Scene->m_MeshLibrary_old.m_Meshes[mesh_name] = mesh_ptr;
-			}
-			else if (type == MeshType::SKYBOX)
-			{
-				std::vector<float> vertex_data = Skybox::CreateSkyboxVertexData(g_SkyboxMeshResolution);
-				std::vector<uint32_t> index_data = Skybox::CreateSkyboxIndexData(g_SkyboxMeshResolution);
-				std::vector<std::string> textureFilenames = {
-					mesh["texture_file_f"].as<std::string>(),
-					mesh["texture_file_b"].as<std::string>(),
-					mesh["texture_file_l"].as<std::string>(),
-					mesh["texture_file_r"].as<std::string>(),
-					mesh["texture_file_u"].as<std::string>(),
-					mesh["texture_file_d"].as<std::string>()
-				};
-
-				//			std::shared_ptr<Mesh> mesh_ptr = std::shared_ptr<Mesh>(new Skybox(vertex_data, index_data, textureFilenames));
-				std::shared_ptr<Mesh> mesh_ptr = std::make_shared<Skybox>(vertex_data, index_data, textureFilenames);
-				m_Scene->m_MeshLibrary_old.m_Meshes[mesh_name] = mesh_ptr;
-			}
-			else
-			{
-				LOG_CORE_WARN("Unidentified MeshType found when creating MeshLibrary!");
-			}
+			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
+			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
 		}
+		else if (type == MeshType::NORMAL_MESH)
+		{
+			std::string vertex_file = mesh["vertex_file"].as<std::string>();
+			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
+			std::string texturePath = mesh["texture_file"].as<std::string>();
+			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<NormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
 
+			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
+			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+		}
+		else if (type == MeshType::SKYBOX)
+		{
+			std::vector<float> vertex_data = Skybox::CreateSkyboxVertexData(g_SkyboxMeshResolution);
+			std::vector<uint32_t> index_data = Skybox::CreateSkyboxIndexData(g_SkyboxMeshResolution);
+			std::vector<std::string> textureFilenames = {
+				mesh["texture_file_f"].as<std::string>(),
+				mesh["texture_file_b"].as<std::string>(),
+				mesh["texture_file_l"].as<std::string>(),
+				mesh["texture_file_r"].as<std::string>(),
+				mesh["texture_file_u"].as<std::string>(),
+				mesh["texture_file_d"].as<std::string>()
+			};
+
+			m_Scene->m_Skybox = std::make_shared<Skybox>(vertex_data, index_data, textureFilenames);
+		}
 	}
-
 }
 
 /*

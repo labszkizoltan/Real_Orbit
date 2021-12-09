@@ -65,7 +65,12 @@ void NormalMesh::Draw()
 	m_VertexArray.UnBind();
 }
 
-void NormalMesh::DrawInstances(std::vector<TransformComponent> transforms)
+void NormalMesh::SetInstances(const std::vector<TransformComponent>& transforms)
+{
+	m_InstanceBuffer.SetData(transforms);
+}
+
+void NormalMesh::DrawInstances(const std::vector<TransformComponent>& transforms)
 {
 	m_VertexArray.Bind();
 	m_Texture->Bind();
