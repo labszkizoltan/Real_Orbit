@@ -40,6 +40,11 @@ TransformComponent& Scene::GetLight()
 	return m_Light;
 }
 
+MeshLibrary& Scene::GetMeshLibrary()
+{
+	return m_MeshLibrary;
+}
+
 
 
 

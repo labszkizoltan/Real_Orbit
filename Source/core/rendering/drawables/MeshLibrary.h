@@ -20,29 +20,4 @@ public:
 };
 
 
-
-
-
-class MeshLibrary_old
-{
-public:
-	MeshLibrary_old() = default;
-	~MeshLibrary_old() = default;
-
-public:
-	std::unordered_map<std::string, std::shared_ptr<Mesh>> m_Meshes;
-
-};
-
-
-
-
-
-
-
-
-
-
-
-
 #endif // MESH_LIBRARY_H

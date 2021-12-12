@@ -28,6 +28,9 @@ public:
 	virtual void OnUpdate(Timestep ts) override;
 	virtual void OnEvent(Event& event) override;
 
+	void EmitMesh(int meshIdx, TransformComponent transform);
+	void RemoveMesh(int meshIdx);
+
 private:
 	bool OnWindowResize(Event& e);
 	bool OnLoosingFocus(Event& e);
@@ -50,6 +53,7 @@ private:
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
 //	SceneUpdater m_SceneUpdater;
+	bool m_InFocus = true;
 
 };
 

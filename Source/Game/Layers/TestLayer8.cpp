@@ -63,6 +63,8 @@ void TestLayer8::OnAttach()
 {
 	LOG_INFO("TestLayer8 attached");
 
+//	Application::Get().GetWindow().GetNativeWindow().setKeyRepeatEnabled(true);
+
 	m_Scene = std::make_shared<Scene>();
 
 	SceneSerializer serializer(m_Scene);
@@ -101,6 +103,17 @@ void TestLayer8::OnEvent(Event& event)
 	event.Dispatch<sf::Event::EventType::MouseButtonReleased>	(BIND_EVENT_FN(OnMouseButtonReleased));
 }
 
+void TestLayer8::EmitMesh(int meshIdx, TransformComponent transform)
+{
+	m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].push_back(transform);
+}
+
+void TestLayer8::RemoveMesh(int meshIdx)
+{
+	if(m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].size()>0)
+		m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].pop_back();
+}
+
 
 /***********************************
 ***** Private member functions *****
@@ -116,12 +129,14 @@ bool TestLayer8::OnWindowResize(Event& e)
 bool TestLayer8::OnLoosingFocus(Event& e)
 {
 	LOG_INFO("TestLayer8 received LostFocus event");
+	m_InFocus = false;
 	return false;
 }
 
 bool TestLayer8::OnGainingFocus(Event& e)
 {
 	LOG_INFO("TestLayer8 received GainFocus event");
+	m_InFocus = true;
 	return false;
 }
 
@@ -169,6 +184,21 @@ bool TestLayer8::MouseWheelScrolled(Event& e)
 bool TestLayer8::OnMouseButtonPressed(Event& e)
 {
 	LOG_INFO("TestLayer8 received OnMouseButtonPressed event");
+	/*
+	sf::Event& event = e.GetEvent();
+	static int idx = m_Scene->GetMeshLibrary().m_NameIndexLookup["OrangeSphere"];
+	if (event.mouseButton.button == sf::Mouse::Left)
+	{
+		TransformComponent trf = m_Scene->GetCamera();
+		trf.scale = 0.1f;
+		EmitMesh(idx, trf);
+	}
+	else if (event.mouseButton.button == sf::Mouse::Right)
+	{
+		RemoveMesh(idx);
+	}
+	*/
+
 	return false;
 }
 
@@ -221,10 +251,33 @@ void TestLayer8::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { cam_velocity *= 1.1f; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
 
+	static int idx = m_Scene->GetMeshLibrary().m_NameIndexLookup["OrangeSphere"];
+	static int skip = 0;
+	if(Input::IsMouseButtonPressed(sf::Mouse::Left))
+	{
+		skip++;
+		if (skip == 30) { EmitMesh(idx, cam_trf); skip = 0; }
+	}
+	else if (Input::IsMouseButtonPressed(sf::Mouse::Right)) { RemoveMesh(idx); skip = 0; }
+
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Space))
 	{
 		TransformComponent& light_trf = m_Scene->GetLight();
 		light_trf.location = cam_trf.location;
+	}
+
+	// mouse related
+	if (m_InFocus)
+	{
+		float r_min_square = 50.0f * 50.0f;
+		sf::Vector2i mousePos = Input::GetMousePosition();
+		mousePos.x -= Application::Get().GetWindow().GetWidth() / 2;
+		mousePos.y -= Application::Get().GetWindow().GetHeight() / 2;
+		float radiusFromCenter_square = (mousePos.x * mousePos.x + mousePos.y * mousePos.y);
+		Vec3D rotationAxis = mousePos.y * cam_trf.orientation.f1 + mousePos.x * cam_trf.orientation.f2;
+		Mat_3D rotationMatrix = Rotation(0.00000001f * ts * std::max(0.0f, radiusFromCenter_square - r_min_square), rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
+
+		cam_trf.orientation = rotationMatrix * cam_trf.orientation;
 	}
 
 //	Renderer::SetCamera(cam_trf);

@@ -42,6 +42,20 @@ Next things to do (as of 2021.11.14.):
 - mouse picking
 
 
+Missing featuers:
+- moving objects,
+- collisions,
+- shooting,
+- Markers,
+- AI behaviours,
+- Sounds,
+- bloom effect,
+- entity bound camera,
+
+
+
+
+
 
 
 

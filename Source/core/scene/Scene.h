@@ -22,6 +22,7 @@ public:
 
 	TransformComponent& GetCamera();
 	TransformComponent& GetLight();
+	MeshLibrary& GetMeshLibrary();
 
 private:
 	entt::registry m_Registry; // do I even need this?
