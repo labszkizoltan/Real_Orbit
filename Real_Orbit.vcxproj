@@ -142,6 +142,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)vendor\yaml-cpp-yaml-cpp-0.7.0\include;$(SolutionDir)vendor\stb_image;$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -167,8 +168,8 @@
     <ClCompile Include="Source\core\rendering\drawables\Mesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\NormalMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\Skybox.cpp" />
-    <ClCompile Include="Source\core\rendering\drawables\TexturedMesh.cpp" />
     <ClCompile Include="Source\core\rendering\Framebuffer.cpp" />
+    <ClCompile Include="Source\core\rendering\InstanceBuffer.cpp" />
     <ClCompile Include="Source\core\rendering\Renderer.cpp" />
     <ClCompile Include="Source\core\rendering\SceneRenderer.cpp" />
     <ClCompile Include="Source\core\rendering\Shader.cpp" />
@@ -178,11 +179,9 @@
     <ClCompile Include="Source\core\scene\Entity.cpp" />
     <ClCompile Include="Source\core\scene\Scene.cpp" />
     <ClCompile Include="Source\core\scene\SceneSerializer.cpp" />
-    <ClCompile Include="Source\core\scene\SceneUpdater.cpp" />
     <ClCompile Include="Source\core\Window.cpp" />
     <ClCompile Include="Source\Game\GameApp.cpp" />
-    <ClCompile Include="Source\Game\Layers\TestLayer5.cpp" />
-    <ClCompile Include="Source\Game\Layers\TestLayer6.cpp" />
+    <ClCompile Include="Source\Game\Layers\TestLayer8.cpp" />
     <ClCompile Include="Source\utils\Matrix_3D.cpp" />
     <ClCompile Include="Source\utils\OctTree.cpp" />
     <ClCompile Include="Source\utils\shape_creator.cpp" />
@@ -207,12 +206,14 @@
     <ClInclude Include="Source\core\rendering\drawables\MeshLibrary.h" />
     <ClInclude Include="Source\core\rendering\drawables\NormalMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Skybox.h" />
-    <ClInclude Include="Source\core\rendering\drawables\TexturedMesh.h" />
     <ClInclude Include="Source\core\rendering\Framebuffer.h" />
+    <ClInclude Include="Source\core\rendering\InstanceBuffer.h" />
     <ClInclude Include="Source\core\rendering\Renderer.h" />
     <ClInclude Include="Source\core\rendering\SceneRenderer.h" />
     <ClInclude Include="Source\core\rendering\Shader.h" />
     <ClInclude Include="Source\core\rendering\ShaderLibrary.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\instanced_colour_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\instanced_normal_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\normal_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\shadow_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\skybox_shaders.h" />
@@ -225,12 +226,10 @@
     <ClInclude Include="Source\core\scene\Entity.h" />
     <ClInclude Include="Source\core\scene\Scene.h" />
     <ClInclude Include="Source\core\scene\SceneSerializer.h" />
-    <ClInclude Include="Source\core\scene\SceneUpdater.h" />
     <ClInclude Include="Source\core\Timestep.h" />
     <ClInclude Include="Source\core\Window.h" />
     <ClInclude Include="Source\Game\Layers\scene_descriptions.h" />
-    <ClInclude Include="Source\Game\Layers\TestLayer5.h" />
-    <ClInclude Include="Source\Game\Layers\TestLayer6.h" />
+    <ClInclude Include="Source\Game\Layers\TestLayer8.h" />
     <ClInclude Include="Source\utils\Matrix_3D.h" />
     <ClInclude Include="Source\utils\OctTree.h" />
     <ClInclude Include="Source\utils\shape_creator.h" />

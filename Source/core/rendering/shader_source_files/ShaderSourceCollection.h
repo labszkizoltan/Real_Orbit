@@ -9,4 +9,8 @@
 #include <core/rendering/shader_source_files/skybox_shaders.h>
 #include <core/rendering/shader_source_files/shadow_shaders.h>
 
+// shaders with instancing:
+#include <core/rendering/shader_source_files/instanced_normal_shader.h>
+#include <core/rendering/shader_source_files/instanced_colour_shader.h>
+
 #endif // SHADER_SOURCE_COLLECTION_H

@@ -19,16 +19,17 @@ public:
 	Entity CreateEntity(const std::string& name = std::string());
 
 	void OnUpdate(Timestep ts);
-	void OnViewportResize(uint32_t width, uint32_t height);
 
-	CameraComponent& GetCamera();
-	LightComponent& GetLight();
+	TransformComponent& GetCamera();
+	TransformComponent& GetLight();
+	MeshLibrary& GetMeshLibrary();
 
 private:
-	entt::registry m_Registry;
-	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
-	CameraComponent m_Camera;
-	LightComponent m_Light;
+	entt::registry m_Registry; // do I even need this?
+	TransformComponent m_Camera;
+	TransformComponent m_Light;
+	std::shared_ptr<Mesh> m_Skybox = nullptr;
+
 	MeshLibrary m_MeshLibrary;
 
 	friend class Entity;

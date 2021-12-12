@@ -13,9 +13,11 @@ const char* shadow_mapper_vertexSrc =
 
 "layout(location = 0) in vec3 aPos; \n"
 
-"uniform vec3 body_location; \n"
-"uniform mat3 body_orientation; \n"
-"uniform float body_scale; \n"
+"layout(location = 3) in vec3 aInstancePos; \n"
+"layout(location = 4) in vec3 aInstanceOrientation_1; \n"
+"layout(location = 5) in vec3 aInstanceOrientation_2; \n"
+"layout(location = 6) in vec3 aInstanceOrientation_3; \n"
+"layout(location = 7) in float aInstanceScale; \n"
 
 "uniform float r_max; \n"
 "uniform float r_min; \n"
@@ -25,7 +27,7 @@ const char* shadow_mapper_vertexSrc =
 "void main()\n"
 "{\n"
 // point coordinate in the absolute coordinate system
-"	vec3 position_tmp = body_location - light_location + body_scale * (aPos[0] * body_orientation[0] + aPos[1] * body_orientation[1] + aPos[2] * body_orientation[2]); \n"
+"	vec3 position_tmp = aInstancePos - light_location + aInstanceScale * (aPos[0] * aInstanceOrientation_1 + aPos[1] * aInstanceOrientation_2 + aPos[2] * aInstanceOrientation_3); \n"
 
 "	float r = length(position_tmp); \n"
 

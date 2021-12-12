@@ -34,8 +34,26 @@ Next things to do (as of 2021.11.14.):
 	https://learnopengl.com/Advanced-OpenGL/Instancing
 	https://www.khronos.org/opengl/wiki/Vertex_Rendering#Instancing
 	https://www.youtube.com/watch?v=9F_lUPPS_pg
+	
+- Change all meshes to the instance rendered versions. Rendering one entity could be just an instance rendered draw
+	with one transform component.
+	Shadow mapping should also switch to the instance rendered version.
 
 - mouse picking
+
+
+Missing featuers:
+- moving objects,
+- collisions,
+- shooting,
+- Markers,
+- AI behaviours,
+- Sounds,
+- bloom effect,
+- entity bound camera,
+
+
+
 
 
 

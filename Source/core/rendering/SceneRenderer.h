@@ -18,10 +18,7 @@ public:
 
 	void SetScene(std::shared_ptr<Scene> scene);
 
-//	static void RenderScene(std::shared_ptr<Scene> scene);
 	void RenderScene();
-
-
 
 private:
 
@@ -51,7 +48,7 @@ inline void SceneRenderer::DrawMeshType()
 		shader->UploadUniformMat3("body_orientation", trf.orientation.Glm());
 		shader->UploadUniformFloat("body_scale", trf.scale);
 
-		mesh.meshPtr->Draw();
+//		mesh.meshPtr->Draw();
 	}
 }
 
@@ -68,7 +65,7 @@ inline void SceneRenderer::ShadowMapMeshType(std::shared_ptr<Shader> shader)
 		shader->UploadUniformMat3("body_orientation", trf.orientation.Glm());
 		shader->UploadUniformFloat("body_scale", trf.scale);
 
-		mesh.meshPtr->Draw();
+//		mesh.meshPtr->Draw();
 	}
 }
 

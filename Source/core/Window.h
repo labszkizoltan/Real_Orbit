@@ -22,12 +22,14 @@ struct WindowProps
 	uint32_t Width;
 	uint32_t Height;
 	int Style;
+	bool ShowMouse;
 
 	WindowProps(const std::string& title = "Real_Orbit_window",
 		uint32_t width = 800,
 		uint32_t height = 800,
-		int style = sf::Style::Default)
-		: Title(title), Width(width), Height(height), Style(style) {}
+		int style = sf::Style::Default,
+		bool show_mouse = true)
+		: Title(title), Width(width), Height(height), Style(style), ShowMouse(show_mouse){}
 };
 
 // Interface representing a desktop sstem based Window

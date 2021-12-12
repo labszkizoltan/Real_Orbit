@@ -24,6 +24,9 @@ struct TransformComponent
 	Vec3D location;
 	Mat_3D orientation;
 	float scale;
+
+	TransformComponent()
+		: location(Vec3D()), orientation(Identity(1.0f)), scale(1.0f) {}
 };
 
 struct DynamicPropertiesComponent
@@ -55,6 +58,7 @@ struct TypedMeshComponent
 	static MeshType GetStaticType() { return s_Type; }
 };
 
+/*
 // identical to the transform component... I just use it to be able to query the scene registry for the camera
 struct CameraComponent
 {
@@ -66,6 +70,7 @@ struct LightComponent
 {
 	TransformComponent light_transform;
 };
+*/
 
 
 

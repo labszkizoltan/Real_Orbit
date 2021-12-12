@@ -47,10 +47,10 @@ public:
 	~Renderer();
 
 	static int Init();
-	static void Draw(Mesh* mesh);
+//	static void Draw(Mesh* mesh);
 
-	static void Draw(Entity entity);
-	static void DrawToShadowMap(Entity entity);
+//	static void Draw(Entity entity);
+//	static void DrawToShadowMap(Entity entity);
 //	static void DrawToTexture(Entity entity, Framebuffer fbo);
 	static void SetAspectRatio(float aspect_ratio);
 	static void SetCamera(TransformComponent camera_transform);
@@ -60,11 +60,13 @@ public:
 
 	static void Refresh();
 
+	static std::shared_ptr<Shader> BindShader(MeshType meshType);
+
 	// a few helper function could go here, like something that uploads various uniform combinations into the shaders
 private:
 
-
-private:
+//temporarly change this to public, to be able to access the depth buffer
+public:
 	static float s_AspectRatio;
 	static std::shared_ptr<Depthbuffer> s_DepthBuffer;
 	static ShaderLibrary s_ShaderLibrary;
