@@ -31,36 +31,6 @@ SceneSerializer::~SceneSerializer()
 
 void SceneSerializer::Serialize(const std::string& output_file)
 {
-	YAML::Emitter out;
-	out << YAML::BeginMap;
-	out << YAML::Key << "Scene";
-	out << YAML::Value << "UnnamedScene";
-	//	out << YAML::Key << "Entities";
-
-	out << YAML::BeginSeq;
-	out << "eggs";
-	out << "bread";
-	out << "milk";
-	out << YAML::EndSeq;
-
-	out << YAML::BeginMap;
-	out << YAML::Key << "name";
-	out << YAML::Value << "Ryan Braun";
-	out << YAML::Key << "position";
-	out << YAML::Value << "LF";
-	out << YAML::EndMap;
-
-	out << YAML::BeginMap;
-	out << YAML::Key << "name";
-	out << YAML::Value << "Barack Obama";
-	out << YAML::Key << "children";
-	out << YAML::Value << YAML::BeginSeq << "Sasha" << "Malia" << YAML::EndSeq;
-	out << YAML::EndMap;
-
-	out << YAML::Flow;
-	out << YAML::BeginSeq << 2 << 3 << 5 << 7 << 11 << YAML::EndSeq;
-
-	std::cout << "Here's the output YAML:\n\n" << out.c_str() << "\n\n"; // prints "Hello, World!"
 }
 
 void SceneSerializer::DeSerialize_text(const std::string& scene_description)
@@ -72,8 +42,8 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 	auto entities = data["Entities"];
 	for (auto entity : entities)
 	{
-//		std::string name = entity["Entity"].as<std::string>();
-//		Entity deserializedEntity = m_Scene->CreateEntity(name);
+		std::string name = entity["Entity"].as<std::string>();
+		Entity deserializedEntity = m_Scene->CreateEntity(name);
 
 		//----- CameraComponent -----//
 		auto cam_com = entity["CameraComponent"];
@@ -110,7 +80,7 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			transformResult.location = trf_com["location"].as<Vec3D>();
 			transformResult.orientation = Mat_3D(trf_com["orientation"]["f1"].as<Vec3D>(), trf_com["orientation"]["f2"].as<Vec3D>(), trf_com["orientation"]["f3"].as<Vec3D>());
 			transformResult.scale = trf_com["scale"].as<float>();
-//			deserializedEntity.AddComponent<TransformComponent>(result);
+			deserializedEntity.AddComponent<TransformComponent>(transformResult);
 		}
 
 		//----- MeshComponent -----//
@@ -125,6 +95,7 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 				int meshIdx = m_Scene->m_MeshLibrary.m_NameIndexLookup[meshName];
 				std::shared_ptr<Mesh> meshPtr = m_Scene->m_MeshLibrary.m_Meshes[meshIdx];
 				m_Scene->m_MeshLibrary.m_MeshTransforms[meshIdx].push_back(transformResult);
+				deserializedEntity.AddComponent<MeshIndexComponent>(meshIdx);
 			}
 		}
 
@@ -136,7 +107,7 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			result.inertial_mass = dynprop_com["inertial_mass"].as<float>();
 			result.velocity = dynprop_com["velocity"].as<Vec3D>();
 			result.angular_velocity = dynprop_com["angular_velocity"].as<Vec3D>();
-//			deserializedEntity.AddComponent<DynamicPropertiesComponent>(result);
+			deserializedEntity.AddComponent<DynamicPropertiesComponent>(result);
 		}
 
 		//----- GravitationalMassComponent -----//
@@ -145,7 +116,7 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 		{
 			GravitationalMassComponent result;
 			result.gravitational_mass = gravmass_com.as<float>();
-//			deserializedEntity.AddComponent<GravitationalMassComponent>(result);
+			deserializedEntity.AddComponent<GravitationalMassComponent>(result);
 		}
 	}
 }

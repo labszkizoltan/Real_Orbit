@@ -12,6 +12,7 @@ public:
 	MeshLibrary() = default;
 	~MeshLibrary() = default;
 	int size() { return m_Meshes.size(); }
+	void Clear();
 
 public:
 	std::unordered_map<std::string, int> m_NameIndexLookup;

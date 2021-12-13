@@ -15,7 +15,7 @@
 #include <core/rendering/drawables/Mesh.h>
 
 #include <core/rendering/SceneRenderer.h>
-// #include <core/scene/SceneUpdater.h>
+#include <core/scene/SceneUpdater.h>
 
 class TestLayer8 : public Layer
 {
@@ -52,7 +52,7 @@ private:
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
-//	SceneUpdater m_SceneUpdater;
+	SceneUpdater m_SceneUpdater;
 	bool m_InFocus = true;
 
 };

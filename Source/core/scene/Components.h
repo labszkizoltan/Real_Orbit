@@ -58,6 +58,11 @@ struct TypedMeshComponent
 	static MeshType GetStaticType() { return s_Type; }
 };
 
+struct MeshIndexComponent
+{
+	int idx = -1;
+};
+
 /*
 // identical to the transform component... I just use it to be able to query the scene registry for the camera
 struct CameraComponent

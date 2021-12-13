@@ -71,6 +71,7 @@ void TestLayer8::OnAttach()
 	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_3.yaml");
 
 	m_SceneRenderer.SetScene(m_Scene);
+	m_SceneUpdater.SetScene(m_Scene);
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -85,6 +86,7 @@ void TestLayer8::OnUpdate(Timestep ts)
 	HandleUserInput(ts);
 
 	m_SceneRenderer.RenderScene();
+	m_SceneUpdater.UpdateScene(ts);
 
 	m_ElapsedTime += ts;
 }
@@ -105,8 +107,21 @@ void TestLayer8::OnEvent(Event& event)
 
 void TestLayer8::EmitMesh(int meshIdx, TransformComponent transform)
 {
-	m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].push_back(transform);
+//	m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].push_back(transform);
+
+	DynamicPropertiesComponent dynProps;
+	dynProps.inertial_mass = 1.0f;
+	dynProps.velocity = 0.001f * transform.orientation.f3;
+	dynProps.angular_velocity = Vec3D();
+	transform.scale = 0.1f;
+	transform.location += 0.1*(transform.orientation.f3 - transform.orientation.f2);
+
+	Entity newEntity = m_Scene->CreateEntity("");
+	newEntity.AddComponent<TransformComponent>(transform);
+	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
+	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
 }
+
 
 void TestLayer8::RemoveMesh(int meshIdx)
 {
@@ -256,7 +271,7 @@ void TestLayer8::HandleUserInput(Timestep ts)
 	if(Input::IsMouseButtonPressed(sf::Mouse::Left))
 	{
 		skip++;
-		if (skip == 30) { EmitMesh(idx, cam_trf); skip = 0; }
+		if (skip == 1) { EmitMesh(idx, cam_trf); skip = 0; }
 	}
 	else if (Input::IsMouseButtonPressed(sf::Mouse::Right)) { RemoveMesh(idx); skip = 0; }
 
@@ -280,5 +295,4 @@ void TestLayer8::HandleUserInput(Timestep ts)
 		cam_trf.orientation = rotationMatrix * cam_trf.orientation;
 	}
 
-//	Renderer::SetCamera(cam_trf);
 }

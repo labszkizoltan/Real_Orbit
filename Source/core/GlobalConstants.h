@@ -4,7 +4,7 @@
 
 const float g_InitialZoomLevel = 1.5f;
 
-const int g_SkyboxMeshResolution = 10; // used in the SceneSerializer
+const int g_SkyboxMeshResolution = 11; // used in the SceneSerializer
 
 const size_t g_MaxInstanceCount = 100000; // 1000000; // this would be ~52Mb, so the GPU should be able to handle a few of these, but at that point the rendering time probably would take too long
 
