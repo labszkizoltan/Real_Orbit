@@ -105,10 +105,35 @@ void TestLayer8::OnEvent(Event& event)
 	event.Dispatch<sf::Event::EventType::MouseButtonReleased>	(BIND_EVENT_FN(OnMouseButtonReleased));
 }
 
+entt::entity TestLayer8::GetTarget()
+{
+	Vec3D pos = m_Scene->GetCamera().location;
+	Vec3D dir = m_Scene->GetCamera().orientation.f3;
+
+	entt::entity result = entt::null;
+
+	float maxScalarProd = -1.0f;
+
+	// exclude TargetComponent, so missiles wont target other missiles
+	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>(entt::exclude<TargetComponent>);
+	for (auto entity : view)
+	{
+		TransformComponent& entity_trf = view.get<TransformComponent>(entity);
+		Vec3D dx = entity_trf.location - pos;
+
+		float scalarProd = dx * dir / dx.length();
+		if (scalarProd > maxScalarProd)
+		{
+			maxScalarProd = scalarProd;
+			result = entity;
+		}
+	}
+
+	return result;
+}
+
 void TestLayer8::EmitMesh(int meshIdx, TransformComponent transform)
 {
-//	m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].push_back(transform);
-
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 1.0f;
 	dynProps.velocity = 0.001f * transform.orientation.f3;
@@ -120,8 +145,26 @@ void TestLayer8::EmitMesh(int meshIdx, TransformComponent transform)
 	newEntity.AddComponent<TransformComponent>(transform);
 	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
 	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
+	newEntity.AddComponent<TimerComponent>(TimerComponent(10000.0f)); // provide ttl in mili seconds
 }
 
+void TestLayer8::LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target)
+{
+	DynamicPropertiesComponent dynProps;
+	dynProps.inertial_mass = 1.0f;
+//	dynProps.velocity = 0.01f * (transform.orientation.f1 + transform.orientation.f3);
+	dynProps.velocity = 0.05f * transform.orientation.f3;
+	dynProps.angular_velocity = Vec3D();
+	transform.scale = 0.05f;
+	transform.location += 0.1 * (transform.orientation.f3 + transform.orientation.f1);
+
+	Entity newEntity = m_Scene->CreateEntity("");
+	newEntity.AddComponent<TransformComponent>(transform);
+	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
+	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
+	newEntity.AddComponent<TimerComponent>(TimerComponent(20000.0f)); // provide ttl in mili seconds
+	newEntity.AddComponent<TargetComponent>(target);
+}
 
 void TestLayer8::RemoveMesh(int meshIdx)
 {
@@ -266,14 +309,18 @@ void TestLayer8::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { cam_velocity *= 1.1f; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
 
-	static int idx = m_Scene->GetMeshLibrary().m_NameIndexLookup["OrangeSphere"];
+	static int orangeIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["OrangeSphere"];
+	static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
 	static int skip = 0;
 	if(Input::IsMouseButtonPressed(sf::Mouse::Left))
 	{
 		skip++;
-		if (skip == 1) { EmitMesh(idx, cam_trf); skip = 0; }
+		if (skip == 1) { EmitMesh(orangeIdx, cam_trf); skip = 0; }
 	}
-	else if (Input::IsMouseButtonPressed(sf::Mouse::Right)) { RemoveMesh(idx); skip = 0; }
+	if (Input::IsMouseButtonPressed(sf::Mouse::Right)) 
+	{
+		LaunchMissile(blueIdx, cam_trf, GetTarget());
+	}
 
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Space))
 	{

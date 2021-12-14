@@ -19,6 +19,42 @@ void SceneUpdater::UpdateScene(Timestep ts)
 {
 	m_Scene->m_MeshLibrary.Clear();
 
+
+	auto timed_entities = m_Scene->m_Registry.view<TimerComponent>();
+	for (auto entity : timed_entities)
+	{
+		TimerComponent& ttl = timed_entities.get<TimerComponent>(entity);
+		ttl.timeToLive -= ts;
+		if (ttl.timeToLive < 0.0f)
+			m_Scene->m_Registry.destroy(entity);
+	}
+
+	auto missiles = m_Scene->m_Registry.view<TargetComponent, TransformComponent, DynamicPropertiesComponent>();
+	for (auto missile : missiles)
+	{
+		TargetComponent& target = missiles.get<TargetComponent>(missile);
+		if (m_Scene->m_Registry.valid(target.targetEntity))
+		{
+			TransformComponent& missileTrf = missiles.get<TransformComponent>(missile);
+			DynamicPropertiesComponent& missileVelocity = missiles.get<DynamicPropertiesComponent>(missile);
+			TransformComponent& targetLoc = m_Scene->m_Registry.get<TransformComponent>(target.targetEntity);
+			DynamicPropertiesComponent& targetVelocity = m_Scene->m_Registry.get<DynamicPropertiesComponent>(target.targetEntity);
+
+			Vec3D dx = targetLoc.location - missileTrf.location;
+			Vec3D dv = targetVelocity.velocity - missileVelocity.velocity;
+			float dt = sqrt(dx.lengthSquare() / dv.lengthSquare());
+			dx += dt * dv;
+			float accel = 0.000005f;
+
+			missileVelocity.velocity += accel * ts * dx / dx.length();
+		}
+		else
+		{
+			// this always returns false according the documentation: registry.valid(entt::tombstone);
+			target.targetEntity = entt::tombstone;
+		}
+	}
+
 	auto grav_masses = m_Scene->m_Registry.view<TransformComponent, GravitationalMassComponent>();
 	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>();
 	for (auto entity : view)

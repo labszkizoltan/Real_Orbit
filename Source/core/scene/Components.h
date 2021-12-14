@@ -7,6 +7,8 @@
 #include <utils/Matrix_3D.h>
 #include <core/rendering/drawables/Mesh.h>
 
+#include <entt/entt.hpp>
+
 
 struct TagComponent
 {
@@ -63,20 +65,17 @@ struct MeshIndexComponent
 	int idx = -1;
 };
 
-/*
-// identical to the transform component... I just use it to be able to query the scene registry for the camera
-struct CameraComponent
+struct TimerComponent
 {
-	TransformComponent camera_transform;
+	float timeToLive = 0.0f;
+	TimerComponent(float ttl) : timeToLive(ttl) {};
 };
 
-// identical to the transform component... I just use it to be able to query the scene registry for the light position
-struct LightComponent
+struct TargetComponent
 {
-	TransformComponent light_transform;
+	entt::entity targetEntity;
+	TargetComponent(entt::entity tgt) : targetEntity(tgt) {};
 };
-*/
-
 
 
 #endif // COMPONENTS_H

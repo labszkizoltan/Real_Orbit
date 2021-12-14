@@ -28,7 +28,9 @@ public:
 	virtual void OnUpdate(Timestep ts) override;
 	virtual void OnEvent(Event& event) override;
 
+	entt::entity GetTarget();
 	void EmitMesh(int meshIdx, TransformComponent transform);
+	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
 	void RemoveMesh(int meshIdx);
 
 private:

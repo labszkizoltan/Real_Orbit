@@ -24,8 +24,8 @@ public:
 	TransformComponent& GetLight();
 	MeshLibrary& GetMeshLibrary();
 
-private:
-	entt::registry m_Registry; // do I even need this?
+public:
+	entt::registry m_Registry;
 	TransformComponent m_Camera;
 	TransformComponent m_Light;
 	std::shared_ptr<Mesh> m_Skybox = nullptr;
