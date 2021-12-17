@@ -275,6 +275,9 @@
     <ClCompile Include="Source\core\rendering\drawables\BrightColouredMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\core\rendering\FramebufferDisplay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\core\rendering\shader_source_files\basic_3D_vertex_shd.glsl" />

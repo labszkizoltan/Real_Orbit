@@ -103,9 +103,6 @@ const char* instanced_normal_shader_fragmentSrc =
 "	float bias = 0.001; \n"
 "	float shadow = (currentDepth - bias) > closestDepth ? 1.0 : 0.0; \n"
 "	FragColor = light_normal_dot < 0.0 ? vec4(color/2, 1.0) : vec4(color*min((1-shadow/2),(1+light_normal_dot)/2), 1.0); \n"
-//"	FragColor = vec4(1,1,1,1); \n"
-//"	FragColor = vec4(0.0, gl_FragCoord.z, 0.0, 1.0); \n"
-//"	FragColor = vec4(vec3((1+light_normal_dot)/2), 1.0); \n"
 "}\0";
 
 

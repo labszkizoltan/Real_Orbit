@@ -78,27 +78,12 @@ void TestLayer8::OnAttach()
 
 
 
-	std::vector<float> vertices_rect = {
-		-10.0f,	-10.0f,	0.0f,	0,	0,	-1,	0.0f,	0.0f,
-		 10.0f,	-10.0f,	0.0f,	0,	0,	-1,	1.0f,	0.0f,
-		-10.0f,	 10.0f,	0.0f,	0,	0,	-1,	0.0f,	1.0f,
-		 10.0f,	 10.0f,	0.0f,	0,	0,	-1,	1.0f,	1.0f
-	};
-
-	std::vector<uint32_t> indices_rect = {
-		0,	1,	2,
-		1,	3,	2
-	};
-
-	m_ScreenMesh = std::shared_ptr<Mesh>(new NormalMesh(vertices_rect, indices_rect, Renderer::GetColorAttachment()));
-//	m_ScreenMesh = std::shared_ptr<Mesh>(new NormalMesh(vertices_rect, indices_rect, Renderer::GetBrightColorAttachment()));
-//	m_ScreenMesh = std::shared_ptr<Mesh>(new NormalMesh(vertices_rect, indices_rect, Renderer::GetDepthAttachment()));
-
-	TransformComponent screen_trf = TransformComponent();
-	std::vector<TransformComponent> screen_trfs = { screen_trf };
-	m_ScreenMesh->SetInstances(screen_trfs);
-
-
+//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
+//	m_FbDisplay.SetTexture(Renderer::GetBrightColorAttachment());
+//	m_FbDisplay.SetTexture(Renderer::GetDepthAttachment());
+	m_FbDisplay.SetTexture(Renderer::s_DepthBuffer->GetDepthAttachment());
+//	Renderer::s_DepthBuffer->GetDepthAttachment();
+	
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -114,10 +99,7 @@ void TestLayer8::OnUpdate(Timestep ts)
 	m_SceneRenderer.RenderScene();
 	m_SceneUpdater.UpdateScene(m_SimulationSpeed*ts);
 
-	// in this shader the proper slot needs to be selected for texture sampling, which is not happening now
-	Renderer::BindShader(m_ScreenMesh->GetMeshType());
-	m_ScreenMesh->Draw();
-
+	m_FbDisplay.Draw();
 
 	m_ElapsedTime += m_SimulationSpeed*ts;
 }
@@ -245,6 +227,13 @@ bool TestLayer8::OnKeyPressed(Event& e)
 		m_SimulationSpeed = 1.0f;
 	else if (event.key.code == sf::Keyboard::Key::Num3)
 		m_SimulationSpeed = 5.0f;
+	else if (event.key.code == sf::Keyboard::Key::N)
+	{
+		static int current_slot = 0;
+		LOG_WARN("Display Texture Slot was changed to: {0}", current_slot % 32);
+		m_FbDisplay.SetDisplayedSlot(current_slot%32);
+		current_slot++;
+	}
 
 	LOG_INFO("TestLayer received KeyPressed evet: {0}", event.key.code);
 
@@ -338,16 +327,21 @@ void TestLayer8::HandleUserInput(Timestep ts)
 
 	static int orangeIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["OrangeSphere"];
 	static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
+	static int yellowIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
 	static int skip = 0;
 	if(Input::IsMouseButtonPressed(sf::Mouse::Left))
 	{
-		skip++;
-		if (skip == 1) { EmitMesh(orangeIdx, cam_trf); skip = 0; }
+		EmitMesh(orangeIdx, cam_trf);
 	}
-	if (Input::IsMouseButtonPressed(sf::Mouse::Right)) 
+	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip%2 == 0) 
 	{
 		LaunchMissile(blueIdx, cam_trf, GetTarget());
 	}
+	if (Input::IsMouseButtonPressed(sf::Mouse::Middle) && skip % 2 == 1)
+	{
+		LaunchMissile(yellowIdx, cam_trf, GetTarget());
+	}
+	skip++;
 
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Space))
 	{

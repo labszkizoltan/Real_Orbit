@@ -35,7 +35,6 @@ Skybox::Skybox(const std::vector<float>& vertexData, const std::vector<uint32_t>
 	{
 		m_Textures[i] = std::make_shared<Texture>(textureFilenames[i]);
 		m_Textures[i]->SetSlot(g_SkyboxTextureSlots[i]); // slot 0 is for other bodies, slot 1 is for the shadow map
-		
 	}
 
 	m_VertexArray.Bind();
@@ -57,7 +56,11 @@ void Skybox::Draw()
 	for (int i = 0; i < m_Textures.size(); i++)
 		m_Textures[i]->Bind();
 
+	static const unsigned int attachment = GL_COLOR_ATTACHMENT0;
+	glDrawBuffers(1, &attachment);
 	glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
+
+	m_VertexArray.UnBind();
 
 	glEnable(GL_DEPTH_TEST);
 }

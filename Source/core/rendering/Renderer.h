@@ -65,8 +65,8 @@ public:
 	// a few helper function could go here, like something that uploads various uniform combinations into the shaders
 private:
 
-
-private:
+public:
+//private:
 	static float s_AspectRatio;
 	static std::shared_ptr<Framebuffer> s_FrameBuffer;
 	static std::shared_ptr<Depthbuffer> s_DepthBuffer;

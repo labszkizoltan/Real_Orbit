@@ -55,6 +55,8 @@ void BrightColouredMesh::Draw()
 {
 	m_VertexArray.Bind();
 
+	static const unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, attachments);
 	GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, 0, m_InstanceBuffer.GetElementCount()));
 
 	m_VertexArray.UnBind();
@@ -67,12 +69,8 @@ void BrightColouredMesh::SetInstances(const std::vector<TransformComponent>& tra
 
 void BrightColouredMesh::DrawInstances(const std::vector<TransformComponent>& transforms)
 {
-	m_VertexArray.Bind();
 	m_InstanceBuffer.SetData(transforms);
-
-	GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, 0, transforms.size()));
-
-	m_VertexArray.UnBind();
+	Draw();
 }
 
 MeshType BrightColouredMesh::GetMeshType()

@@ -11,6 +11,7 @@
 #include <core/scene/Entity.h>
 #include <core/rendering/Shader.h>
 #include <core/rendering/Framebuffer.h>
+#include <core/rendering/FramebufferDisplay.h>
 #include <core/rendering/Depthbuffer.h>
 #include <core/rendering/drawables/Mesh.h>
 
@@ -52,15 +53,15 @@ private:
 private:
 	float m_ElapsedTime = 0.0f;
 	float m_SimulationSpeed = 1.0f;
-	std::unique_ptr<Framebuffer> m_FrameBuffer = nullptr;
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
 	SceneUpdater m_SceneUpdater;
 	bool m_InFocus = true;
 
-	std::shared_ptr<Shader> m_ScreenDrawer = nullptr;
-	std::shared_ptr<Mesh> m_ScreenMesh = nullptr;
+//	std::shared_ptr<Shader> m_ScreenDrawer = nullptr;
+
+	FramebufferDisplay m_FbDisplay;
 
 };
 

@@ -25,6 +25,7 @@ public:
 	uint32_t GetRendererID() const { return m_RendererID; };
 
 	void SetSlot(uint32_t slot) { m_Slot = slot; }
+	uint32_t GetSlot() { return m_Slot; }
 	void SetData(void* data, uint32_t size);
 
 	void Bind() const;

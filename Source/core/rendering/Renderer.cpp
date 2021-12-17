@@ -26,7 +26,6 @@ int Renderer::Init()
 	FrameBufferSpecification dbSpec;
 	dbSpec.Width = 4096;
 	dbSpec.Height = 4096;
-//	s_DepthBuffer = std::shared_ptr<Depthbuffer>(new Depthbuffer(fbspec));
 	s_DepthBuffer = std::make_shared<Depthbuffer>(dbSpec);
 	s_DepthBuffer->GetDepthAttachment()->SetSlot(g_RendererShadowDepthSlot);
 	s_DepthBuffer->GetDepthAttachment()->Bind();
@@ -36,10 +35,14 @@ int Renderer::Init()
 	fbSpec.Width = Application::Get().GetWindow().GetWidth();
 	fbSpec.Height = Application::Get().GetWindow().GetHeight();
 	fbSpec.Samples = 1;
-	s_FrameBuffer = std::make_shared<Framebuffer>(fbSpec);
+	s_FrameBuffer = std::make_shared<Framebuffer>(fbSpec); // the constructor automatically binds the framebuffer
 	s_FrameBuffer->GetColorAttachment()->SetSlot(g_RendererColorAttchSlot);
 	s_FrameBuffer->GetBrightColorAttachment()->SetSlot(g_RendererBrightColAttchSlot);
 	s_FrameBuffer->GetDepthAttachment()->SetSlot(g_RendererDepthAttchSlot);
+
+	s_FrameBuffer->GetColorAttachment()->Bind();
+	s_FrameBuffer->GetBrightColorAttachment()->Bind();
+	s_FrameBuffer->GetDepthAttachment()->Bind();
 	s_FrameBuffer->Unbind();
 
 	// Add the shaders to the shader library
@@ -104,63 +107,6 @@ int Renderer::Init()
 	return result;
 }
 
-/*
-void Renderer::Draw(Mesh* mesh)
-{
-	if (mesh == nullptr)
-		return;
-
-	s_ShaderLibrary.BindShader(mesh->GetMeshType());
-	// shader uniforms should be uploaded here later on
-	mesh->Draw();
-}
-*/
-
-/*
-void Renderer::Draw(Entity entity)
-{
-//	Framebuffer::UnbindAll();
-
-	// check if the required components are there, otherwise skip the function body
-	if (entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
-	{
-		TransformComponent& trf = entity.GetComponent<TransformComponent>();
-		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
-		//	LOG_CORE_INFO("Transform component = {0}, {1}, {2}; mesh type = {3}", trf.x, trf.y, trf.rotation, (int)mesh.meshPtr->GetMeshType());
-
-		std::shared_ptr<Shader> shader = s_ShaderLibrary.BindShader(mesh.meshPtr->GetMeshType()); //	MeshType::COLOURED_MESH
-		shader->UploadUniformFloat3("body_location", trf.location.Glm());
-		shader->UploadUniformMat3("body_orientation", trf.orientation.Glm());
-		shader->UploadUniformFloat("body_scale", trf.scale);
-
-		mesh.meshPtr->Draw();
-	}
-}
-*/
-
-/*
-void Renderer::DrawToShadowMap(Entity entity)
-{
-	s_DepthBuffer->Bind();
-
-	// check if the required components are there, otherwise skip the function body
-	if (entity.HasComponent<TransformComponent>() && entity.HasComponent<MeshComponent>())
-	{
-		TransformComponent& trf = entity.GetComponent<TransformComponent>();
-		MeshComponent& mesh = entity.GetComponent<MeshComponent>();
-
-		std::shared_ptr<Shader> shader = s_ShaderLibrary.BindShader(MeshType::SHADOW_MAP);
-		shader->UploadUniformFloat3("body_location", trf.location.Glm());
-		shader->UploadUniformMat3("body_orientation", trf.orientation.Glm());
-		shader->UploadUniformFloat("body_scale", trf.scale);
-
-		mesh.meshPtr->Draw();
-	}
-
-	s_DepthBuffer->Unbind();
-}
-*/
-
 void Renderer::SetAspectRatio(float aspect_ratio)
 {
 	s_AspectRatio = aspect_ratio;
@@ -189,7 +135,6 @@ void Renderer::SetLightPosition(Vec3D light_pos)
 
 void Renderer::Refresh()
 {
-
 	glClearColor(0.0f, 0.05f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -197,6 +142,14 @@ void Renderer::Refresh()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	s_DepthBuffer->Unbind();
+
+	s_FrameBuffer->Bind();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	static const GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, draw_buffers);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	s_FrameBuffer->Unbind();
+
 }
 
 std::shared_ptr<Shader> Renderer::BindShader(MeshType meshType)

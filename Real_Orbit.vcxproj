@@ -171,6 +171,7 @@
     <ClCompile Include="Source\core\rendering\drawables\NormalMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\Skybox.cpp" />
     <ClCompile Include="Source\core\rendering\Framebuffer.cpp" />
+    <ClCompile Include="Source\core\rendering\FramebufferDisplay.cpp" />
     <ClCompile Include="Source\core\rendering\InstanceBuffer.cpp" />
     <ClCompile Include="Source\core\rendering\Renderer.cpp" />
     <ClCompile Include="Source\core\rendering\SceneRenderer.cpp" />

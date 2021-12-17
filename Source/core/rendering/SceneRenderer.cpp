@@ -42,7 +42,7 @@ void SceneRenderer::RenderScene()
 	glCullFace(GL_BACK);
 
 	// draw into the framebuffer
-//	Renderer::s_FrameBuffer->Bind();
+	Renderer::s_FrameBuffer->Bind();
 
 	// set camera
 	Renderer::SetCamera(m_Scene->GetCamera());
@@ -57,5 +57,5 @@ void SceneRenderer::RenderScene()
 		m_Scene->m_MeshLibrary.m_Meshes[i]->Draw(); // no need to set transform data again, it was already uploaded at shadow mapping
 	}
 
-//	Renderer::s_FrameBuffer->Unbind();
+	Renderer::s_FrameBuffer->Unbind();
 }

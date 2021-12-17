@@ -85,9 +85,6 @@ void Framebuffer::Bind()
 	glGetIntegerv(GL_VIEWPORT, m_ViewPortBefore);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
-
-	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, attachments);
 	glViewport(0, 0, m_Specification.Width, m_Specification.Height);
 }
 

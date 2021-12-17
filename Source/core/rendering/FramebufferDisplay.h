@@ -14,7 +14,7 @@ public:
 	~FramebufferDisplay();
 
 	void SetTexture(std::shared_ptr<Texture> texture);
-	void SetTextureSlot(int slot);
+	void SetDisplayedSlot(int slot);
 	int GetTextureSlot();
 	void Draw();
 
@@ -26,11 +26,10 @@ private:
 	std::shared_ptr<Texture> m_Texture = nullptr;
 	std::shared_ptr<Shader> m_Shader = nullptr;
 
+private:
+	static BufferLayout s_VertexLayout;
+
 };
-
-
-
-
 
 
 

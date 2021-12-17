@@ -55,6 +55,8 @@ void ColouredMesh::Draw()
 {
 	m_VertexArray.Bind();
 
+	static const unsigned int attachment = GL_COLOR_ATTACHMENT0;
+	glDrawBuffers(1, &attachment);
 	GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, 0, m_InstanceBuffer.GetElementCount()));
 
 	m_VertexArray.UnBind();
@@ -67,12 +69,8 @@ void ColouredMesh::SetInstances(const std::vector<TransformComponent>& transform
 
 void ColouredMesh::DrawInstances(const std::vector<TransformComponent>& transforms)
 {
-	m_VertexArray.Bind();
 	m_InstanceBuffer.SetData(transforms);
-
-	GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, 0, transforms.size()));
-
-	m_VertexArray.UnBind();
+	Draw();
 }
 
 MeshType ColouredMesh::GetMeshType()
