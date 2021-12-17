@@ -3,6 +3,7 @@
 #define RENDERER_H
 
 #include <core/rendering/ShaderLibrary.h>
+#include <core/rendering/Framebuffer.h>
 #include <core/rendering/Depthbuffer.h>
 #include <core/rendering/drawables/Mesh.h>
 #include <core/scene/Entity.h>
@@ -47,11 +48,7 @@ public:
 	~Renderer();
 
 	static int Init();
-//	static void Draw(Mesh* mesh);
 
-//	static void Draw(Entity entity);
-//	static void DrawToShadowMap(Entity entity);
-//	static void DrawToTexture(Entity entity, Framebuffer fbo);
 	static void SetAspectRatio(float aspect_ratio);
 	static void SetCamera(TransformComponent camera_transform);
 	static void SetZoomLevel(float zoom_level);
@@ -61,13 +58,17 @@ public:
 	static void Refresh();
 
 	static std::shared_ptr<Shader> BindShader(MeshType meshType);
+	static std::shared_ptr<Texture> GetColorAttachment();
+	static std::shared_ptr<Texture> GetBrightColorAttachment();
+	static std::shared_ptr<Texture> GetDepthAttachment();
 
 	// a few helper function could go here, like something that uploads various uniform combinations into the shaders
 private:
 
-//temporarly change this to public, to be able to access the depth buffer
-public:
+
+private:
 	static float s_AspectRatio;
+	static std::shared_ptr<Framebuffer> s_FrameBuffer;
 	static std::shared_ptr<Depthbuffer> s_DepthBuffer;
 	static ShaderLibrary s_ShaderLibrary;
 

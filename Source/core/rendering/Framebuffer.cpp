@@ -16,16 +16,20 @@ Framebuffer::~Framebuffer()
 {
 	glDeleteFramebuffers(1, &m_RendererID);
 	glDeleteTextures(1, &m_ColorAttachment->m_RendererID);
+	glDeleteTextures(1, &m_BrightColorAttachment->m_RendererID);
 	glDeleteTextures(1, &m_DepthAttachment->m_RendererID);
 }
 
 void Framebuffer::Invalidate()
 {
+	glGetIntegerv(GL_VIEWPORT, m_ViewPortBefore);
+
 	// delete current content
 	if (m_RendererID)
 	{
 		glDeleteFramebuffers(1, &m_RendererID);
 		glDeleteTextures(1, &m_ColorAttachment->m_RendererID);
+		glDeleteTextures(1, &m_BrightColorAttachment->m_RendererID);
 		glDeleteTextures(1, &m_DepthAttachment->m_RendererID);
 	}
 
@@ -49,6 +53,17 @@ void Framebuffer::Invalidate()
 
 	GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorAttachment->m_RendererID, 0));
 
+	// create the bright color attachment
+	m_BrightColorAttachment = std::shared_ptr<Texture>(new Texture(colorSpec));
+
+	GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_BrightColorAttachment->m_RendererID));
+	GLCall(glBindTexture(GL_TEXTURE_2D, m_BrightColorAttachment->m_RendererID));
+	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Specification.Width, m_Specification.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+	GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+	GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_BrightColorAttachment->m_RendererID, 0));
+
 	// create the depth attachment
 	TextureSpecifications depthSpec;
 	depthSpec.Width = m_Specification.Width;
@@ -70,7 +85,10 @@ void Framebuffer::Bind()
 	glGetIntegerv(GL_VIEWPORT, m_ViewPortBefore);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
-	glViewport(0, 0, m_Specification.Width, m_Specification.Height); // before adding this line, the rotation center wasnt in the middle of the imgui window
+
+	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, attachments);
+	glViewport(0, 0, m_Specification.Width, m_Specification.Height);
 }
 
 void Framebuffer::Unbind()
@@ -87,6 +105,11 @@ void Framebuffer::UnbindAll()
 std::shared_ptr<Texture> Framebuffer::GetColorAttachment()
 {
 	return m_ColorAttachment;
+}
+
+std::shared_ptr<Texture> Framebuffer::GetBrightColorAttachment()
+{
+	return m_BrightColorAttachment;
 }
 
 std::shared_ptr<Texture> Framebuffer::GetDepthAttachment()

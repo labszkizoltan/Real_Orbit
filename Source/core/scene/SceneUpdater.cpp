@@ -44,7 +44,7 @@ void SceneUpdater::UpdateScene(Timestep ts)
 			Vec3D dv = targetVelocity.velocity - missileVelocity.velocity;
 			float dt = sqrt(dx.lengthSquare() / dv.lengthSquare());
 			dx += dt * dv;
-			float accel = 0.000005f;
+			float accel = 0.00005f;
 
 			missileVelocity.velocity += accel * ts * dx / dx.length();
 		}
@@ -128,6 +128,5 @@ void SceneUpdater::UpdateScene(Timestep ts)
 	}
 	*/
 
-	std::cout << "Scene updated\n";
 
 }

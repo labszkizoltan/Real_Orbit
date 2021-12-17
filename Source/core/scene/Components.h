@@ -77,5 +77,15 @@ struct TargetComponent
 	TargetComponent(entt::entity tgt) : targetEntity(tgt) {};
 };
 
+struct TeamComponent_0 {};
+struct TeamComponent_1 {};
+struct TeamComponent_2 {};
+struct TeamComponent_3 {};
+struct TeamComponent_4 {};
+struct TeamComponent_5 {};
+struct TeamComponent_6 {};
+struct TeamComponent_7 {};
+struct TeamComponent_default {};
+
 
 #endif // COMPONENTS_H

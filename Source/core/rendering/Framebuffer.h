@@ -30,6 +30,7 @@ public:
 
 	// get the textures:
 	std::shared_ptr<Texture> GetColorAttachment();
+	std::shared_ptr<Texture> GetBrightColorAttachment();
 	std::shared_ptr<Texture> GetDepthAttachment();
 
 	//	void Resize(uint32_t width, uint32_t height); // probably not going to deal with this now
@@ -43,6 +44,7 @@ private:
 	uint32_t m_RendererID = 0;
 	FrameBufferSpecification m_Specification;
 	std::shared_ptr<Texture> m_ColorAttachment;
+	std::shared_ptr<Texture> m_BrightColorAttachment;
 	std::shared_ptr<Texture> m_DepthAttachment;
 
 };

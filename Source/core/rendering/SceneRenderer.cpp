@@ -41,6 +41,9 @@ void SceneRenderer::RenderScene()
 	Renderer::s_DepthBuffer->Unbind();
 	glCullFace(GL_BACK);
 
+	// draw into the framebuffer
+//	Renderer::s_FrameBuffer->Bind();
+
 	// set camera
 	Renderer::SetCamera(m_Scene->GetCamera());
 
@@ -53,4 +56,6 @@ void SceneRenderer::RenderScene()
 		Renderer::BindShader(m_Scene->m_MeshLibrary.m_Meshes[i]->GetMeshType());
 		m_Scene->m_MeshLibrary.m_Meshes[i]->Draw(); // no need to set transform data again, it was already uploaded at shadow mapping
 	}
+
+//	Renderer::s_FrameBuffer->Unbind();
 }

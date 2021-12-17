@@ -63,7 +63,10 @@ void TestLayer8::OnAttach()
 {
 	LOG_INFO("TestLayer8 attached");
 
-//	Application::Get().GetWindow().GetNativeWindow().setKeyRepeatEnabled(true);
+	FrameBufferSpecification fbSpec;
+	fbSpec.Width = Application::Get().GetWindow().GetWidth();
+	fbSpec.Height = Application::Get().GetWindow().GetHeight();
+	fbSpec.Samples = 1;
 
 	m_Scene = std::make_shared<Scene>();
 
@@ -72,6 +75,29 @@ void TestLayer8::OnAttach()
 
 	m_SceneRenderer.SetScene(m_Scene);
 	m_SceneUpdater.SetScene(m_Scene);
+
+
+
+	std::vector<float> vertices_rect = {
+		-10.0f,	-10.0f,	0.0f,	0,	0,	-1,	0.0f,	0.0f,
+		 10.0f,	-10.0f,	0.0f,	0,	0,	-1,	1.0f,	0.0f,
+		-10.0f,	 10.0f,	0.0f,	0,	0,	-1,	0.0f,	1.0f,
+		 10.0f,	 10.0f,	0.0f,	0,	0,	-1,	1.0f,	1.0f
+	};
+
+	std::vector<uint32_t> indices_rect = {
+		0,	1,	2,
+		1,	3,	2
+	};
+
+	m_ScreenMesh = std::shared_ptr<Mesh>(new NormalMesh(vertices_rect, indices_rect, Renderer::GetColorAttachment()));
+//	m_ScreenMesh = std::shared_ptr<Mesh>(new NormalMesh(vertices_rect, indices_rect, Renderer::GetBrightColorAttachment()));
+//	m_ScreenMesh = std::shared_ptr<Mesh>(new NormalMesh(vertices_rect, indices_rect, Renderer::GetDepthAttachment()));
+
+	TransformComponent screen_trf = TransformComponent();
+	std::vector<TransformComponent> screen_trfs = { screen_trf };
+	m_ScreenMesh->SetInstances(screen_trfs);
+
 
 	glEnable(GL_DEPTH_TEST);
 }
@@ -86,9 +112,14 @@ void TestLayer8::OnUpdate(Timestep ts)
 	HandleUserInput(ts);
 
 	m_SceneRenderer.RenderScene();
-	m_SceneUpdater.UpdateScene(ts);
+	m_SceneUpdater.UpdateScene(m_SimulationSpeed*ts);
 
-	m_ElapsedTime += ts;
+	// in this shader the proper slot needs to be selected for texture sampling, which is not happening now
+	Renderer::BindShader(m_ScreenMesh->GetMeshType());
+	m_ScreenMesh->Draw();
+
+
+	m_ElapsedTime += m_SimulationSpeed*ts;
 }
 
 void TestLayer8::OnEvent(Event& event)
@@ -179,28 +210,23 @@ void TestLayer8::RemoveMesh(int meshIdx)
 
 bool TestLayer8::OnWindowResize(Event& e)
 {
-	sf::Event& event = e.GetEvent();
-	LOG_CORE_INFO("Window Resize event captured in TestLayer8: width - {0}, height - {1}", event.size.width, event.size.height);
 	return false;
 }
 
 bool TestLayer8::OnLoosingFocus(Event& e)
 {
-	LOG_INFO("TestLayer8 received LostFocus event");
 	m_InFocus = false;
 	return false;
 }
 
 bool TestLayer8::OnGainingFocus(Event& e)
 {
-	LOG_INFO("TestLayer8 received GainFocus event");
 	m_InFocus = true;
 	return false;
 }
 
 bool TestLayer8::OnTextEntered(Event& e)
 {
-	LOG_INFO("TestLayer8 received OnTextEntered event");
 	return false;
 }
 
@@ -211,6 +237,14 @@ bool TestLayer8::OnKeyPressed(Event& e)
 	{
 		Application::Get().Close();
 	}
+	else if (event.key.code == sf::Keyboard::Key::Space)
+		m_SimulationSpeed = 0.0f;
+	else if (event.key.code == sf::Keyboard::Key::Num1)
+		m_SimulationSpeed = 0.2f;
+	else if (event.key.code == sf::Keyboard::Key::Num2)
+		m_SimulationSpeed = 1.0f;
+	else if (event.key.code == sf::Keyboard::Key::Num3)
+		m_SimulationSpeed = 5.0f;
 
 	LOG_INFO("TestLayer received KeyPressed evet: {0}", event.key.code);
 
@@ -219,7 +253,6 @@ bool TestLayer8::OnKeyPressed(Event& e)
 
 bool TestLayer8::OnKeyReleased(Event& e)
 {
-	LOG_INFO("TestLayer8 received OnKeyReleased event");
 	return false;
 }
 
@@ -235,13 +268,11 @@ bool TestLayer8::MouseWheelScrolled(Event& e)
 
 	Renderer::SetZoomLevel(zoom_level);
 
-	LOG_INFO("TestLayer8 received MouseWheelScrolled evet: delta: {0}, x: {1}, y: {2}", event.mouseWheelScroll.delta, event.mouseWheelScroll.x, event.mouseWheelScroll.y);
 	return false;
 }
 
 bool TestLayer8::OnMouseButtonPressed(Event& e)
 {
-	LOG_INFO("TestLayer8 received OnMouseButtonPressed event");
 	/*
 	sf::Event& event = e.GetEvent();
 	static int idx = m_Scene->GetMeshLibrary().m_NameIndexLookup["OrangeSphere"];
@@ -262,25 +293,21 @@ bool TestLayer8::OnMouseButtonPressed(Event& e)
 
 bool TestLayer8::OnMouseButtonReleased(Event& e)
 {
-	LOG_INFO("TestLayer8 received OnMouseButtonReleased event");
 	return false;
 }
 
 bool TestLayer8::OnMouseMoved(Event& e)
 {
-	LOG_INFO("TestLayer8 received OnMouseMoved event");
 	return false;
 }
 
 bool TestLayer8::OnMouseEntered(Event& e)
 {
-	LOG_INFO("TestLayer8 received OnMouseEntered event");
 	return false;
 }
 
 bool TestLayer8::OnMouseLeft(Event& e)
 {
-	LOG_INFO("TestLayer8 received OnMouseLeft event");
 	return false;
 }
 

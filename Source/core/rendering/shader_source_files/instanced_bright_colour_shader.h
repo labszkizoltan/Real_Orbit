@@ -1,10 +1,10 @@
 
-#ifndef INSTANCED_COLOUR_SHADER_H
-#define INSTANCED_COLOUR_SHADER_H
+#ifndef INSTANCED_BRIGHT_COLOUR_SHADER_H
+#define INSTANCED_BRIGHT_COLOUR_SHADER_H
 
 
 // vertex shader:
-const char* instanced_colour_shader_vertexSrc =
+const char* instanced_bright_shader_vertexSrc =
 "#version 460 core\n"
 
 "layout(location = 0) in vec3 aPos; \n"
@@ -68,17 +68,20 @@ const char* instanced_colour_shader_vertexSrc =
 
 
 // fragment shader
-const char* instanced_colour_shader_fragmentSrc =
+const char* instanced_bright_shader_fragmentSrc =
 "#version 460 core\n"
 "layout(location = 0) out vec4 FragColor; \n"
+"layout(location = 1) out vec4 BrightColor; \n"
 "in vec3 outColor; \n"
 "uniform float alpha; \n"
 "void main()\n"
 "{\n"
 "	FragColor = vec4(outColor, 1.0); \n"
+"	BrightColor = vec4(outColor, 1.0); \n"
 //"	FragColor = vec4(vec3(gl_FragCoord.z), 1.0); \n"
 "}\0";
 
 
 
-#endif // INSTANCED_COLOUR_SHADER_H
+#endif // INSTANCED_BRIGHT_COLOUR_SHADER_H
+

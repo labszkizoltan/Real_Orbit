@@ -128,7 +128,7 @@ void Shader::UploadUniformInt(const std::string& name, const int value)
 	}
 	else
 	{
-		std::cout << "Shader::UploadUniformInt() : uniform called \"" << name << "\" does not exist in shader , or hasn't been added with Shader::SearchAndAddUniform()\n";
+//		std::cout << "Shader::UploadUniformInt() : uniform called \"" << name << "\" does not exist in shader , or hasn't been added with Shader::SearchAndAddUniform()\n";
 	}
 }
 
@@ -143,7 +143,7 @@ void Shader::UploadUniformIntArray(const std::string& name, int* values, uint32_
 	}
 	else
 	{
-		std::cout << "Shader::UploadUniformIntArray() : uniform called \"" << name << "\" does not exist in shader , or hasn't been added with Shader::SearchAndAddUniform()\n";
+//		std::cout << "Shader::UploadUniformIntArray() : uniform called \"" << name << "\" does not exist in shader , or hasn't been added with Shader::SearchAndAddUniform()\n";
 	}
 }
 
@@ -159,7 +159,7 @@ void Shader::UploadUniformFloat(const std::string& name, const float value)
 	}
 	else
 	{
-		std::cout << "Shader::UploadUniformFloat() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
+//		std::cout << "Shader::UploadUniformFloat() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
 	}
 }
 
@@ -175,7 +175,7 @@ void Shader::UploadUniformFloat2(const std::string& name, const glm::vec2& value
 	}
 	else
 	{
-		std::cout << "Shader::UploadUniformFloat2() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
+//		std::cout << "Shader::UploadUniformFloat2() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
 	}
 }
 
@@ -190,7 +190,7 @@ void Shader::UploadUniformFloat3(const std::string& name, const glm::vec3& value
 	}
 	else
 	{
-		std::cout << "Shader::UploadUniformFloat3() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
+//		std::cout << "Shader::UploadUniformFloat3() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
 	}
 }
 
@@ -205,7 +205,7 @@ void Shader::UploadUniformFloat4(const std::string& name, const glm::vec4& value
 	}
 	else
 	{
-		std::cout << "Shader::UploadUniformFloat4() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
+//		std::cout << "Shader::UploadUniformFloat4() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
 	}
 }
 
@@ -220,7 +220,7 @@ void Shader::UploadUniformFloatArray(const std::string& name, float* values, uin
 	}
 	else
 	{
-		std::cout << "Shader::UploadUniformFloatArray() : uniform called \"" << name << "\" does not exist in shader , or hasn't been added with Shader::SearchAndAddUniform()\n";
+//		std::cout << "Shader::UploadUniformFloatArray() : uniform called \"" << name << "\" does not exist in shader , or hasn't been added with Shader::SearchAndAddUniform()\n";
 	}
 }
 
@@ -235,7 +235,7 @@ void Shader::UploadUniformMat3(const std::string& name, const glm::mat3& value)
 	}
 	else
 	{
-		std::cout << "Shader::UploadUniformMat3() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
+//		std::cout << "Shader::UploadUniformMat3() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
 	}
 }
 
@@ -250,7 +250,7 @@ void Shader::UploadUniformMat4(const std::string& name, const glm::mat4& value)
 	}
 	else
 	{
-		std::cout << "Shader::UploadUniformMat4() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
+//		std::cout << "Shader::UploadUniformMat4() : uniform called \"" << name << "\" does not exist in shader, or hasn't been added with Shader::SearchAndAddUniform()\n";
 	}
 }
 

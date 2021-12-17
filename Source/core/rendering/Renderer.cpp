@@ -7,6 +7,7 @@
 #include <core/GlobalConstants.h>
 
 float Renderer::s_AspectRatio = 1.0f;
+std::shared_ptr<Framebuffer> Renderer::s_FrameBuffer = nullptr;
 std::shared_ptr<Depthbuffer> Renderer::s_DepthBuffer = nullptr;
 ShaderLibrary Renderer::s_ShaderLibrary;
 
@@ -22,12 +23,24 @@ int Renderer::Init()
 		std::cout << "Failed to initialize OpenGL context\n";
 
 	// Create the framebuffer for the shadow map:
-	FrameBufferSpecification fbspec;
-	fbspec.Width = 4096;
-	fbspec.Height = 4096;
-	s_DepthBuffer = std::shared_ptr<Depthbuffer>(new Depthbuffer(fbspec));
-	s_DepthBuffer->GetDepthAttachment()->SetSlot(1);
+	FrameBufferSpecification dbSpec;
+	dbSpec.Width = 4096;
+	dbSpec.Height = 4096;
+//	s_DepthBuffer = std::shared_ptr<Depthbuffer>(new Depthbuffer(fbspec));
+	s_DepthBuffer = std::make_shared<Depthbuffer>(dbSpec);
+	s_DepthBuffer->GetDepthAttachment()->SetSlot(g_RendererShadowDepthSlot);
 	s_DepthBuffer->GetDepthAttachment()->Bind();
+
+
+	FrameBufferSpecification fbSpec;
+	fbSpec.Width = Application::Get().GetWindow().GetWidth();
+	fbSpec.Height = Application::Get().GetWindow().GetHeight();
+	fbSpec.Samples = 1;
+	s_FrameBuffer = std::make_shared<Framebuffer>(fbSpec);
+	s_FrameBuffer->GetColorAttachment()->SetSlot(g_RendererColorAttchSlot);
+	s_FrameBuffer->GetBrightColorAttachment()->SetSlot(g_RendererBrightColAttchSlot);
+	s_FrameBuffer->GetDepthAttachment()->SetSlot(g_RendererDepthAttchSlot);
+	s_FrameBuffer->Unbind();
 
 	// Add the shaders to the shader library
 
@@ -35,6 +48,12 @@ int Renderer::Init()
 	s_ShaderLibrary.AddShader(
 		std::string(instanced_colour_shader_vertexSrc),
 		std::string(instanced_colour_shader_fragmentSrc)
+	);
+
+	// MeshType::BRIGHT_COLOURED_MESH
+	s_ShaderLibrary.AddShader(
+		std::string(instanced_bright_shader_vertexSrc),
+		std::string(instanced_bright_shader_fragmentSrc)
 	);
 
 	// MeshType::NORMAL_MESH
@@ -184,4 +203,20 @@ std::shared_ptr<Shader> Renderer::BindShader(MeshType meshType)
 {
 	return s_ShaderLibrary.BindShader(meshType);
 }
+
+std::shared_ptr<Texture> Renderer::GetColorAttachment()
+{
+	return s_FrameBuffer->GetColorAttachment();
+}
+
+std::shared_ptr<Texture> Renderer::GetBrightColorAttachment()
+{
+	return s_FrameBuffer->GetBrightColorAttachment();
+}
+
+std::shared_ptr<Texture> Renderer::GetDepthAttachment()
+{
+	return s_DepthBuffer->GetDepthAttachment();
+}
+
 
