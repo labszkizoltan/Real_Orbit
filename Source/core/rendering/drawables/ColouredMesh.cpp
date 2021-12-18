@@ -55,8 +55,8 @@ void ColouredMesh::Draw()
 {
 	m_VertexArray.Bind();
 
-	static const unsigned int attachment = GL_COLOR_ATTACHMENT0;
-	glDrawBuffers(1, &attachment);
+//	static const unsigned int attachment = GL_COLOR_ATTACHMENT0;
+//	glDrawBuffers(1, &attachment);
 	GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, 0, m_InstanceBuffer.GetElementCount()));
 
 	m_VertexArray.UnBind();

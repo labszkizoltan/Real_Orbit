@@ -55,12 +55,14 @@ const char* skybox_shader_vertexSrc =
 const char* skybox_shader_fragmentSrc =
 "	#version 460 core \n"
 "	layout(location = 0) out vec4 color; \n"
+"	layout(location = 1) out vec4 BrightColor; \n"
 "	in vec2 vTexCoord; \n"
 "	in float vTexID; \n"
 "	uniform sampler2D u_Textures[32]; \n"
 "	void main() \n"
 "	{ \n"
 "		color = texture(u_Textures[int(vTexID+2)], vTexCoord); \n"
+"		BrightColor = vec4(0,0,0,0); \n"
 //"		color = vec4(vTexID/6); \n"
 "	}\0";
 

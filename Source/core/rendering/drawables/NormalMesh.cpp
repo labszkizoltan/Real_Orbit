@@ -42,7 +42,7 @@ NormalMesh::NormalMesh(const std::vector<float>& vertexData, const std::vector<u
 	m_Texture(new Texture(texturePath))
 {
 	// s_VertexLayout already uses 0/1/2 slots in the layout, so the instance buffer elements should continue from there
-	m_InstanceBuffer.SetAttribStartIdx(s_VertexLayout.m_Elements.size());
+//	m_InstanceBuffer.SetAttribStartIdx(s_VertexLayout.m_Elements.size());
 
 	m_VertexArray.Bind();
 	m_VertexBuffer.SetLayout(s_VertexLayout);
@@ -60,8 +60,8 @@ void NormalMesh::Draw()
 	m_VertexArray.Bind();
 	m_Texture->Bind();
 
-	static const unsigned int attachment = GL_COLOR_ATTACHMENT0;
-	glDrawBuffers(1, &attachment);
+//	static const unsigned int attachment = GL_COLOR_ATTACHMENT0;
+//	glDrawBuffers(1, &attachment);
 	GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, 0, m_InstanceBuffer.GetElementCount()));
 
 	m_VertexArray.UnBind();

@@ -56,8 +56,8 @@ void Skybox::Draw()
 	for (int i = 0; i < m_Textures.size(); i++)
 		m_Textures[i]->Bind();
 
-	static const unsigned int attachment = GL_COLOR_ATTACHMENT0;
-	glDrawBuffers(1, &attachment);
+//	static const unsigned int attachment = GL_COLOR_ATTACHMENT0;
+//	glDrawBuffers(1, &attachment);
 	glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
 
 	m_VertexArray.UnBind();

@@ -89,6 +89,7 @@ const char* instanced_normal_shader_vertexSrc =
 const char* instanced_normal_shader_fragmentSrc =
 "#version 460 core\n"
 "layout(location = 0) out vec4 FragColor; \n"
+"layout(location = 1) out vec4 BrightColor; \n"
 "in vec2 texCoord; \n"
 "in vec3 lightCoordinates; \n"
 "in float light_normal_dot; \n"
@@ -103,10 +104,8 @@ const char* instanced_normal_shader_fragmentSrc =
 "	float bias = 0.001; \n"
 "	float shadow = (currentDepth - bias) > closestDepth ? 1.0 : 0.0; \n"
 "	FragColor = light_normal_dot < 0.0 ? vec4(color/2, 1.0) : vec4(color*min((1-shadow/2),(1+light_normal_dot)/2), 1.0); \n"
+"	BrightColor = vec4(0,0,0,0); \n"
 "}\0";
-
-
-
 
 
 

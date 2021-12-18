@@ -55,8 +55,8 @@ void BrightColouredMesh::Draw()
 {
 	m_VertexArray.Bind();
 
-	static const unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, attachments);
+//	static const unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+//	glDrawBuffers(2, attachments);
 	GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, 0, m_InstanceBuffer.GetElementCount()));
 
 	m_VertexArray.UnBind();

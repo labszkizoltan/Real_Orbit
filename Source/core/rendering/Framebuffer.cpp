@@ -43,7 +43,7 @@ void Framebuffer::Invalidate()
 	colorSpec.Height = m_Specification.Height;
 	colorSpec.InternalFormat = GL_RGBA8;
 	colorSpec.DataFormat = GL_RGBA;
-	m_ColorAttachment = std::shared_ptr<Texture>(new Texture(colorSpec));
+	m_ColorAttachment = std::make_shared<Texture>(colorSpec);
 
 	GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_ColorAttachment->m_RendererID));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_ColorAttachment->m_RendererID));
@@ -54,7 +54,7 @@ void Framebuffer::Invalidate()
 	GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorAttachment->m_RendererID, 0));
 
 	// create the bright color attachment
-	m_BrightColorAttachment = std::shared_ptr<Texture>(new Texture(colorSpec));
+	m_BrightColorAttachment = std::make_shared<Texture>(colorSpec);
 
 	GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_BrightColorAttachment->m_RendererID));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_BrightColorAttachment->m_RendererID));
@@ -70,7 +70,7 @@ void Framebuffer::Invalidate()
 	depthSpec.Height = m_Specification.Height;
 	depthSpec.InternalFormat = GL_DEPTH24_STENCIL8;
 	depthSpec.DataFormat = GL_DEPTH24_STENCIL8; // i think this is not used
-	m_DepthAttachment = std::shared_ptr<Texture>(new Texture(depthSpec));
+	m_DepthAttachment = std::make_shared<Texture>(depthSpec);
 
 	GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &m_DepthAttachment->m_RendererID));
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_DepthAttachment->m_RendererID));
@@ -83,6 +83,9 @@ void Framebuffer::Invalidate()
 void Framebuffer::Bind()
 {
 	glGetIntegerv(GL_VIEWPORT, m_ViewPortBefore);
+
+//	static const unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+//	glDrawBuffers(2, attachments);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 	glViewport(0, 0, m_Specification.Width, m_Specification.Height);

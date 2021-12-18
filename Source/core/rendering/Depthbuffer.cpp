@@ -39,7 +39,7 @@ void Depthbuffer::Invalidate()
 	depthSpec.Height = m_Specification.Height;
 	depthSpec.InternalFormat = GL_DEPTH_COMPONENT32F; // GL_DEPTH24_STENCIL8;
 //	depthSpec.DataFormat = GL_DEPTH24_STENCIL8; // i think this is not used
-	m_DepthAttachment = std::shared_ptr<Texture>(new Texture(depthSpec));
+	m_DepthAttachment = std::make_shared<Texture>(depthSpec);
 
 
 	glCreateTextures(GL_TEXTURE_2D, 1, &m_DepthAttachment->m_RendererID);

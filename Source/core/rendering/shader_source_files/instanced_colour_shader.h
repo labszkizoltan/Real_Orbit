@@ -71,13 +71,18 @@ const char* instanced_colour_shader_vertexSrc =
 const char* instanced_colour_shader_fragmentSrc =
 "#version 460 core\n"
 "layout(location = 0) out vec4 FragColor; \n"
+"layout(location = 1) out vec4 BrightColor; \n"
 "in vec3 outColor; \n"
 "uniform float alpha; \n"
 "void main()\n"
 "{\n"
 "	FragColor = vec4(outColor, 1.0); \n"
+"	BrightColor = vec4(0,0,0,0); \n"
 //"	FragColor = vec4(vec3(gl_FragCoord.z), 1.0); \n"
 "}\0";
+
+
+
 
 
 

@@ -26,10 +26,9 @@ int Renderer::Init()
 	FrameBufferSpecification dbSpec;
 	dbSpec.Width = 4096;
 	dbSpec.Height = 4096;
-	s_DepthBuffer = std::make_shared<Depthbuffer>(dbSpec);
+	s_DepthBuffer = std::make_shared<Depthbuffer>(dbSpec); // the constructor automatically binds the depthbuffer
 	s_DepthBuffer->GetDepthAttachment()->SetSlot(g_RendererShadowDepthSlot);
-	s_DepthBuffer->GetDepthAttachment()->Bind();
-
+	s_DepthBuffer->Unbind();
 
 	FrameBufferSpecification fbSpec;
 	fbSpec.Width = Application::Get().GetWindow().GetWidth();
@@ -39,11 +38,14 @@ int Renderer::Init()
 	s_FrameBuffer->GetColorAttachment()->SetSlot(g_RendererColorAttchSlot);
 	s_FrameBuffer->GetBrightColorAttachment()->SetSlot(g_RendererBrightColAttchSlot);
 	s_FrameBuffer->GetDepthAttachment()->SetSlot(g_RendererDepthAttchSlot);
+	s_FrameBuffer->Unbind();
 
+	// frame/depth buffer construction somehow invalidates the texture binding,
+	// so Im doing it after both framebuffers are done
+	s_DepthBuffer->GetDepthAttachment()->Bind();
 	s_FrameBuffer->GetColorAttachment()->Bind();
 	s_FrameBuffer->GetBrightColorAttachment()->Bind();
 	s_FrameBuffer->GetDepthAttachment()->Bind();
-	s_FrameBuffer->Unbind();
 
 	// Add the shaders to the shader library
 
@@ -103,6 +105,8 @@ int Renderer::Init()
 	SetLightPosition(Vec3D(0.0f, 0.0f, -3.0f));
 	SetMinMaxRange(0.05f, 300.0f);
 	s_ShaderLibrary.SetTextureSlots();
+
+	glEnable(GL_DEPTH_TEST);
 
 	return result;
 }

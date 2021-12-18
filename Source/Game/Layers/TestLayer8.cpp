@@ -78,13 +78,13 @@ void TestLayer8::OnAttach()
 
 
 
-//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
+	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 //	m_FbDisplay.SetTexture(Renderer::GetBrightColorAttachment());
 //	m_FbDisplay.SetTexture(Renderer::GetDepthAttachment());
-	m_FbDisplay.SetTexture(Renderer::s_DepthBuffer->GetDepthAttachment());
-//	Renderer::s_DepthBuffer->GetDepthAttachment();
+//	m_FbDisplay.SetTexture(Renderer::s_DepthBuffer->GetDepthAttachment());
 	
-	glEnable(GL_DEPTH_TEST);
+
+
 }
 
 void TestLayer8::OnDetach()
