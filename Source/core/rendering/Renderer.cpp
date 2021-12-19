@@ -2,9 +2,11 @@
 #include "Renderer.h"
 #include <core/Application.h>
 #include <core/rendering/shader_source_files/ShaderSourceCollection.h>
+#include <core/rendering/ImageProcessor.h>
 //#include <core/rendering/shader_source_files/basic_3D_shaders.h>
 #include <core/scene/Components.h>
 #include <core/GlobalConstants.h>
+
 
 float Renderer::s_AspectRatio = 1.0f;
 std::shared_ptr<DoubleFramebuffer> Renderer::s_FrameBuffer = nullptr;
@@ -65,6 +67,11 @@ int Renderer::Init()
 	result = InitShaderLibrary();
 	if(!result)
 		std::cout << "Failed to initialize ShaderLibrary\n";
+
+//	// Init ImageProcessor
+//	result = ImageProcessor::Init();
+//	if(!result)
+//		std::cout << "Failed to initialize ImageProcessor\n";
 
 	float w = Application::Get().GetWindow().GetWidth();
 	float h = Application::Get().GetWindow().GetHeight();

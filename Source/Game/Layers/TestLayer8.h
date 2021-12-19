@@ -14,6 +14,7 @@
 #include <core/rendering/DoubleFramebuffer.h>
 #include <core/rendering/FramebufferDisplay.h>
 #include <core/rendering/Depthbuffer.h>
+#include <core/rendering/ImageProcessor.h>
 #include <core/rendering/drawables/Mesh.h>
 
 #include <core/rendering/SceneRenderer.h>
@@ -66,6 +67,8 @@ private:
 //	std::shared_ptr<Shader> m_ScreenDrawer = nullptr;
 
 	FramebufferDisplay m_FbDisplay;
+	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;
+	int m_current_slot = 0;
 
 };
 

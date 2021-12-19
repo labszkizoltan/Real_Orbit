@@ -75,15 +75,10 @@ void TestLayer8::OnAttach()
 	m_SceneRenderer.SetScene(m_Scene);
 	m_SceneUpdater.SetScene(m_Scene);
 
-
-
-	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
-//	m_FbDisplay.SetTexture(Renderer::GetBrightColorAttachment());
-//	m_FbDisplay.SetTexture(Renderer::GetDepthAttachment());
-//	m_FbDisplay.SetTexture(Renderer::s_DepthBuffer->GetDepthAttachment());
+//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
+	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
 	
-
-
+	m_ImgProcessor = std::make_unique<ImageProcessor>();
 }
 
 void TestLayer8::OnDetach()
@@ -98,9 +93,13 @@ void TestLayer8::OnUpdate(Timestep ts)
 	m_SceneRenderer.RenderScene();
 	m_SceneUpdater.UpdateScene(m_SimulationSpeed*ts);
 
-	m_FbDisplay.Draw();
+//	m_ImgProcessor->Blur(g_RendererBlurDepthSlot, Renderer::s_BlurBuffer); // this is not working, as expected
+	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
+
+//	m_FbDisplay.Draw();
 //	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, 0);
 //	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBrightColAttchSlot);
+	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 //	m_FbDisplay.DrawCombined(Renderer::GetColorAttachment(), Renderer::GetBrightColorAttachment());
 
 	m_ElapsedTime += m_SimulationSpeed*ts;
@@ -231,10 +230,9 @@ bool TestLayer8::OnKeyPressed(Event& e)
 		m_SimulationSpeed = 5.0f;
 	else if (event.key.code == sf::Keyboard::Key::N)
 	{
-		static int current_slot = 0;
-		LOG_WARN("Display Texture Slot was changed to: {0}", current_slot % 32);
-		m_FbDisplay.SetDisplayedSlot(current_slot%32);
-		current_slot++;
+		LOG_WARN("Display Texture Slot was changed to: {0}", m_current_slot % 32);
+		m_FbDisplay.SetDisplayedSlot(m_current_slot %32);
+		m_current_slot++;
 	}
 
 	LOG_INFO("TestLayer received KeyPressed evet: {0}", event.key.code);
@@ -306,6 +304,8 @@ void TestLayer8::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Down)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f1) * cam_trf.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Left)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Right)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::P)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::O)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
 
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { cam_velocity *= 1.1f; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }

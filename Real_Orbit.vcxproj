@@ -173,6 +173,7 @@
     <ClCompile Include="Source\core\rendering\DoubleFramebuffer.cpp" />
     <ClCompile Include="Source\core\rendering\Framebuffer.cpp" />
     <ClCompile Include="Source\core\rendering\FramebufferDisplay.cpp" />
+    <ClCompile Include="Source\core\rendering\ImageProcessor.cpp" />
     <ClCompile Include="Source\core\rendering\InstanceBuffer.cpp" />
     <ClCompile Include="Source\core\rendering\Renderer.cpp" />
     <ClCompile Include="Source\core\rendering\SceneRenderer.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="Source\core\rendering\DoubleFramebuffer.h" />
     <ClInclude Include="Source\core\rendering\Framebuffer.h" />
     <ClInclude Include="Source\core\rendering\FramebufferDisplay.h" />
+    <ClInclude Include="Source\core\rendering\ImageProcessor.h" />
     <ClInclude Include="Source\core\rendering\InstanceBuffer.h" />
     <ClInclude Include="Source\core\rendering\Renderer.h" />
     <ClInclude Include="Source\core\rendering\SceneRenderer.h" />
