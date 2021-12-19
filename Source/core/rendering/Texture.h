@@ -39,6 +39,7 @@ private:
 
 
 	friend class Framebuffer;
+	friend class DoubleFramebuffer;
 	friend class Depthbuffer;
 };
 

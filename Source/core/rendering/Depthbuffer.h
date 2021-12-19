@@ -3,7 +3,8 @@
 #define DEPTHBUFFER_H
 
 #include <stdint.h> // withoud including this, the uint32_t type is not recognized
-#include "Framebuffer.h"
+//#include "Framebuffer.h"
+#include "DoubleFramebuffer.h"
 #include "Texture.h"
 
 class Depthbuffer

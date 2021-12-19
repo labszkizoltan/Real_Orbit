@@ -16,6 +16,8 @@ const int g_SkyboxTextureSlots[6] = { 2,3,4,5,6,7 };
 const int g_RendererColorAttchSlot = 8;
 const int g_RendererBrightColAttchSlot = 9;
 const int g_RendererDepthAttchSlot = 10;
+const int g_RendererBlurredSlot = 11;
+const int g_RendererBlurDepthSlot = 12; // this in not used, but the framebuffer class has a depth buffer
 
 
 #endif // GLOBAL_CONSTANTS_H

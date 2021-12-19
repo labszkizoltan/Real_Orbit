@@ -11,7 +11,6 @@
 #include <core/scene/SceneSerializer.h>
 #include <core/scene/Components.h>
 
-#include <core/GlobalConstants.h>
 
 #include <utils/Vector_3D.h>
 #include <glad/glad.h>
@@ -100,13 +99,16 @@ void TestLayer8::OnUpdate(Timestep ts)
 	m_SceneUpdater.UpdateScene(m_SimulationSpeed*ts);
 
 	m_FbDisplay.Draw();
+//	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, 0);
+//	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBrightColAttchSlot);
+//	m_FbDisplay.DrawCombined(Renderer::GetColorAttachment(), Renderer::GetBrightColorAttachment());
 
 	m_ElapsedTime += m_SimulationSpeed*ts;
 }
 
 void TestLayer8::OnEvent(Event& event)
 {
-	LOG_INFO("TestLayer8 event received");
+//	LOG_INFO("TestLayer8 event received");
 
 	event.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
 	event.Dispatch<sf::Event::EventType::LostFocus>				(BIND_EVENT_FN(OnLoosingFocus));
@@ -149,9 +151,9 @@ void TestLayer8::EmitMesh(int meshIdx, TransformComponent transform)
 {
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 1.0f;
-	dynProps.velocity = 0.001f * transform.orientation.f3;
+	dynProps.velocity = 0.05f * transform.orientation.f3;
 	dynProps.angular_velocity = Vec3D();
-	transform.scale = 0.1f;
+	transform.scale = 0.02f;
 	transform.location += 0.1*(transform.orientation.f3 - transform.orientation.f2);
 
 	Entity newEntity = m_Scene->CreateEntity("");
@@ -247,36 +249,19 @@ bool TestLayer8::OnKeyReleased(Event& e)
 
 bool TestLayer8::MouseWheelScrolled(Event& e)
 {
-	static float zoom_level = g_InitialZoomLevel;
-
 	sf::Event& event = e.GetEvent();
 
-	zoom_level *= event.mouseWheelScroll.delta > 0 ? 1.25f : 0.8f;
-	zoom_level = zoom_level < g_InitialZoomLevel ? g_InitialZoomLevel : zoom_level;
-	zoom_level = zoom_level > 128.0f ? 128.0f : zoom_level;
+	m_ZoomLevel *= event.mouseWheelScroll.delta > 0 ? 1.25f : 0.8f;
+	m_ZoomLevel = m_ZoomLevel < g_InitialZoomLevel ? g_InitialZoomLevel : m_ZoomLevel;
+	m_ZoomLevel = m_ZoomLevel > 128.0f ? 128.0f : m_ZoomLevel;
 
-	Renderer::SetZoomLevel(zoom_level);
+	Renderer::SetZoomLevel(m_ZoomLevel);
 
 	return false;
 }
 
 bool TestLayer8::OnMouseButtonPressed(Event& e)
 {
-	/*
-	sf::Event& event = e.GetEvent();
-	static int idx = m_Scene->GetMeshLibrary().m_NameIndexLookup["OrangeSphere"];
-	if (event.mouseButton.button == sf::Mouse::Left)
-	{
-		TransformComponent trf = m_Scene->GetCamera();
-		trf.scale = 0.1f;
-		EmitMesh(idx, trf);
-	}
-	else if (event.mouseButton.button == sf::Mouse::Right)
-	{
-		RemoveMesh(idx);
-	}
-	*/
-
 	return false;
 }
 
@@ -326,12 +311,15 @@ void TestLayer8::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
 
 	static int orangeIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["OrangeSphere"];
+	static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
 	static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
 	static int yellowIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
 	static int skip = 0;
 	if(Input::IsMouseButtonPressed(sf::Mouse::Left))
 	{
-		EmitMesh(orangeIdx, cam_trf);
+//		EmitMesh(orangeIdx, cam_trf);
+		if(skip%4==0)
+			EmitMesh(bulletIdx, cam_trf);
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip%2 == 0) 
 	{
@@ -358,7 +346,7 @@ void TestLayer8::HandleUserInput(Timestep ts)
 		mousePos.y -= Application::Get().GetWindow().GetHeight() / 2;
 		float radiusFromCenter_square = (mousePos.x * mousePos.x + mousePos.y * mousePos.y);
 		Vec3D rotationAxis = mousePos.y * cam_trf.orientation.f1 + mousePos.x * cam_trf.orientation.f2;
-		Mat_3D rotationMatrix = Rotation(0.00000001f * ts * std::max(0.0f, radiusFromCenter_square - r_min_square), rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
+		Mat_3D rotationMatrix = Rotation(0.00000001f * ts * std::max(0.0f, radiusFromCenter_square - r_min_square) / m_ZoomLevel, rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
 
 		cam_trf.orientation = rotationMatrix * cam_trf.orientation;
 	}

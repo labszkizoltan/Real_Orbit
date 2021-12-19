@@ -43,24 +43,45 @@ const char* fbDisplay_fragmentSource =
 "	FragColor = texture(u_Textures[int(textureSlot)], texCoord); \n"
 "}\0";
 
+
+const char* fbDisplay_combined_fragmentSource =
+"#version 460 core\n"
+//"layout(location = 0) out vec4 FragColor; \n"
+"out vec4 FragColor; \n"
+"in vec2 texCoord; \n"
+"uniform sampler2D u_Textures[32]; \n"
+"uniform float textureSlot_1; \n"
+"uniform float textureSlot_2; \n"
+"void main()\n"
+"{\n"
+"	vec4 col_1 = texture(u_Textures[int(textureSlot_1)], texCoord); \n"
+"	vec4 col_2 = texture(u_Textures[int(textureSlot_2)], texCoord); \n"
+//"	vec4 col_1 = texture(u_Textures[8], texCoord); \n"
+//"	vec4 col_2 = texture(u_Textures[9], texCoord); \n"
+"	FragColor = col_1 + col_2; \n"
+"}\0";
+
+
 FramebufferDisplay::FramebufferDisplay()
     : m_VertexArray(),
 	m_VertexBuffer((float*)&fbDisplay_vertices[0], fbDisplay_vertices.size() * sizeof(float)),
 	m_IndexBuffer((uint32_t*)&fbDisplay_indices[0], fbDisplay_indices.size()),
 	m_Texture(nullptr),
-	m_Shader(std::make_shared<Shader>(std::string(fbDisplay_vertexSource), std::string(fbDisplay_fragmentSource)))
+	m_Shader(std::make_shared<Shader>(std::string(fbDisplay_vertexSource), std::string(fbDisplay_fragmentSource))),
+	m_CombinedShader(std::make_shared<Shader>(std::string(fbDisplay_vertexSource), std::string(fbDisplay_combined_fragmentSource)))
 {
 	m_VertexArray.Bind();
 	m_VertexBuffer.SetLayout(s_VertexLayout);
 	m_IndexBuffer.Bind();
 	m_VertexArray.UnBind();
 
-	
 	SetDisplayedSlot(0.0f);
 	int samplers[32];
 	for (uint32_t i = 0; i < 32; i++) { samplers[i] = i; }
 	// shader already bound by the SetDisplayedSlot call
 	m_Shader->UploadUniformIntArray("u_Textures", samplers, 32);
+	m_CombinedShader->Bind();
+	m_CombinedShader->UploadUniformIntArray("u_Textures", samplers, 32);
 }
 
 FramebufferDisplay::~FramebufferDisplay()
@@ -88,9 +109,38 @@ void FramebufferDisplay::Draw()
 {
 	m_Shader->Bind();
 	m_VertexArray.Bind();
-	m_Texture->Bind();
+//	m_Texture->Bind();
 
 	glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
 
 	m_VertexArray.UnBind();
 }
+
+void FramebufferDisplay::DrawCombined(int slot_1, int slot_2)
+{
+	m_CombinedShader->Bind();
+	m_CombinedShader->UploadUniformFloat("textureSlot_1", (float)slot_1);
+	m_CombinedShader->UploadUniformFloat("textureSlot_2", (float)slot_2);
+
+	m_VertexArray.Bind();
+	glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
+	m_VertexArray.UnBind();
+}
+
+/*
+void FramebufferDisplay::DrawCombined(std::shared_ptr<Texture> tex_1, std::shared_ptr<Texture> tex_2)
+{
+	m_VertexArray.Bind();
+
+	m_CombinedShader->Bind();
+	m_CombinedShader->UploadUniformFloat("textureSlot_1", (float)tex_1->GetSlot());
+	m_CombinedShader->UploadUniformFloat("textureSlot_2", (float)tex_2->GetSlot());
+
+	tex_1->Bind();
+	tex_2->Bind();
+	
+	glDrawElements(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
+	m_VertexArray.UnBind();
+}
+*/
+

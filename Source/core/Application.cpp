@@ -18,10 +18,10 @@ Application::Application(const std::string& name)
 	properties.Title = name;
 	properties.Width = 1200;
 	properties.Height = 800;
-	properties.Style = sf::Style::Default;
-	properties.ShowMouse = true;
-//	properties.Style = sf::Style::Fullscreen;
-//	properties.ShowMouse = false;
+//	properties.Style = sf::Style::Default;
+//	properties.ShowMouse = true;
+	properties.Style = sf::Style::Fullscreen;
+	properties.ShowMouse = false;
 
 	// need to create an OpenGL context without a window to query OpenGL version, then destroy the context
 	int versionMajor = 4, versionMinor = 6;
@@ -36,6 +36,7 @@ Application::Application(const std::string& name)
 
 //	m_Window = std::unique_ptr<Window>(Window::Create(WindowProps(name)));
 	m_Window = std::unique_ptr<Window>(Window::Create(properties, settings));
+
 	LOG_CORE_INFO("SFML window created with OpenGL version Major / Minor: {0} / {1}", settings.majorVersion, settings.minorVersion);
 
 	int renderInitStatus = Renderer::Init();

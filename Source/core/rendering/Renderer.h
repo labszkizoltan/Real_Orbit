@@ -3,7 +3,8 @@
 #define RENDERER_H
 
 #include <core/rendering/ShaderLibrary.h>
-#include <core/rendering/Framebuffer.h>
+#include <core/rendering/DoubleFramebuffer.h>
+//#include <core/rendering/Framebuffer.h>
 #include <core/rendering/Depthbuffer.h>
 #include <core/rendering/drawables/Mesh.h>
 #include <core/scene/Entity.h>
@@ -61,14 +62,17 @@ public:
 	static std::shared_ptr<Texture> GetColorAttachment();
 	static std::shared_ptr<Texture> GetBrightColorAttachment();
 	static std::shared_ptr<Texture> GetDepthAttachment();
+	static std::shared_ptr<Texture> GetBlurredAttachment();
 
 	// a few helper function could go here, like something that uploads various uniform combinations into the shaders
 private:
+	static int InitShaderLibrary();
 
 public:
 //private:
 	static float s_AspectRatio;
-	static std::shared_ptr<Framebuffer> s_FrameBuffer;
+	static std::shared_ptr<DoubleFramebuffer> s_FrameBuffer; // this is to render the bright meshes separately
+	static std::shared_ptr<Framebuffer> s_BlurBuffer; // this is to blur the layer of bright meshes
 	static std::shared_ptr<Depthbuffer> s_DepthBuffer;
 	static ShaderLibrary s_ShaderLibrary;
 

@@ -105,9 +105,6 @@
     <ClInclude Include="Source\core\rendering\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\core\rendering\Framebuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\core\rendering\Depthbuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -163,6 +160,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\core\rendering\FramebufferDisplay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\rendering\DoubleFramebuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\rendering\Framebuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -239,9 +242,6 @@
     <ClCompile Include="Source\core\rendering\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\core\rendering\Framebuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\core\rendering\Depthbuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -276,6 +276,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\core\rendering\FramebufferDisplay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\rendering\DoubleFramebuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\rendering\Framebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

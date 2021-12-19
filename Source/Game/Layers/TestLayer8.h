@@ -10,13 +10,16 @@
 #include <core/scene/Scene.h>
 #include <core/scene/Entity.h>
 #include <core/rendering/Shader.h>
-#include <core/rendering/Framebuffer.h>
+//#include <core/rendering/Framebuffer.h>
+#include <core/rendering/DoubleFramebuffer.h>
 #include <core/rendering/FramebufferDisplay.h>
 #include <core/rendering/Depthbuffer.h>
 #include <core/rendering/drawables/Mesh.h>
 
 #include <core/rendering/SceneRenderer.h>
 #include <core/scene/SceneUpdater.h>
+
+#include <core/GlobalConstants.h>
 
 class TestLayer8 : public Layer
 {
@@ -53,6 +56,7 @@ private:
 private:
 	float m_ElapsedTime = 0.0f;
 	float m_SimulationSpeed = 1.0f;
+	float m_ZoomLevel = g_InitialZoomLevel;
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;

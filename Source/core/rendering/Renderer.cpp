@@ -7,7 +7,8 @@
 #include <core/GlobalConstants.h>
 
 float Renderer::s_AspectRatio = 1.0f;
-std::shared_ptr<Framebuffer> Renderer::s_FrameBuffer = nullptr;
+std::shared_ptr<DoubleFramebuffer> Renderer::s_FrameBuffer = nullptr;
+std::shared_ptr<Framebuffer> Renderer::s_BlurBuffer = nullptr;
 std::shared_ptr<Depthbuffer> Renderer::s_DepthBuffer = nullptr;
 ShaderLibrary Renderer::s_ShaderLibrary;
 
@@ -30,15 +31,26 @@ int Renderer::Init()
 	s_DepthBuffer->GetDepthAttachment()->SetSlot(g_RendererShadowDepthSlot);
 	s_DepthBuffer->Unbind();
 
+	// Create the framebuffer for the double colour attachment buffer:
 	FrameBufferSpecification fbSpec;
 	fbSpec.Width = Application::Get().GetWindow().GetWidth();
 	fbSpec.Height = Application::Get().GetWindow().GetHeight();
 	fbSpec.Samples = 1;
-	s_FrameBuffer = std::make_shared<Framebuffer>(fbSpec); // the constructor automatically binds the framebuffer
+	s_FrameBuffer = std::make_shared<DoubleFramebuffer>(fbSpec); // the constructor automatically binds the framebuffer
 	s_FrameBuffer->GetColorAttachment()->SetSlot(g_RendererColorAttchSlot);
 	s_FrameBuffer->GetBrightColorAttachment()->SetSlot(g_RendererBrightColAttchSlot);
 	s_FrameBuffer->GetDepthAttachment()->SetSlot(g_RendererDepthAttchSlot);
 	s_FrameBuffer->Unbind();
+
+	// Create the framebuffer for the single colour attachment buffer (for blurring)
+	FrameBufferSpecification blurSpec;
+	blurSpec.Width = Application::Get().GetWindow().GetWidth();
+	blurSpec.Height = Application::Get().GetWindow().GetHeight();
+	blurSpec.Samples = 1;
+	s_BlurBuffer = std::make_shared<Framebuffer>(blurSpec); // the constructor automatically binds the framebuffer
+	s_BlurBuffer->GetColorAttachment()->SetSlot(g_RendererBlurredSlot);
+	s_BlurBuffer->GetDepthAttachment()->SetSlot(g_RendererBlurDepthSlot);
+	s_BlurBuffer->Unbind();
 
 	// frame/depth buffer construction somehow invalidates the texture binding,
 	// so Im doing it after both framebuffers are done
@@ -46,52 +58,13 @@ int Renderer::Init()
 	s_FrameBuffer->GetColorAttachment()->Bind();
 	s_FrameBuffer->GetBrightColorAttachment()->Bind();
 	s_FrameBuffer->GetDepthAttachment()->Bind();
+	s_BlurBuffer->GetColorAttachment()->Bind();
+	s_BlurBuffer->GetDepthAttachment()->Bind();
 
 	// Add the shaders to the shader library
-
-	// MeshType::COLOURED_MESH
-	s_ShaderLibrary.AddShader(
-		std::string(instanced_colour_shader_vertexSrc),
-		std::string(instanced_colour_shader_fragmentSrc)
-	);
-
-	// MeshType::BRIGHT_COLOURED_MESH
-	s_ShaderLibrary.AddShader(
-		std::string(instanced_bright_shader_vertexSrc),
-		std::string(instanced_bright_shader_fragmentSrc)
-	);
-
-	// MeshType::NORMAL_MESH
-	s_ShaderLibrary.AddShader(
-		std::string(instanced_normal_shader_vertexSrc),
-		std::string(instanced_normal_shader_fragmentSrc)
-	);
-
-	// MeshType::SKYBOX
-	s_ShaderLibrary.AddShader(
-		std::string(skybox_shader_vertexSrc),
-		std::string(skybox_shader_fragmentSrc)
-	);
-
-	// Shadow mapper
-	s_ShaderLibrary.AddShader(
-		std::string(shadow_mapper_vertexSrc),
-		std::string(shadow_mapper_fragmentSrc)
-	);
-
-//	// MeshType::MARKER_MESH
-//	s_ShaderLibrary.AddShader(
-//		std::string(shadow_mapper_vertexSrc),
-//		std::string(shadow_mapper_fragmentSrc)
-//	);
-
-//	// Add subsequent shader here:
-//	// MeshType::OTHER_MESH_TYPE
-//	s_ShaderLibrary.AddShader(
-//		ParseShader("Source/core/rendering/shader_source_files/other_3D_vertex_shd.glsl"),
-//		ParseShader("Source/core/rendering/shader_source_files/other_3D_fragment_shd.glsl")
-//	);
-
+	result = InitShaderLibrary();
+	if(!result)
+		std::cout << "Failed to initialize ShaderLibrary\n";
 
 	float w = Application::Get().GetWindow().GetWidth();
 	float h = Application::Get().GetWindow().GetHeight();
@@ -105,6 +78,9 @@ int Renderer::Init()
 	SetLightPosition(Vec3D(0.0f, 0.0f, -3.0f));
 	SetMinMaxRange(0.05f, 300.0f);
 	s_ShaderLibrary.SetTextureSlots();
+
+	glViewport(0, 0, Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
+	Renderer::SetAspectRatio((float)Application::Get().GetWindow().GetWidth() / (float)Application::Get().GetWindow().GetHeight());
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -149,10 +125,15 @@ void Renderer::Refresh()
 
 	s_FrameBuffer->Bind();
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	static const GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, draw_buffers);
+//	static const GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+//	glDrawBuffers(2, draw_buffers);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	s_FrameBuffer->Unbind();
+
+	s_BlurBuffer->Bind();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	s_BlurBuffer->Unbind();
 
 }
 
@@ -174,6 +155,59 @@ std::shared_ptr<Texture> Renderer::GetBrightColorAttachment()
 std::shared_ptr<Texture> Renderer::GetDepthAttachment()
 {
 	return s_DepthBuffer->GetDepthAttachment();
+}
+
+std::shared_ptr<Texture> Renderer::GetBlurredAttachment()
+{
+//	return nullptr;
+	return s_BlurBuffer->GetColorAttachment();
+}
+
+int Renderer::InitShaderLibrary()
+{	// MeshType::COLOURED_MESH
+	s_ShaderLibrary.AddShader(
+		std::string(instanced_colour_shader_vertexSrc),
+		std::string(instanced_colour_shader_fragmentSrc)
+	);
+
+	// MeshType::BRIGHT_COLOURED_MESH
+	s_ShaderLibrary.AddShader(
+		std::string(instanced_bright_shader_vertexSrc),
+		std::string(instanced_bright_shader_fragmentSrc)
+	);
+
+	// MeshType::NORMAL_MESH
+	s_ShaderLibrary.AddShader(
+		std::string(instanced_normal_shader_vertexSrc),
+		std::string(instanced_normal_shader_fragmentSrc)
+	);
+
+	// MeshType::SKYBOX
+	s_ShaderLibrary.AddShader(
+		std::string(skybox_shader_vertexSrc),
+		std::string(skybox_shader_fragmentSrc)
+	);
+
+	// Shadow mapper
+	s_ShaderLibrary.AddShader(
+		std::string(shadow_mapper_vertexSrc),
+		std::string(shadow_mapper_fragmentSrc)
+	);
+
+	//	// MeshType::MARKER_MESH
+	//	s_ShaderLibrary.AddShader(
+	//		std::string(shadow_mapper_vertexSrc),
+	//		std::string(shadow_mapper_fragmentSrc)
+	//	);
+
+	//	// Add subsequent shader here:
+	//	// MeshType::OTHER_MESH_TYPE
+	//	s_ShaderLibrary.AddShader(
+	//		ParseShader("Source/core/rendering/shader_source_files/other_3D_vertex_shd.glsl"),
+	//		ParseShader("Source/core/rendering/shader_source_files/other_3D_fragment_shd.glsl")
+	//	);
+
+	return 1;
 }
 
 
