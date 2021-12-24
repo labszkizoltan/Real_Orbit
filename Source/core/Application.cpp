@@ -18,10 +18,10 @@ Application::Application(const std::string& name)
 	properties.Title = name;
 	properties.Width = 1200;
 	properties.Height = 800;
-//	properties.Style = sf::Style::Default;
-//	properties.ShowMouse = true;
-	properties.Style = sf::Style::Fullscreen;
-	properties.ShowMouse = false;
+	properties.Style = sf::Style::Default;
+	properties.ShowMouse = true;
+//	properties.Style = sf::Style::Fullscreen;
+//	properties.ShowMouse = false;
 
 	// need to create an OpenGL context without a window to query OpenGL version, then destroy the context
 	int versionMajor = 4, versionMinor = 6; // works for 3.0, 3.3, 4.6... etc

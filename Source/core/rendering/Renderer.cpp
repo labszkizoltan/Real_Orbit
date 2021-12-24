@@ -9,9 +9,9 @@
 
 
 float Renderer::s_AspectRatio = 1.0f;
-std::shared_ptr<DoubleFramebuffer> Renderer::s_FrameBuffer = nullptr;
+std::shared_ptr<Framebuffer> Renderer::s_FrameBuffer = nullptr;
 std::shared_ptr<Framebuffer> Renderer::s_BlurBuffer = nullptr;
-std::shared_ptr<Depthbuffer> Renderer::s_DepthBuffer = nullptr;
+std::shared_ptr<Framebuffer> Renderer::s_DepthBuffer = nullptr;
 ShaderLibrary Renderer::s_ShaderLibrary;
 
 Renderer::~Renderer()
@@ -25,43 +25,11 @@ int Renderer::Init()
 	if (!result)
 		std::cout << "Failed to initialize OpenGL context\n";
 
-	// Create the framebuffer for the shadow map:
-	FrameBufferSpecification dbSpec;
-	dbSpec.Width = 4096;
-	dbSpec.Height = 4096;
-	s_DepthBuffer = std::make_shared<Depthbuffer>(dbSpec); // the constructor automatically binds the depthbuffer
-	s_DepthBuffer->GetDepthAttachment()->SetSlot(g_RendererShadowDepthSlot);
-	s_DepthBuffer->Unbind();
 
-	// Create the framebuffer for the double colour attachment buffer:
-	FrameBufferSpecification fbSpec;
-	fbSpec.Width = Application::Get().GetWindow().GetWidth();
-	fbSpec.Height = Application::Get().GetWindow().GetHeight();
-	fbSpec.Samples = 1;
-	s_FrameBuffer = std::make_shared<DoubleFramebuffer>(fbSpec); // the constructor automatically binds the framebuffer
-	s_FrameBuffer->GetColorAttachment()->SetSlot(g_RendererColorAttchSlot);
-	s_FrameBuffer->GetBrightColorAttachment()->SetSlot(g_RendererBrightColAttchSlot);
-	s_FrameBuffer->GetDepthAttachment()->SetSlot(g_RendererDepthAttchSlot);
-	s_FrameBuffer->Unbind();
-
-	// Create the framebuffer for the single colour attachment buffer (for blurring)
-	FrameBufferSpecification blurSpec;
-	blurSpec.Width = Application::Get().GetWindow().GetWidth();
-	blurSpec.Height = Application::Get().GetWindow().GetHeight();
-	blurSpec.Samples = 1;
-	s_BlurBuffer = std::make_shared<Framebuffer>(blurSpec); // the constructor automatically binds the framebuffer
-	s_BlurBuffer->GetColorAttachment()->SetSlot(g_RendererBlurredSlot);
-	s_BlurBuffer->GetDepthAttachment()->SetSlot(g_RendererBlurDepthSlot);
-	s_BlurBuffer->Unbind();
-
-	// frame/depth buffer construction somehow invalidates the texture binding,
-	// so Im doing it after both framebuffers are done
-	s_DepthBuffer->GetDepthAttachment()->Bind();
-	s_FrameBuffer->GetColorAttachment()->Bind();
-	s_FrameBuffer->GetBrightColorAttachment()->Bind();
-	s_FrameBuffer->GetDepthAttachment()->Bind();
-	s_BlurBuffer->GetColorAttachment()->Bind();
-	s_BlurBuffer->GetDepthAttachment()->Bind();
+	// Create the required framebuffers
+	result = InitFramebuffers();
+	if (!result)
+		std::cout << "Failed to initialize ShaderLibrary\n";
 
 	// Add the shaders to the shader library
 	result = InitShaderLibrary();
@@ -132,8 +100,6 @@ void Renderer::Refresh()
 
 	s_FrameBuffer->Bind();
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-//	static const GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-//	glDrawBuffers(2, draw_buffers);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	s_FrameBuffer->Unbind();
 
@@ -156,7 +122,8 @@ std::shared_ptr<Texture> Renderer::GetColorAttachment()
 
 std::shared_ptr<Texture> Renderer::GetBrightColorAttachment()
 {
-	return s_FrameBuffer->GetBrightColorAttachment();
+//	return s_FrameBuffer->GetBrightColorAttachment();
+	return s_FrameBuffer->GetColorAttachment(1);
 }
 
 std::shared_ptr<Texture> Renderer::GetDepthAttachment()
@@ -168,6 +135,55 @@ std::shared_ptr<Texture> Renderer::GetBlurredAttachment()
 {
 //	return nullptr;
 	return s_BlurBuffer->GetColorAttachment();
+}
+
+int Renderer::InitFramebuffers()
+{
+	// Create the framebuffer for the shadow map:
+	FrameBufferSpecification dbSpec;
+	dbSpec.Width = 4096;
+	dbSpec.Height = 4096;
+	dbSpec.HasDepthBuffer = true;
+	dbSpec.ColourAttachmentCount = 0;
+	s_DepthBuffer = std::make_shared<Framebuffer>(dbSpec); // the constructor automatically binds the depthbuffer
+	s_DepthBuffer->GetDepthAttachment()->SetSlot(g_RendererShadowDepthSlot);
+	s_DepthBuffer->Unbind();
+
+	// Create the framebuffer for the double colour attachment buffer:
+	FrameBufferSpecification fbSpec;
+	fbSpec.Width = Application::Get().GetWindow().GetWidth();
+	fbSpec.Height = Application::Get().GetWindow().GetHeight();
+	fbSpec.Samples = 1;
+	fbSpec.HasDepthBuffer = true;
+	fbSpec.ColourAttachmentCount = 2;
+	s_FrameBuffer = std::make_shared<Framebuffer>(fbSpec); // the constructor automatically binds the framebuffer
+	s_FrameBuffer->GetColorAttachment(0)->SetSlot(g_RendererColorAttchSlot);
+	s_FrameBuffer->GetColorAttachment(1)->SetSlot(g_RendererBrightColAttchSlot);
+	s_FrameBuffer->GetDepthAttachment()->SetSlot(g_RendererDepthAttchSlot);
+	s_FrameBuffer->Unbind();
+
+	// Create the framebuffer for the single colour attachment buffer (for blurring)
+	FrameBufferSpecification blurSpec;
+	blurSpec.Width = Application::Get().GetWindow().GetWidth();
+	blurSpec.Height = Application::Get().GetWindow().GetHeight();
+	blurSpec.Samples = 1;
+	blurSpec.HasDepthBuffer = true;
+	blurSpec.ColourAttachmentCount = 1;
+	s_BlurBuffer = std::make_shared<Framebuffer>(blurSpec); // the constructor automatically binds the framebuffer
+	s_BlurBuffer->GetColorAttachment(0)->SetSlot(g_RendererBlurredSlot);
+	s_BlurBuffer->GetDepthAttachment()->SetSlot(g_RendererBlurDepthSlot);
+	s_BlurBuffer->Unbind();
+
+	// frame/depth buffer construction somehow invalidates the texture binding,
+	// so Im doing it after both framebuffers are done
+	s_DepthBuffer->GetDepthAttachment()->Bind();
+	s_FrameBuffer->GetColorAttachment(0)->Bind();
+	s_FrameBuffer->GetColorAttachment(1)->Bind();
+	s_FrameBuffer->GetDepthAttachment()->Bind();
+	s_BlurBuffer->GetColorAttachment(0)->Bind();
+	s_BlurBuffer->GetDepthAttachment()->Bind();
+
+	return 1;
 }
 
 int Renderer::InitShaderLibrary()

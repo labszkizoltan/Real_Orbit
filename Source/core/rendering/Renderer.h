@@ -66,16 +66,17 @@ public:
 
 	// a few helper function could go here, like something that uploads various uniform combinations into the shaders
 private:
+	static int InitFramebuffers();
 	static int InitShaderLibrary();
 
 public:
 //private:
 	static float s_AspectRatio;
-	static std::shared_ptr<DoubleFramebuffer> s_FrameBuffer; // this is to render the bright meshes separately
+	static std::shared_ptr<Framebuffer> s_DepthBuffer; // this will contain the depth values from thr light sources point of view
+	static std::shared_ptr<Framebuffer> s_FrameBuffer; // this is to render the bright meshes separately
 	static std::shared_ptr<Framebuffer> s_BlurBuffer; // this is to blur the layer of bright meshes
-	static std::shared_ptr<Depthbuffer> s_DepthBuffer;
 	static ShaderLibrary s_ShaderLibrary;
-
+	
 
 
 	friend class SceneRenderer;

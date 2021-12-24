@@ -102,10 +102,12 @@ void InstanceBuffer::SetData(const std::vector<TransformComponent>& data)
 	{
 		Bind();
 		// when less than half of the capacity is utilized, shrink buffer to current size
+		//----- this may not be a very good idea -----//
 		if (m_Capacity >= (2 * data.size()))
 		{
 			m_Capacity = data.size();
 			GLCall(glBufferData(GL_ARRAY_BUFFER, m_Capacity * sizeof(TransformComponent), (void*)&data[0], GL_DYNAMIC_DRAW)); // GL_STREAM_DRAW, GL_STATIC_DRAW, GL_DYNAMIC_DRAW.
+//			GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, data.size() * sizeof(TransformComponent), (void*)&data[0]));
 		}
 		else if (m_Capacity >= data.size())
 		{

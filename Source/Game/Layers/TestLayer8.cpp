@@ -102,6 +102,7 @@ void TestLayer8::OnUpdate(Timestep ts)
 		//	RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
 		//	RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
 		//}
+		/*
 		if (randomLaunchCounter % 1000 < 50)
 		{
 			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
@@ -115,6 +116,7 @@ void TestLayer8::OnUpdate(Timestep ts)
 			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
 			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
 		}
+		*/
 		/*
 		if ((randomLaunchCounter+500) % 1000 < 50)
 		{
