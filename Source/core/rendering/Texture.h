@@ -20,6 +20,8 @@ public:
 	Texture(const std::string path);
 	~Texture();
 
+	void CreateMipMap();
+
 	uint32_t GetWidth() const { return m_Specification.Width; }
 	uint32_t GetHeight() const { return m_Specification.Height; }
 	uint32_t GetRendererID() const { return m_RendererID; };

@@ -57,14 +57,79 @@ const char* imgProc_blur_fragmentSource =
 "	vec3 result = texture(u_Textures[int(textureSlot)], texCoord).rgb * weight[0]; \n"  // current fragment's contribution
 "	for (int i = 1; i < 11; ++i)\n"
 "	{\n"
-"		result += texture(u_Textures[int(textureSlot)], texCoord + vec2(tex_offset.x * 2*i, 0.0)).rgb * weight[i];\n"
-"		result += texture(u_Textures[int(textureSlot)], texCoord - vec2(tex_offset.x * 2*i, 0.0)).rgb * weight[i];\n"
-"		result += texture(u_Textures[int(textureSlot)], texCoord + vec2(0.0, tex_offset.y * 2*i)).rgb * weight[i];\n"
-"		result += texture(u_Textures[int(textureSlot)], texCoord - vec2(0.0, tex_offset.y * 2*i)).rgb * weight[i];\n"
+"		result += texture(u_Textures[int(textureSlot)], texCoord + vec2(tex_offset.x * 3*i, 0.0)).rgb * weight[i];\n"
+"		result += texture(u_Textures[int(textureSlot)], texCoord - vec2(tex_offset.x * 3*i, 0.0)).rgb * weight[i];\n"
+"		result += texture(u_Textures[int(textureSlot)], texCoord + vec2(0.0, tex_offset.y * 3*i)).rgb * weight[i];\n"
+"		result += texture(u_Textures[int(textureSlot)], texCoord - vec2(0.0, tex_offset.y * 3*i)).rgb * weight[i];\n"
 "	}\n"
 //"	FragColor = texture(u_Textures[int(textureSlot)], texCoord)/2; \n"
 //"	FragColor = vec4(1.0,0,0,0); \n"
 "	FragColor = vec4(result, 1.0); \n"
+"}\0";
+
+
+const char* imgProc_blur_fragmentSource1_5 =
+"#version 460 core\n"
+"layout(location = 0) out vec4 FragColor; \n"
+"in vec2 texCoord; \n"
+"uniform sampler2D u_Textures[32]; \n"
+"uniform float textureSlot; \n"
+"uniform float weight[11] = float[](0.29090466, 0.20844230, 0.14935543, 0.10701784, 0.07668164, 0.05494479, 0.03936966, 0.02820960, 0.02021306, 0.01448329, 0.01037773); \n" 
+"uniform int mipmapLevel; \n"
+"void main()\n"
+"{\n"
+//"	int mipmapLevel = 4; \n"
+"	vec2 tex_offset = 0.25 / textureSize(u_Textures[int(textureSlot)], mipmapLevel); \n"  // gets size of single texel
+"	vec3 result = textureLod(u_Textures[int(textureSlot)], texCoord, mipmapLevel).rgb * weight[0]; \n"  // current fragment's contribution
+"	for (int i = 1; i < 11; ++i)\n"
+"	{\n"
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord + vec2(tex_offset.x * i, 0.0), mipmapLevel).rgb * weight[i];\n"
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord - vec2(tex_offset.x * i, 0.0), mipmapLevel).rgb * weight[i];\n"
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord + vec2(0.0, tex_offset.y * i), mipmapLevel).rgb * weight[i];\n"
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord - vec2(0.0, tex_offset.y * i), mipmapLevel).rgb * weight[i];\n"
+"	}\n"
+//"	FragColor = texture(u_Textures[int(textureSlot)], texCoord)/2; \n"
+//"	FragColor = vec4(1.0,0,0,0); \n"
+"	FragColor = vec4(result, 1.0); \n"
+"}\0";
+
+const char* imgProc_blur_fragmentSource2 =
+"#version 460 core\n"
+"layout(location = 0) out vec4 FragColor; \n"
+"in vec2 texCoord; \n"
+"uniform sampler2D u_Textures[32]; \n"
+"uniform float textureSlot; \n"
+"void main()\n"
+"{\n"
+"	int max_mipmapLevel = 8; \n"
+"	vec3 result = vec3(0,0,0); \n"
+"	vec2 tex_offset = 1.0 / textureSize(u_Textures[int(textureSlot)], 0); \n"  // gets size of single texel
+"	for (int mipmapLevel = 0; mipmapLevel < max_mipmapLevel ; ++mipmapLevel)\n"
+"	{\n"
+//"		vec2 tex_offset = 1.0 / textureSize(u_Textures[int(textureSlot)], mipmapLevel); \n"  // gets size of single texel, so I can sample the neighbouring pixel
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord + vec2(tex_offset.x, 0.0), mipmapLevel).rgb;\n"
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord - vec2(tex_offset.x, 0.0), mipmapLevel).rgb;\n"
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord + vec2(0.0, tex_offset.y), mipmapLevel).rgb;\n"
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord - vec2(0.0, tex_offset.y), mipmapLevel).rgb;\n"
+
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord + vec2(tex_offset.x, tex_offset.y), mipmapLevel).rgb/2;\n"
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord + vec2(tex_offset.x, -tex_offset.y), mipmapLevel).rgb/2;\n"
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord + vec2(-tex_offset.x, tex_offset.y), mipmapLevel).rgb/2;\n"
+"		result += textureLod(u_Textures[int(textureSlot)], texCoord + vec2(-tex_offset.x, -tex_offset.y), mipmapLevel).rgb/2;\n"
+
+"		tex_offset = 2*tex_offset; \n"
+"	}\n"
+//"	FragColor = vec4(result/(1+max_mipmapLevel*6), 1.0); \n"
+"	FragColor = vec4(result/(max_mipmapLevel), 1.0); \n"
+
+////"	vec3 result = texture(u_Textures[int(textureSlot)], texCoord).rgb; \n"  // current fragment's contribution
+//"	vec3 result = textureLod(u_Textures[int(textureSlot)], texCoord, max_mipmapLevel).rgb; \n"  // current fragment's contribution
+//"	vec2 tex_offset = 1.0 / textureSize(u_Textures[int(textureSlot)], max_mipmapLevel); \n"  // gets size of single texel
+//"		result += textureLod(u_Textures[int(textureSlot)], texCoord + vec2(tex_offset.x, 0.0), max_mipmapLevel).rgb;\n"
+//"		result += textureLod(u_Textures[int(textureSlot)], texCoord - vec2(tex_offset.x, 0.0), max_mipmapLevel).rgb;\n"
+//"		result += textureLod(u_Textures[int(textureSlot)], texCoord + vec2(0.0, tex_offset.y), max_mipmapLevel).rgb;\n"
+//"		result += textureLod(u_Textures[int(textureSlot)], texCoord - vec2(0.0, tex_offset.y), max_mipmapLevel).rgb;\n"
+//"	FragColor = vec4(result/5, 1.0); \n"
 "}\0";
 
 
@@ -73,13 +138,13 @@ ImageProcessor::ImageProcessor()
 	m_VertexBuffer((float*)&imgProc_vertices[0], imgProc_vertices.size() * sizeof(float)),
 	m_IndexBuffer((uint32_t*)&imgProc_indices[0], imgProc_indices.size()),
 	m_BlurShader(std::make_unique<Shader>(std::string(imgProc_vertexSource), std::string(imgProc_blur_fragmentSource)))
+//	m_BlurShader(std::make_unique<Shader>(std::string(imgProc_vertexSource), std::string(imgProc_blur_fragmentSource1_5)))
+//	m_BlurShader(std::make_unique<Shader>(std::string(imgProc_vertexSource), std::string(imgProc_blur_fragmentSource2)))
 {
 	m_VertexArray.Bind();
 	m_VertexBuffer.SetLayout(s_VertexLayout);
 	m_IndexBuffer.Bind();
 	m_VertexArray.UnBind();
-
-//	m_BlurShader = std::make_unique<Shader>(std::string(imgProc_vertexSource), std::string(imgProc_blur_fragmentSource));
 
 	SetInputSlot(0.0f);
 	int samplers[32];
@@ -115,6 +180,12 @@ void ImageProcessor::Blur(int inputSlot, std::shared_ptr<Framebuffer> outputFram
 	m_VertexArray.UnBind();
 
 	outputFramebuffer->Unbind();
+}
+
+void ImageProcessor::SetMipMapLevel(int level)
+{
+	m_BlurShader->Bind();
+	m_BlurShader->UploadUniformInt("mipmapLevel", level);
 }
 
 void ImageProcessor::SetInputSlot(int slot)

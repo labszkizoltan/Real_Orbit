@@ -79,6 +79,7 @@ void TestLayer8::OnAttach()
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
 	
 	m_ImgProcessor = std::make_unique<ImageProcessor>();
+	m_ImgProcessor->SetMipMapLevel(4);
 }
 
 void TestLayer8::OnDetach()
@@ -88,18 +89,64 @@ void TestLayer8::OnDetach()
 
 void TestLayer8::OnUpdate(Timestep ts)
 {
+
 	HandleUserInput(ts);
+	{
+		static int randomLaunchCounter = 0;
+		static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+		static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
+		static int yellowIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
+		//if (randomLaunchCounter % 1000 < 50)
+		//if (randomLaunchCounter % 8 == 0)
+		//{
+		//	RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+		//	RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+		//}
+		if (randomLaunchCounter % 1000 < 50)
+		{
+			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
+		}
+		/*
+		if ((randomLaunchCounter+500) % 1000 < 50)
+		{
+			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
+		}
+		*/
+
+		randomLaunchCounter++;
+	}
 
 	m_SceneRenderer.RenderScene();
 	m_SceneUpdater.UpdateScene(m_SimulationSpeed*ts);
+
+	Renderer::GetBrightColorAttachment()->CreateMipMap();
 
 //	m_ImgProcessor->Blur(g_RendererBlurDepthSlot, Renderer::s_BlurBuffer); // this is not working, as expected
 	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
 
 //	m_FbDisplay.Draw();
+	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
+
 //	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, 0);
 //	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBrightColAttchSlot);
-	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 //	m_FbDisplay.DrawCombined(Renderer::GetColorAttachment(), Renderer::GetBrightColorAttachment());
 
 	m_ElapsedTime += m_SimulationSpeed*ts;
@@ -117,6 +164,34 @@ void TestLayer8::OnEvent(Event& event)
 	event.Dispatch<sf::Event::EventType::MouseWheelScrolled>	(BIND_EVENT_FN(MouseWheelScrolled));
 	event.Dispatch<sf::Event::EventType::MouseButtonPressed>	(BIND_EVENT_FN(OnMouseButtonPressed));
 	event.Dispatch<sf::Event::EventType::MouseButtonReleased>	(BIND_EVENT_FN(OnMouseButtonReleased));
+//	event.Dispatch<sf::Event::EventType::MouseMoved>			(BIND_EVENT_FN(OnMouseMoved));
+}
+
+void TestLayer8::RandomRocketLaunch(int meshIdx, Vec3D origin)
+{
+	// get a random target
+//	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>(entt::exclude<TimerComponent>);
+	auto poolOfTargets = m_Scene->m_Registry.view<TransformComponent>(entt::exclude<TimerComponent>);
+	int size = poolOfTargets.size_hint();
+	int idx = rand() % size;
+
+	entt::entity target = entt::null;
+	while (target == entt::null)
+	{
+		for (auto entity : poolOfTargets)
+		{
+			if (idx == 0)
+			{
+				target = entity;
+				break;
+			}
+			idx--;
+		}
+	}
+
+	TransformComponent trf;
+	trf.location = origin;
+	LaunchMissile(meshIdx, trf, target);
 }
 
 entt::entity TestLayer8::GetTarget()
@@ -167,7 +242,8 @@ void TestLayer8::LaunchMissile(int meshIdx, TransformComponent transform, entt::
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 1.0f;
 //	dynProps.velocity = 0.01f * (transform.orientation.f1 + transform.orientation.f3);
-	dynProps.velocity = 0.05f * transform.orientation.f3;
+//	dynProps.velocity = 0.05f * transform.orientation.f3;
+	dynProps.velocity = 0.0f * transform.orientation.f3;
 	dynProps.angular_velocity = Vec3D();
 	transform.scale = 0.05f;
 	transform.location += 0.1 * (transform.orientation.f3 + transform.orientation.f1);
@@ -231,9 +307,17 @@ bool TestLayer8::OnKeyPressed(Event& e)
 	else if (event.key.code == sf::Keyboard::Key::N)
 	{
 		LOG_WARN("Display Texture Slot was changed to: {0}", m_current_slot % 32);
-		m_FbDisplay.SetDisplayedSlot(m_current_slot %32);
+		m_FbDisplay.SetDisplayedSlot(m_current_slot % 32);
 		m_current_slot++;
 	}
+	else if (event.key.code == sf::Keyboard::Key::M)
+	{
+		LOG_WARN("MipMap level was changed to: {0}", m_mipmap_level % 12);
+		m_ImgProcessor->SetMipMapLevel(m_mipmap_level%12);
+		m_mipmap_level++;
+	}
+	else if (event.key.code == sf::Keyboard::Key::C)
+		m_CameraContinuousRotation = !m_CameraContinuousRotation;
 
 	LOG_INFO("TestLayer received KeyPressed evet: {0}", event.key.code);
 
@@ -270,6 +354,33 @@ bool TestLayer8::OnMouseButtonReleased(Event& e)
 
 bool TestLayer8::OnMouseMoved(Event& e)
 {
+	static int center_x = Application::Get().GetWindow().GetWidth() / 2;
+	static int center_y = Application::Get().GetWindow().GetHeight() / 2;
+
+	sf::Event& event = e.GetEvent();
+	std::cout << "new mouse x: " << event.mouseMove.x << "\n";
+	std::cout << "new mouse y: " << event.mouseMove.y << "\n";
+	if (m_InFocus)
+	{
+		TransformComponent& cam_trf = m_Scene->GetCamera();
+		static const float r_min_square = 50.0f * 50.0f;
+
+		int dx = event.mouseMove.x - center_x;
+		int dy = event.mouseMove.y - center_y;
+//		float moveLengthSqr = dx * dx + dy * dy;
+		float moveLength = sqrt(dx * dx + dy * dy);
+		Vec3D rotationAxis = dy * cam_trf.orientation.f1 + dx * cam_trf.orientation.f2;
+//		Mat_3D rotationMatrix = Rotation(0.0001f * moveLengthSqr / m_ZoomLevel, rotationAxis); // angle is divided by zoom level to slow down turning when really zoomed into something
+		Mat_3D rotationMatrix = Rotation(0.005f * moveLength / m_ZoomLevel, rotationAxis); 
+
+		cam_trf.orientation = rotationMatrix * cam_trf.orientation;
+
+		// re-center mouse
+		static int center_x = Application::Get().GetWindow().GetWidth() / 2;
+		static int center_y = Application::Get().GetWindow().GetHeight() / 2;
+		sf::Mouse::setPosition(sf::Vector2i(center_x, center_y), Application::Get().GetWindow().GetNativeWindow());
+	}
+
 	return false;
 }
 
@@ -304,8 +415,8 @@ void TestLayer8::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Down)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f1) * cam_trf.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Left)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Right)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::P)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::O)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::P)) { ZoomIn(); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::O)) { ZoomOut(); }
 
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { cam_velocity *= 1.1f; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
@@ -337,18 +448,53 @@ void TestLayer8::HandleUserInput(Timestep ts)
 		light_trf.location = cam_trf.location;
 	}
 
-	// mouse related
+	// move with as the mouse changes position
 	if (m_InFocus)
 	{
-		float r_min_square = 50.0f * 50.0f;
-		sf::Vector2i mousePos = Input::GetMousePosition();
-		mousePos.x -= Application::Get().GetWindow().GetWidth() / 2;
-		mousePos.y -= Application::Get().GetWindow().GetHeight() / 2;
-		float radiusFromCenter_square = (mousePos.x * mousePos.x + mousePos.y * mousePos.y);
-		Vec3D rotationAxis = mousePos.y * cam_trf.orientation.f1 + mousePos.x * cam_trf.orientation.f2;
-		Mat_3D rotationMatrix = Rotation(0.00000001f * ts * std::max(0.0f, radiusFromCenter_square - r_min_square) / m_ZoomLevel, rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
+		if (!m_CameraContinuousRotation)
+		{
+			sf::Vector2i mousePos = Input::GetMousePosition();
+			static int center_x = Application::Get().GetWindow().GetWidth() / 2;
+			static int center_y = Application::Get().GetWindow().GetHeight() / 2;
 
-		cam_trf.orientation = rotationMatrix * cam_trf.orientation;
+			int dx = mousePos.x - center_x;
+			int dy = mousePos.y - center_y;
+
+			float radiusFromCenter = sqrt(dx * dx + dy * dy);
+			float radiusFromCenterSqr = dx * dx + dy * dy;
+			Vec3D rotationAxis = dy * cam_trf.orientation.f1 + dx * cam_trf.orientation.f2;
+			Mat_3D rotationMatrix = Rotation(ts * (0.00025f * radiusFromCenter + 0.0000001f * radiusFromCenterSqr) / m_ZoomLevel, rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
+	//		Mat_3D rotationMatrix = Rotation(0.0001f * ts * radiusFromCenter / m_ZoomLevel, rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
+
+			cam_trf.orientation = rotationMatrix * cam_trf.orientation;
+			sf::Mouse::setPosition(sf::Vector2i(center_x, center_y), Application::Get().GetWindow().GetNativeWindow());
+		}
+		else
+		{
+			float r_min_square = 50.0f * 50.0f;
+			sf::Vector2i mousePos = Input::GetMousePosition();
+			mousePos.x -= Application::Get().GetWindow().GetWidth() / 2;
+			mousePos.y -= Application::Get().GetWindow().GetHeight() / 2;
+			float radiusFromCenter_square = (mousePos.x * mousePos.x + mousePos.y * mousePos.y);
+			Vec3D rotationAxis = mousePos.y * cam_trf.orientation.f1 + mousePos.x * cam_trf.orientation.f2;
+			Mat_3D rotationMatrix = Rotation(0.00000001f * ts * std::max(0.0f, radiusFromCenter_square - r_min_square) / m_ZoomLevel, rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
+
+			cam_trf.orientation = rotationMatrix * cam_trf.orientation;
+		}
 	}
 
+}
+
+void TestLayer8::ZoomIn()
+{
+	m_ZoomLevel *= 1.05f;
+	m_ZoomLevel = m_ZoomLevel > 128.0f ? 128.0f : m_ZoomLevel;
+	Renderer::SetZoomLevel(m_ZoomLevel);
+}
+
+void TestLayer8::ZoomOut()
+{
+	m_ZoomLevel /= 1.05f;
+	m_ZoomLevel = m_ZoomLevel < g_InitialZoomLevel ? g_InitialZoomLevel : m_ZoomLevel;
+	Renderer::SetZoomLevel(m_ZoomLevel);
 }

@@ -33,6 +33,7 @@ public:
 	virtual void OnUpdate(Timestep ts) override;
 	virtual void OnEvent(Event& event) override;
 
+	void RandomRocketLaunch(int meshIdx, Vec3D origin);
 	entt::entity GetTarget();
 	void EmitMesh(int meshIdx, TransformComponent transform);
 	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
@@ -53,6 +54,8 @@ private:
 	bool OnMouseLeft(Event& e);
 
 	void HandleUserInput(Timestep ts);
+	void ZoomIn();
+	void ZoomOut();
 
 private:
 	float m_ElapsedTime = 0.0f;
@@ -69,8 +72,12 @@ private:
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;
 	int m_current_slot = 0;
+	int m_mipmap_level = 0;
+	bool m_CameraContinuousRotation = false;
 
 };
+
+
 
 
 

@@ -19,6 +19,7 @@ public:
 //	static int Init();
 
 	void Blur(int inputSlot, std::shared_ptr<Framebuffer> outputFramebuffer);
+	void SetMipMapLevel(int level);
 
 private:
 	void SetInputSlot(int slot);

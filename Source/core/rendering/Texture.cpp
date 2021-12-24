@@ -15,11 +15,11 @@ Texture::Texture(uint32_t width, uint32_t height)
 	glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 	glTextureStorage2D(m_RendererID, 1, m_Specification.InternalFormat, m_Specification.Width, m_Specification.Height);
 
-	glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // GL_LINEAR or GL_NEAREST
+	glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 Texture::Texture(TextureSpecifications spec)
@@ -29,10 +29,10 @@ Texture::Texture(TextureSpecifications spec)
 	glTextureStorage2D(m_RendererID, 1, m_Specification.InternalFormat, m_Specification.Width, m_Specification.Height);
 
 	glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 
@@ -69,6 +69,7 @@ Texture::Texture(const std::string path)
 	glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 	glTextureStorage2D(m_RendererID, 1, internalFormat, width, height);
 	glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // flags: GL_CLAMP_TO_BORDER, GL_CLAMP_TO_EDGE, GL_REPEAT, GL_MIRRORED_REPEAT
 	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -80,6 +81,11 @@ Texture::Texture(const std::string path)
 Texture::~Texture()
 {
 	glDeleteTextures(1, &m_RendererID);
+}
+
+void Texture::CreateMipMap()
+{
+	glGenerateTextureMipmap((GLuint)m_RendererID);
 }
 
 void Texture::SetData(void* data, uint32_t size)

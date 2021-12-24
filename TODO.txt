@@ -39,24 +39,32 @@ Next things to do (as of 2021.11.14.):
 	with one transform component.
 	Shadow mapping should also switch to the instance rendered version.
 
-- mouse picking
 
 
 Missing featuers:
-- moving objects,
 - collisions,
-- shooting,
 - Markers,
 - AI behaviours,
 - Sounds,
-- bloom effect,
 - entity bound camera,
+- mouse picking
+
+Mostly done (could take some tweaking):
+- bloom effect,
 
 
+Features done:
+- moving objects,
+- shooting,
 
 
+Other things to implement:
+- Add mip-map to the textures
+- generalize the framebuffer class to be able to hold arbitrary number of colour attachments (so I dont need 3 classes for almost the same things: shadow/doubleFB/single FB)
 
+Test lower OpenGL versions!
 
+Blender: proper sphere texturing
 
 
 

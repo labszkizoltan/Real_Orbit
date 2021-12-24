@@ -1,0 +1,258 @@
+Scene: TestScene
+
+Entities:
+  - Entity: Camera
+    CameraComponent:
+      location: [0.0, 0.0, -1.0]
+      orientation:
+        f1: [1.0, 0.0, 0.0]
+        f2: [0.0, 0.0, -1.0]
+        f3: [0.0, 1.0, 0.0]
+      scale: 1.0
+      
+  - Entity: Light
+    LightComponent:
+      location: [0.0, -1.0, 0.0]
+      orientation:
+        f1: [1.0, 0.0, 0.0]
+        f2: [0.0, 1.0, 0.0]
+        f3: [0.0, 0.0, 1.0]
+      scale: 1.0
+
+#  - Entity: Skybox
+#    MeshComponent: Skybox
+
+  - Entity: Plane
+    TransformComponent:
+      location: [1.0, 0.7, 1.0]
+      orientation:
+        f1: [1.0, 0.0, 0.0]
+        f2: [0.0, 1.0, 0.0]
+        f3: [0.0, 0.0, 1.0]
+      scale: 0.5
+    DynamicPropertiesComponent:
+      inertial_mass: 1.0
+      velocity: [0.0005, 0.0, 0.0]
+      angular_velocity: [0.0, 0.0, 0.0001]
+#    MeshComponent: Plane
+    MeshComponent: PurpleSphere
+    
+    
+#  - Entity: PurpleSphere
+#    TransformComponent:
+#      location: [-0.5, 1.5, 0.0]
+#      orientation:
+#        f1: [1.0, 0.0, 0.0]
+#        f2: [0.0, 0.0, -1.0]
+#        f3: [0.0, 1.0, 0.0]
+#      scale: 0.2
+#    MeshComponent: PurpleSphere
+
+  - Entity: OrangeSphere
+    TransformComponent:
+      location: [0.5, 1.5, 0.0]
+      orientation:
+        f1: [1.0, 0.0, 0.0]
+        f2: [0.0, 0.0, -1.0]
+        f3: [0.0, 1.0, 0.0]
+      scale: 0.25
+    DynamicPropertiesComponent:
+      inertial_mass: 1.0
+      velocity: [0.001, 0.0, 0.0]
+      angular_velocity: [0.0, 0.0, 0.00005]
+    MeshComponent: OrangeSphere
+    
+    
+  - Entity: Sphere3
+    TransformComponent:
+      location: [-0.5, 0.5, -1.0]
+      orientation:
+        f1: [1.0, 0.0, 0.0]
+        f2: [0.0, 0.0, -1.0]
+        f3: [0.0, 1.0, 0.0]
+      scale: 0.25
+    DynamicPropertiesComponent:
+      inertial_mass: 1.0
+      velocity: [0.001, 0.0, 0.0]
+      angular_velocity: [0.0, 0.0, -0.00007]
+    MeshComponent: Moon
+    
+    
+  - Entity: Sphere4
+    TransformComponent:
+      location: [-5.5, 5.5, -5.0]
+      orientation:
+        f1: [0.0, 0.0, -1.0]
+        f2: [0.0, 1.0, 0.0]
+        f3: [1.0, 0.0, 0.0]
+      scale: 0.25
+    DynamicPropertiesComponent:
+      inertial_mass: 1.0
+      velocity: [0.001, 0.0, 0.0]
+      angular_velocity: [0.0, -0.0001, 0.0]
+    MeshComponent: Moon
+    
+    
+  - Entity: Sphere5
+    TransformComponent:
+      location: [-3.5, -7.5, 5.0]
+      orientation:
+        f1: [1.0, 0.0, 0.0]
+        f2: [0.0, 0.0, -1.0]
+        f3: [0.0, 1.0, 0.0]
+      scale: 0.25
+    DynamicPropertiesComponent:
+      inertial_mass: 1.0
+      velocity: [0.001, 0.0, 0.0]
+      angular_velocity: [0.0, 0.0, 0.0001]
+    MeshComponent: cruiser
+    
+    
+  - Entity: Sphere6
+    TransformComponent:
+      location: [5.5, 5.5, -5.0]
+      orientation:
+        f1: [1.0, 0.0, 0.0]
+        f2: [0.0, 0.0, -1.0]
+        f3: [0.0, 1.0, 0.0]
+      scale: 0.25
+    DynamicPropertiesComponent:
+      inertial_mass: 1.0
+      velocity: [0.001, 0.0, 0.0]
+      angular_velocity: [0.0, 0.0, 0.0001]
+    MeshComponent: heavy_cruiser
+    
+    
+  - Entity: Sphere7
+    TransformComponent:
+      location: [3.5, -3.5, -6.0]
+      orientation:
+        f1: [1.0, 0.0, 0.0]
+        f2: [0.0, 0.0, -1.0]
+        f3: [0.0, 1.0, 0.0]
+      scale: 0.25
+    DynamicPropertiesComponent:
+      inertial_mass: 1.0
+      velocity: [0.001, 0.0, 0.0]
+      angular_velocity: [0.0, 0.0, 0.0001]
+    MeshComponent: DeformedSphere
+    
+    
+  - Entity: Earth
+    TransformComponent:
+      location: [5.5, 10.5, 0.0]
+      orientation:
+        f1: [1.0, 0.0, 0.0]
+        f2: [0.0, 0.0, -1.0]
+        f3: [0.0, 1.0, 0.0]
+      scale: 2.3
+    DynamicPropertiesComponent:
+      inertial_mass: 5.0
+      velocity: [0.0, 0.0, 0.0]
+      angular_velocity: [0.0, 0.0, 0.0001]
+    GravitationalMassComponent: 0.00001
+    MeshComponent: Earth
+
+
+Meshes:
+  - Mesh: PurpleSphere
+    MeshType: COLOURED_MESH
+    vertex_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/01_colouredMeshes/Sphere_10_purple.txt"
+
+  - Mesh: OrangeSphere
+    MeshType: COLOURED_MESH
+    vertex_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/01_colouredMeshes/Sphere_10_orange.txt"
+
+  - Mesh: BlueSphere
+    MeshType: BRIGHT_COLOURED_MESH
+    vertex_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/01_colouredMeshes/Sphere_10_blue.txt"
+
+  - Mesh: Bullet
+    MeshType: BRIGHT_COLOURED_MESH
+    vertex_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/01_colouredMeshes/Bullet.txt"
+
+  - Mesh: YellowSphere
+    MeshType: BRIGHT_COLOURED_MESH
+    vertex_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/01_colouredMeshes/Sphere_10_yellow.txt"
+
+  - Mesh: DeformedSphere
+    MeshType: NORMAL_MESH
+    vertex_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_8_deformed.txt"
+    texture_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/all_in_one.png"
+
+
+  - Mesh: cruiser
+    MeshType: NORMAL_MESH
+    vertex_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/cruiser.txt"
+    texture_file: "D:/cpp_codes/26_portals/Portals/assets/blender_files/cruiser_texture.png"
+
+  - Mesh: heavy_cruiser
+    MeshType: NORMAL_MESH
+    vertex_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/heavy_cruiser.txt"
+    texture_file: "D:/cpp_codes/26_portals/Portals/assets/blender_files/endesga-64-1x.png"
+
+
+  - Mesh: Earth
+    MeshType: NORMAL_MESH
+    vertex_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_16_corrected.txt"
+    texture_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/Earth_Realistic.png"
+
+  - Mesh: Moon
+    MeshType: NORMAL_MESH
+    vertex_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/meshes/03_normalMeshes/Sphere_16_corrected.txt"
+    texture_file: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/MoonBright.png"
+
+  - Mesh: Skybox
+    MeshType: SKYBOX
+    texture_file_f: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_dark_front.png"
+    texture_file_b: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_dark_back.png"
+    texture_file_l: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_dark_left.png"
+    texture_file_r: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_dark_right.png"
+    texture_file_u: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_dark_up.png"
+    texture_file_d: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_dark_down.png"
+
+#    texture_file_f: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_front.png"
+#    texture_file_b: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_back.png"
+#    texture_file_l: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_left.png"
+#    texture_file_r: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_right.png"
+#    texture_file_u: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_up.png"
+#    texture_file_d: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/space2_down.png"
+
+#    texture_file_f: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_front.png"
+#    texture_file_b: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_back.png"
+#    texture_file_l: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_left.png"
+#    texture_file_r: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_right.png"
+#    texture_file_u: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_up.png"
+#    texture_file_d: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/mountains_down.png"
+
+#    texture_file_f: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_front.png"
+#    texture_file_b: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_back.png"
+#    texture_file_l: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_left.png"
+#    texture_file_r: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_right.png"
+#    texture_file_u: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_up.png"
+#    texture_file_d: "D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/textures/skyboxes/skybox_test_down.png"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -43,7 +43,9 @@ void SceneUpdater::UpdateScene(Timestep ts)
 			Vec3D dx = targetLoc.location - missileTrf.location;
 			Vec3D dv = targetVelocity.velocity - missileVelocity.velocity;
 			float dt = sqrt(dx.lengthSquare() / dv.lengthSquare());
-			dx += dt * dv;
+//			float dt = dx.lengthSquare() / (dx*dv);
+//			dx += dt * dv/2;
+			dx += dt * dv * 0.9f;
 			float accel = 0.00005f;
 
 			missileVelocity.velocity += accel * ts * dx / dx.length();
