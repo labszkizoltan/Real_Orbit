@@ -5,7 +5,7 @@
 #include <core/Timestep.h>
 #include <entt/entt.hpp>
 #include <core/rendering/drawables/MeshLibrary.h>
-#include <core/scene/Components.h>
+#include <core/scene/CoreComponents.h>
 //#include <entt/entity/registry.hpp>
 
 class Entity;

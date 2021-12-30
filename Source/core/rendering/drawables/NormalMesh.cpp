@@ -5,7 +5,7 @@
 #include <vendor/stb_image/stb_image.h>
 #include <core/rendering/Renderer.h> // needed for the GLCall macro
 // #include <core/rendering/Buffer.h>
-#include <core/scene/Components.h> // needed for TransformComponent definition
+#include <core/scene/CoreComponents.h> // needed for TransformComponent definition
 
 BufferLayout NormalMesh::s_VertexLayout = {
 		{ShaderDataType::Float3, "aPos"},
@@ -32,6 +32,7 @@ NormalMesh::NormalMesh(const std::vector<float>& vertexData, const std::vector<u
 	m_InstanceBuffer.SetLayout();
 	m_IndexBuffer.Bind();
 	m_VertexArray.UnBind();
+	m_Texture->CreateMipMap();
 }
 
 NormalMesh::NormalMesh(const std::vector<float>& vertexData, const std::vector<uint32_t>& indexData, const std::string& texturePath)
@@ -49,6 +50,7 @@ NormalMesh::NormalMesh(const std::vector<float>& vertexData, const std::vector<u
 	m_InstanceBuffer.SetLayout();
 	m_IndexBuffer.Bind();
 	m_VertexArray.UnBind();
+	m_Texture->CreateMipMap();
 }
 
 NormalMesh::~NormalMesh()

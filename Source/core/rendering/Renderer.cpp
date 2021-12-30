@@ -4,7 +4,7 @@
 #include <core/rendering/shader_source_files/ShaderSourceCollection.h>
 #include <core/rendering/ImageProcessor.h>
 //#include <core/rendering/shader_source_files/basic_3D_shaders.h>
-#include <core/scene/Components.h>
+#include <core/scene/CoreComponents.h>
 #include <core/GlobalConstants.h>
 
 
@@ -205,6 +205,18 @@ int Renderer::InitShaderLibrary()
 		std::string(instanced_normal_shader_fragmentSrc)
 	);
 
+	// MeshType::ALPHA_MESH
+	s_ShaderLibrary.AddShader(
+		std::string(instanced_alpha_shader_vertexSrc),
+		std::string(instanced_alpha_shader_fragmentSrc)
+	);
+
+	// MeshType::MARKER_MESH
+	s_ShaderLibrary.AddShader(
+		std::string(instanced_marker_shader_vertexSrc),
+		std::string(instanced_marker_shader_fragmentSrc)
+	);
+
 	// MeshType::SKYBOX
 	s_ShaderLibrary.AddShader(
 		std::string(skybox_shader_vertexSrc),
@@ -216,12 +228,6 @@ int Renderer::InitShaderLibrary()
 		std::string(shadow_mapper_vertexSrc),
 		std::string(shadow_mapper_fragmentSrc)
 	);
-
-	//	// MeshType::MARKER_MESH
-	//	s_ShaderLibrary.AddShader(
-	//		std::string(shadow_mapper_vertexSrc),
-	//		std::string(shadow_mapper_fragmentSrc)
-	//	);
 
 	//	// Add subsequent shader here:
 	//	// MeshType::OTHER_MESH_TYPE

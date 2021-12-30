@@ -10,7 +10,7 @@
 #include <utils/Vector_3D.h>
 #include <utils/Matrix_3D.h>
 #include <core/scene/Entity.h>
-#include <core/scene/Components.h>
+#include <core/scene/CoreComponents.h>
 
 #include <core/rendering/drawables/ColouredMesh.h>
 #include <core/rendering/drawables/BrightColouredMesh.h>

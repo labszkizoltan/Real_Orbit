@@ -4,7 +4,7 @@
 
 #include <core/rendering/Shader.h>
 #include <core/rendering/drawables/Mesh.h>
-#include <core/scene/Components.h>
+#include <core/scene/CoreComponents.h>
 #include <vector>
 
 class ShaderLibrary

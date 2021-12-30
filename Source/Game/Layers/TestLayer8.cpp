@@ -9,7 +9,7 @@
 #include <core/rendering/drawables/NormalMesh.h>
 
 #include <core/scene/SceneSerializer.h>
-#include <core/scene/Components.h>
+#include <core/scene/CoreComponents.h>
 
 
 #include <utils/Vector_3D.h>
@@ -80,6 +80,23 @@ void TestLayer8::OnAttach()
 	
 	m_ImgProcessor = std::make_unique<ImageProcessor>();
 	m_ImgProcessor->SetMipMapLevel(4);
+
+
+
+
+	// load background music
+	if (!m_Music.openFromFile("assets/audio/Adrift_by_Hayden_Folker.ogg"))
+		LOG_ERROR("Audio not found: assets/audio/Adrift_by_Hayden_Folker.ogg");
+	m_Music.play();
+
+	// Load a sound to play
+	if (!m_ShotSoundBuffer.loadFromFile("assets/audio/SciFi_weapon_MultiShot_1.wav"))
+		LOG_ERROR("Audio not found: assets/audio/SciFi_weapon_MultiShot_1.wav");
+	m_ShotSound.setBuffer(m_ShotSoundBuffer);
+	m_ShotSound.setVolume(60.0f);
+
+
+
 }
 
 void TestLayer8::OnDetach()
@@ -89,6 +106,12 @@ void TestLayer8::OnDetach()
 
 void TestLayer8::OnUpdate(Timestep ts)
 {
+	// if music finished, start again
+	if (m_Music.getStatus() == sf::SoundSource::Status::Stopped)
+	{
+		m_Music.openFromFile("assets/audio/Adrift_by_Hayden_Folker.ogg");
+		m_Music.play();
+	}
 
 	HandleUserInput(ts);
 	{
@@ -117,7 +140,6 @@ void TestLayer8::OnUpdate(Timestep ts)
 			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
 		}
 		*/
-		/*
 		if ((randomLaunchCounter+500) % 1000 < 50)
 		{
 			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
@@ -131,7 +153,6 @@ void TestLayer8::OnUpdate(Timestep ts)
 			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
 			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
 		}
-		*/
 
 		randomLaunchCounter++;
 	}
@@ -245,7 +266,7 @@ void TestLayer8::LaunchMissile(int meshIdx, TransformComponent transform, entt::
 	dynProps.inertial_mass = 1.0f;
 //	dynProps.velocity = 0.01f * (transform.orientation.f1 + transform.orientation.f3);
 //	dynProps.velocity = 0.05f * transform.orientation.f3;
-	dynProps.velocity = 0.0f * transform.orientation.f3;
+	dynProps.velocity = 0.00000001f * transform.orientation.f3;
 	dynProps.angular_velocity = Vec3D();
 	transform.scale = 0.05f;
 	transform.location += 0.1 * (transform.orientation.f3 + transform.orientation.f1);
@@ -433,16 +454,25 @@ void TestLayer8::HandleUserInput(Timestep ts)
 //		EmitMesh(orangeIdx, cam_trf);
 		if(skip%4==0)
 			EmitMesh(bulletIdx, cam_trf);
+		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) {
+			m_ShotSound.play(); 
+		}
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip%2 == 0) 
 	{
 		LaunchMissile(blueIdx, cam_trf, GetTarget());
+		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Middle) && skip % 2 == 1)
 	{
 		LaunchMissile(yellowIdx, cam_trf, GetTarget());
+		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
 	}
+	if(!Input::IsMouseButtonPressed(sf::Mouse::Left) && !Input::IsMouseButtonPressed(sf::Mouse::Right) && !Input::IsMouseButtonPressed(sf::Mouse::Middle))
+		m_ShotSound.stop();
+
 	skip++;
+
 
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Space))
 	{

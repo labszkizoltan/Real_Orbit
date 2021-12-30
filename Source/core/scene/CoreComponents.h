@@ -1,6 +1,6 @@
 
-#ifndef COMPONENTS_H
-#define COMPONENTS_H
+#ifndef CORE_COMPONENTS_H
+#define CORE_COMPONENTS_H
 
 // #include <glm/glm.hpp>
 #include <string>
@@ -9,6 +9,9 @@
 
 #include <entt/entt.hpp>
 
+//---------------------------//
+//----- Core components -----//
+//---------------------------//
 
 struct TagComponent
 {
@@ -31,25 +34,21 @@ struct TransformComponent
 		: location(Vec3D()), orientation(Identity(1.0f)), scale(1.0f) {}
 };
 
-struct DynamicPropertiesComponent
-{
-	float inertial_mass;
-	Vec3D velocity;
-	Vec3D angular_velocity;
-
-//	Vec3D acceleration;
-};
-
-struct GravitationalMassComponent
-{
-	float gravitational_mass;
-};
-
 struct MeshComponent
 {
 	std::shared_ptr<Mesh> meshPtr;
 };
 
+struct ColourComponent
+{
+	float r=0.0f;
+	float g=0.0f;
+	float b=0.0f;
+	float a=0.0f;
+};
+
+
+/*
 template <MeshType Type>
 struct TypedMeshComponent
 {
@@ -59,11 +58,33 @@ struct TypedMeshComponent
 	static const MeshType s_Type = Type;
 	static MeshType GetStaticType() { return s_Type; }
 };
+*/
+
+//---------------------------//
+//----- Game components -----//
+//---------------------------//
+
+//----- Moving around in space -----//
+struct DynamicPropertiesComponent
+{
+	float inertial_mass;
+	Vec3D velocity;
+	Vec3D angular_velocity;
+//	Vec3D acceleration;
+};
+
+struct GravitationalMassComponent
+{
+	float gravitational_mass;
+};
+
 
 struct MeshIndexComponent
 {
 	int idx = -1;
 };
+
+//----- Entity lifetime -----//
 
 struct TimerComponent
 {
@@ -71,6 +92,12 @@ struct TimerComponent
 	TimerComponent(float ttl) : timeToLive(ttl) {};
 };
 
+struct HitPointComponent
+{
+	uint32_t HP;
+};
+
+//----- Other -----//
 struct TargetComponent
 {
 	entt::entity targetEntity;
@@ -88,4 +115,4 @@ struct TeamComponent_7 {};
 struct TeamComponent_default {};
 
 
-#endif // COMPONENTS_H
+#endif // CORE_COMPONENTS_H

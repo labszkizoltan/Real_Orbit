@@ -4,7 +4,7 @@
 
 #include <core/rendering/drawables/Mesh.h>
 #include <vector>
-#include <core/scene/Components.h>
+#include <core/scene/CoreComponents.h>
 
 struct MeshLibrary
 {

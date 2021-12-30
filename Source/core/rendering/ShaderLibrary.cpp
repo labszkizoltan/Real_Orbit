@@ -96,8 +96,10 @@ std::shared_ptr<Shader> ShaderLibrary::BindShader(MeshType meshType)
 	case MeshType::COLOURED_MESH:			m_Shaders[0]->Bind(); m_LastBoundShader = m_Shaders[0]; return m_LastBoundShader;
 	case MeshType::BRIGHT_COLOURED_MESH:	m_Shaders[1]->Bind(); m_LastBoundShader = m_Shaders[1]; return m_LastBoundShader;
 	case MeshType::NORMAL_MESH:				m_Shaders[2]->Bind(); m_LastBoundShader = m_Shaders[2]; return m_LastBoundShader;
-	case MeshType::SKYBOX:					m_Shaders[3]->Bind(); m_LastBoundShader = m_Shaders[3]; return m_LastBoundShader;
-	case MeshType::SHADOW_MAP:				m_Shaders[4]->Bind(); m_LastBoundShader = m_Shaders[4]; return m_LastBoundShader;
+	case MeshType::ALPHA_MESH:				m_Shaders[3]->Bind(); m_LastBoundShader = m_Shaders[3]; return m_LastBoundShader;
+	case MeshType::MARKER_MESH:				m_Shaders[4]->Bind(); m_LastBoundShader = m_Shaders[4]; return m_LastBoundShader;
+	case MeshType::SKYBOX:					m_Shaders[5]->Bind(); m_LastBoundShader = m_Shaders[5]; return m_LastBoundShader;
+	case MeshType::SHADOW_MAP:				m_Shaders[6]->Bind(); m_LastBoundShader = m_Shaders[6]; return m_LastBoundShader;
 	}
 
 	LOG_CORE_INFO("MeshType not recognized, cannot bind shader");

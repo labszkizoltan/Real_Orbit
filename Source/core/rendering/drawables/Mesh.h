@@ -10,7 +10,7 @@ struct TransformComponent;
 // each mesh type has a fixed layout, and a corresponding shader that can draw it
 enum class MeshType
 {
-	COLOURED_MESH, BRIGHT_COLOURED_MESH, NORMAL_MESH, SKYBOX, SHADOW_MAP, UNKOWN
+	COLOURED_MESH, BRIGHT_COLOURED_MESH, NORMAL_MESH, ALPHA_MESH, MARKER_MESH, SKYBOX, SHADOW_MAP, UNKOWN
 };
 
 std::string MeshType_to_String(MeshType type);

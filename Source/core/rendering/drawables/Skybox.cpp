@@ -1,6 +1,6 @@
 
 #include "Skybox.h"
-#include <core/scene/Components.h> // needed for TransformComponent definition
+#include <core/scene/CoreComponents.h> // needed for TransformComponent definition
 #include <core/GlobalConstants.h>
 
 BufferLayout Skybox::s_Layout = {
@@ -23,6 +23,8 @@ Skybox::Skybox(const std::vector<float>& vertexData, const std::vector<uint32_t>
 	m_VertexBuffer.SetLayout(s_Layout);
 	m_IndexBuffer.Bind();
 	m_VertexArray.UnBind();
+	for (int i = 0; i < 6; i++)
+		m_Textures[i]->CreateMipMap();
 }
 
 Skybox::Skybox(const std::vector<float>& vertexData, const std::vector<uint32_t>& indexData, const std::vector<std::string>& textureFilenames)
@@ -35,6 +37,7 @@ Skybox::Skybox(const std::vector<float>& vertexData, const std::vector<uint32_t>
 	{
 		m_Textures[i] = std::make_shared<Texture>(textureFilenames[i]);
 		m_Textures[i]->SetSlot(g_SkyboxTextureSlots[i]); // slot 0 is for other bodies, slot 1 is for the shadow map
+		m_Textures[i]->CreateMipMap();
 	}
 
 	m_VertexArray.Bind();

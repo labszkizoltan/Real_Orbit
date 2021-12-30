@@ -13,5 +13,7 @@
 #include <core/rendering/shader_source_files/instanced_colour_shader.h>
 #include <core/rendering/shader_source_files/instanced_bright_colour_shader.h>
 #include <core/rendering/shader_source_files/instanced_normal_shader.h>
+#include <core/rendering/shader_source_files/instanced_alpha_shader.h>
+#include <core/rendering/shader_source_files/instanced_marker_shader.h>
 
 #endif // SHADER_SOURCE_COLLECTION_H

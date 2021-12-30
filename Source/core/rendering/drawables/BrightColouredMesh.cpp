@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <core/rendering/Renderer.h> // needed for the GLCall macro
 // #include <core/rendering/Buffer.h>
-#include <core/scene/Components.h> // needed for TransformComponent definition
+#include <core/scene/CoreComponents.h> // needed for TransformComponent definition
 
 BufferLayout BrightColouredMesh::s_VertexLayout = {
 		{ShaderDataType::Float3, "aPos"},

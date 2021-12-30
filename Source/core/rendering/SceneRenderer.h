@@ -3,7 +3,7 @@
 #define SCENE_RENDERER_H
 
 #include <core/scene/Scene.h>
-#include <core/scene/Components.h>
+#include <core/scene/CoreComponents.h>
 #include <core/rendering/Renderer.h>
 #include <core/rendering/Shader.h>
 

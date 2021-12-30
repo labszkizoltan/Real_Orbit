@@ -163,7 +163,9 @@
     <ClCompile Include="Source\core\OpenGLContext.cpp" />
     <ClCompile Include="Source\core\Real_Orbit_main.cpp" />
     <ClCompile Include="Source\core\rendering\Buffer.cpp" />
+    <ClCompile Include="Source\core\rendering\ColourInstanceBuffer.cpp" />
     <ClCompile Include="Source\core\rendering\Depthbuffer.cpp" />
+    <ClCompile Include="Source\core\rendering\drawables\AlphaMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\BrightColouredMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\ColouredMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\Mesh.cpp" />
@@ -206,9 +208,12 @@
     <ClInclude Include="Source\core\OpenGLContext.h" />
     <ClInclude Include="Source\core\pch\pch.h" />
     <ClInclude Include="Source\core\rendering\Buffer.h" />
+    <ClInclude Include="Source\core\rendering\ColourInstanceBuffer.h" />
     <ClInclude Include="Source\core\rendering\Depthbuffer.h" />
+    <ClInclude Include="Source\core\rendering\drawables\AlphaMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\BrightColouredMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\ColouredMesh.h" />
+    <ClInclude Include="Source\core\rendering\drawables\MarkerMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Mesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\MeshLibrary.h" />
     <ClInclude Include="Source\core\rendering\drawables\NormalMesh.h" />
@@ -222,8 +227,10 @@
     <ClInclude Include="Source\core\rendering\SceneRenderer.h" />
     <ClInclude Include="Source\core\rendering\Shader.h" />
     <ClInclude Include="Source\core\rendering\ShaderLibrary.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\instanced_alpha_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_bright_colour_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_colour_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\instanced_marker_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_normal_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\normal_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\shadow_shaders.h" />
@@ -233,7 +240,7 @@
     <ClInclude Include="Source\core\rendering\shader_source_files\ShaderSourceCollection.h" />
     <ClInclude Include="Source\core\rendering\Texture.h" />
     <ClInclude Include="Source\core\rendering\VertexArray.h" />
-    <ClInclude Include="Source\core\scene\Components.h" />
+    <ClInclude Include="Source\core\scene\CoreComponents.h" />
     <ClInclude Include="Source\core\scene\Entity.h" />
     <ClInclude Include="Source\core\scene\Scene.h" />
     <ClInclude Include="Source\core\scene\SceneSerializer.h" />

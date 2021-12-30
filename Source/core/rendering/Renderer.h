@@ -8,7 +8,7 @@
 #include <core/rendering/Depthbuffer.h>
 #include <core/rendering/drawables/Mesh.h>
 #include <core/scene/Entity.h>
-#include <core/scene/Components.h>
+#include <core/scene/CoreComponents.h>
 #include <glad/glad.h>
 #include <iostream>
 

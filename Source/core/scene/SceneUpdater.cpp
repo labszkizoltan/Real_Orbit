@@ -41,9 +41,15 @@ void SceneUpdater::UpdateScene(Timestep ts)
 			DynamicPropertiesComponent& targetVelocity = m_Scene->m_Registry.get<DynamicPropertiesComponent>(target.targetEntity);
 
 			Vec3D dx = targetLoc.location - missileTrf.location;
+			if (dx.length() < (targetLoc.scale + missileTrf.scale))
+			{
+				TimerComponent& ttl = timed_entities.get<TimerComponent>(missile);
+				ttl = 0.0f;
+			}
 			Vec3D dv = targetVelocity.velocity - missileVelocity.velocity;
 			float dt = sqrt(dx.lengthSquare() / dv.lengthSquare());
 //			float dt = dx.lengthSquare() / (dx*dv);
+//			dx += dt * dv;
 //			dx += dt * dv/2;
 			dx += dt * dv * 0.9f;
 			float accel = 0.00005f;

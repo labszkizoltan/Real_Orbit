@@ -41,17 +41,25 @@ Next things to do (as of 2021.11.14.):
 
 
 
+Before the missing features, some organizational work should be done.
+Core and game specific code should be separated. Under this I mean
+the components should be separated to core and game components. The 
+scene serialization and update should also go to the game side, as
+the components can be client specific.
+
+
 Missing featuers:
-- collisions,
-- Markers,
-- AI behaviours,
-- Sounds,
-- entity bound camera,
-- mouse picking
+- Markers (create a new mesh type for them, core feature),
+- mouse picking (core feature)
+- Composite meshes (like a ship with a normal mesh plus a bright mesh as the engine, probably core side)
+- AI behaviours (probably game side),
+- collisions (probably game side),
+- Sounds (it might be enough to implement it on the game side),
+- entity bound camera (probably game side),
+
 
 Mostly done (could take some tweaking):
 - bloom effect,
-
 
 Features done:
 - moving objects,
@@ -59,7 +67,7 @@ Features done:
 
 
 Other things to implement:
-- Add mip-map to the textures
+- Add mip-map to the textures -> done in the mesh constructors
 - generalize the framebuffer class to be able to hold arbitrary number of colour attachments (so I dont need 3 classes for almost the same things: shadow/doubleFB/single FB)
 
 Test lower OpenGL versions!

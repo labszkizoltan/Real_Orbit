@@ -22,6 +22,9 @@
 
 #include <core/GlobalConstants.h>
 
+
+#include <SFML/Audio.hpp>
+
 class TestLayer8 : public Layer
 {
 public:
@@ -66,6 +69,12 @@ private:
 	SceneRenderer m_SceneRenderer;
 	SceneUpdater m_SceneUpdater;
 	bool m_InFocus = true;
+
+	sf::Music m_Music;
+	sf::SoundBuffer m_ShotSoundBuffer;
+	sf::Sound m_ShotSound;
+	sf::Sound m_ExplosionSound;
+
 
 //	std::shared_ptr<Shader> m_ScreenDrawer = nullptr;
 
