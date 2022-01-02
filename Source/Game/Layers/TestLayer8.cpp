@@ -70,7 +70,8 @@ void TestLayer8::OnAttach()
 	m_Scene = std::make_shared<Scene>();
 
 	SceneSerializer serializer(m_Scene);
-	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_3.yaml");
+//	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_3.yaml");
+	serializer.DeSerialize_file("assets/scenes/test_scene_3.yaml");
 
 	m_SceneRenderer.SetScene(m_Scene);
 	m_SceneUpdater.SetScene(m_Scene);
@@ -139,7 +140,6 @@ void TestLayer8::OnUpdate(Timestep ts)
 			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
 			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
 		}
-		*/
 		if ((randomLaunchCounter+500) % 1000 < 50)
 		{
 			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
@@ -153,14 +153,20 @@ void TestLayer8::OnUpdate(Timestep ts)
 			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
 			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
 		}
+		*/
+
+		int asteroid_count = 30;
+		if (randomLaunchCounter % (asteroid_count * 80) == 0)
+		{
+			for(int i=0; i<asteroid_count; i++)
+				SpawnAsteroid();
+		}
 
 		randomLaunchCounter++;
 	}
 
 	m_SceneRenderer.RenderScene();
 	m_SceneUpdater.UpdateScene(m_SimulationSpeed*ts);
-
-	Renderer::GetBrightColorAttachment()->CreateMipMap();
 
 //	m_ImgProcessor->Blur(g_RendererBlurDepthSlot, Renderer::s_BlurBuffer); // this is not working, as expected
 	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
@@ -227,7 +233,7 @@ entt::entity TestLayer8::GetTarget()
 	float maxScalarProd = -1.0f;
 
 	// exclude TargetComponent, so missiles wont target other missiles
-	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>(entt::exclude<TargetComponent>);
+	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent, HitPointComponent>(entt::exclude<TargetComponent>);
 	for (auto entity : view)
 	{
 		TransformComponent& entity_trf = view.get<TransformComponent>(entity);
@@ -244,6 +250,27 @@ entt::entity TestLayer8::GetTarget()
 	return result;
 }
 
+void TestLayer8::SpawnAsteroid()
+{
+	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
+
+	TransformComponent transform;
+	transform.location = Vec3D(rand() % 50 + 500, rand() % 50, rand() % 50);
+	transform.orientation = Rotation((float)(rand() % 31415)/10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
+	transform.scale = (float)(rand() % 10 + 2)/20.0f;
+
+	DynamicPropertiesComponent dynProps;
+	dynProps.inertial_mass = 1.0f;
+	dynProps.velocity = -0.01 * transform.location / transform.location.length();
+	dynProps.angular_velocity = 0.0001 * Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
+
+	Entity newEntity = m_Scene->CreateEntity("");
+	newEntity.AddComponent<TransformComponent>(transform);
+	newEntity.AddComponent<MeshIndexComponent>(asteroidIdx);
+	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
+	newEntity.AddComponent<HitPointComponent>(1.0f + (float)(rand()%10));
+}
+
 void TestLayer8::EmitMesh(int meshIdx, TransformComponent transform)
 {
 	DynamicPropertiesComponent dynProps;
@@ -258,6 +285,7 @@ void TestLayer8::EmitMesh(int meshIdx, TransformComponent transform)
 	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
 	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
 	newEntity.AddComponent<TimerComponent>(TimerComponent(10000.0f)); // provide ttl in mili seconds
+	newEntity.AddComponent<HitPointComponent>(1.0f);
 }
 
 void TestLayer8::LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target)
@@ -268,7 +296,7 @@ void TestLayer8::LaunchMissile(int meshIdx, TransformComponent transform, entt::
 //	dynProps.velocity = 0.05f * transform.orientation.f3;
 	dynProps.velocity = 0.00000001f * transform.orientation.f3;
 	dynProps.angular_velocity = Vec3D();
-	transform.scale = 0.05f;
+	transform.scale = 0.01f;
 	transform.location += 0.1 * (transform.orientation.f3 + transform.orientation.f1);
 
 	Entity newEntity = m_Scene->CreateEntity("");
@@ -448,6 +476,7 @@ void TestLayer8::HandleUserInput(Timestep ts)
 	static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
 	static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
 	static int yellowIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
+	static int explosionIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Explosion"];
 	static int skip = 0;
 	if(Input::IsMouseButtonPressed(sf::Mouse::Left))
 	{
@@ -461,6 +490,7 @@ void TestLayer8::HandleUserInput(Timestep ts)
 	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip%2 == 0) 
 	{
 		LaunchMissile(blueIdx, cam_trf, GetTarget());
+		//LaunchMissile(explosionIdx, cam_trf, GetTarget());
 		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Middle) && skip % 2 == 1)

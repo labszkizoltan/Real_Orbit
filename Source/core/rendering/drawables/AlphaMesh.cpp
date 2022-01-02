@@ -48,9 +48,17 @@ AlphaMesh::~AlphaMesh()
 
 void AlphaMesh::Draw()
 {
+	// turn off writing to the depth buffer
+	glDepthMask(GL_FALSE);
+	glEnable(GL_BLEND);
+
 	m_VertexArray.Bind();
 	GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, 0, m_InstanceBuffer.GetElementCount()));
 	m_VertexArray.UnBind();
+
+	// turn back on again
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
 }
 
 void AlphaMesh::SetInstances(const std::vector<TransformComponent>& transforms)
@@ -68,6 +76,11 @@ void AlphaMesh::DrawInstances(const std::vector<TransformComponent>& transforms)
 {
 	m_InstanceBuffer.SetData(transforms);
 	Draw();
+}
+
+bool AlphaMesh::HasColourInstances()
+{
+	return true;
 }
 
 MeshType AlphaMesh::GetMeshType()

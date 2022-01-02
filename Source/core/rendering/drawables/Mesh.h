@@ -6,6 +6,7 @@
 
 // forward declare struct:
 struct TransformComponent;
+struct ColourComponent;
 
 // each mesh type has a fixed layout, and a corresponding shader that can draw it
 enum class MeshType
@@ -23,7 +24,9 @@ public:
 
 	virtual void Draw() = 0;
 	virtual void SetInstances(const std::vector<TransformComponent>& transforms) = 0;
+	virtual void SetColourInstances(const std::vector<ColourComponent>& colours) = 0;
 	virtual void DrawInstances(const std::vector<TransformComponent>& transforms) = 0;
+	virtual bool HasColourInstances() = 0;
 	virtual MeshType GetMeshType() = 0;
 	virtual BufferLayout GetVertexLayout() = 0;
 	virtual BufferLayout GetInstanceLayout() = 0;

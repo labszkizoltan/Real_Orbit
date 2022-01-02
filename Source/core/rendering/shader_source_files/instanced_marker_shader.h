@@ -71,14 +71,14 @@ const char* instanced_marker_shader_vertexSrc =
 const char* instanced_marker_shader_fragmentSrc =
 "#version 460 core\n"
 "layout(location = 0) out vec4 FragColor; \n"
+"layout(location = 1) out vec4 BrightColor; \n"
 "in vec4 outColor; \n"
 "uniform float alpha; \n"
 "void main()\n"
 "{\n"
 "	FragColor = outColor; \n"
+"	BrightColor = vec4(0,0,0,0); \n"
 "}\0";
-
-
 
 
 

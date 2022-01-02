@@ -4,6 +4,9 @@
 
 #include "Scene.h"
 
+
+#include <SFML/Audio.hpp> // just quickly hacking in explosion sounds
+
 class SceneUpdater
 {
 public:
@@ -17,7 +20,15 @@ public:
 	std::shared_ptr<Scene> GetScene() { return m_Scene; }
 
 private:
+	void SpawnExplosion(TransformComponent trf, DynamicPropertiesComponent dyn);
+
+private:
 	std::shared_ptr<Scene> m_Scene = nullptr;
+
+	// just quickly hacking in explosion sounds:
+	sf::SoundBuffer m_ExplosionSoundBuffer;
+	sf::Sound m_ExplosionSound;
+
 
 //protected:
 //

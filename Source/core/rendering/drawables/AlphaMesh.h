@@ -20,8 +20,9 @@ public:
 
 	virtual void Draw() override;
 	virtual void SetInstances(const std::vector<TransformComponent>& transforms) override;
-	void SetColourInstances(const std::vector<ColourComponent>& colours);
+	virtual void SetColourInstances(const std::vector<ColourComponent>& colours) override;
 	virtual void DrawInstances(const std::vector<TransformComponent>& transforms) override;
+	virtual bool HasColourInstances() override;
 	virtual MeshType GetMeshType() override;
 	virtual BufferLayout GetVertexLayout() override;
 	virtual BufferLayout GetInstanceLayout() override;

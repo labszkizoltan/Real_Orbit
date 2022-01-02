@@ -67,10 +67,19 @@ void BrightColouredMesh::SetInstances(const std::vector<TransformComponent>& tra
 	m_InstanceBuffer.SetData(transforms);
 }
 
+void BrightColouredMesh::SetColourInstances(const std::vector<ColourComponent>& colours)
+{
+}
+
 void BrightColouredMesh::DrawInstances(const std::vector<TransformComponent>& transforms)
 {
 	m_InstanceBuffer.SetData(transforms);
 	Draw();
+}
+
+bool BrightColouredMesh::HasColourInstances()
+{
+	return false;
 }
 
 MeshType BrightColouredMesh::GetMeshType()

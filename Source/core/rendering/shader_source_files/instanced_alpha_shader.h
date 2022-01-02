@@ -72,12 +72,13 @@ const char* instanced_alpha_shader_vertexSrc =
 const char* instanced_alpha_shader_fragmentSrc =
 "#version 460 core\n"
 "layout(location = 0) out vec4 FragColor; \n"
+"layout(location = 1) out vec4 BrightColor; \n"
 "in vec4 outColor; \n"
-"uniform float alpha; \n"
 "void main()\n"
 "{\n"
-//"	FragColor = outColor; \n"
-"	FragColor = vec4(1,1,1,1); \n"
+"	FragColor = outColor; \n"
+//"	FragColor = vec4(1,1,1,0.1); \n"
+//"	BrightColor = vec4(0,0,0,0); \n" // if this line is commented out, the mesh will glow, otherwise not
 "}\0";
 
 

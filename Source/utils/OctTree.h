@@ -2,6 +2,11 @@
 // I almost copy-pasted the wikipedia description of this data structure
 // https://en.wikipedia.org/wiki/Quadtree
 
+// this library could be useful:
+// https://pointclouds.org/documentation/classpcl_1_1octree_1_1_octree_base.html
+// quote from https://pcl.readthedocs.io/projects/tutorials/en/master/walkthrough.html#octree:
+// "Furthermore, a memory pool implementation reduces expensive memory allocation and deallocation operations in scenarios where octrees needs to be created at high rate."
+
 #ifndef OCTTREE_H
 #define OCTTREE_H
 

@@ -53,7 +53,13 @@ void SceneRenderer::RenderScene()
 
 	for (int i = 0; i < m_Scene->m_MeshLibrary.size(); i++)
 	{
-		Renderer::BindShader(m_Scene->m_MeshLibrary.m_Meshes[i]->GetMeshType());
+		MeshType mesh_type = m_Scene->m_MeshLibrary.m_Meshes[i]->GetMeshType();
+		if (m_Scene->m_MeshLibrary.m_Meshes[i]->HasColourInstances())
+		{
+			int mesh_count = m_Scene->m_MeshLibrary.m_MeshTransforms[i].size();
+			m_Scene->m_MeshLibrary.m_Meshes[i]->SetColourInstances(std::vector<ColourComponent>(mesh_count));
+		}
+		Renderer::BindShader(mesh_type);
 		m_Scene->m_MeshLibrary.m_Meshes[i]->Draw(); // no need to set transform data again, it was already uploaded at shadow mapping
 	}
 

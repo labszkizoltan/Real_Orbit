@@ -74,10 +74,19 @@ void NormalMesh::SetInstances(const std::vector<TransformComponent>& transforms)
 	m_InstanceBuffer.SetData(transforms);
 }
 
+void NormalMesh::SetColourInstances(const std::vector<ColourComponent>& colours)
+{
+}
+
 void NormalMesh::DrawInstances(const std::vector<TransformComponent>& transforms)
 {
 	m_InstanceBuffer.SetData(transforms);
 	Draw();
+}
+
+bool NormalMesh::HasColourInstances()
+{
+	return false;
 }
 
 MeshType NormalMesh::GetMeshType()

@@ -15,6 +15,7 @@
 #include <core/rendering/drawables/ColouredMesh.h>
 #include <core/rendering/drawables/BrightColouredMesh.h>
 #include <core/rendering/drawables/NormalMesh.h>
+#include <core/rendering/drawables/AlphaMesh.h>
 #include <core/rendering/drawables/Skybox.h>
 
 SceneSerializer::SceneSerializer()
@@ -119,6 +120,17 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			result.gravitational_mass = gravmass_com.as<float>();
 			deserializedEntity.AddComponent<GravitationalMassComponent>(result);
 		}
+
+		//----- HitPointComponent -----//
+		auto hp_com = entity["HitPointComponent"];
+		if (hp_com)
+		{
+			HitPointComponent result;
+			result.HP = hp_com.as<float>();
+			deserializedEntity.AddComponent<HitPointComponent>(result);
+		}
+
+
 	}
 }
 
@@ -150,6 +162,15 @@ static bool contains_key(std::unordered_map<std::string, int> map, std::string k
 
 	return "Present";
 }
+
+
+/*
+* Use std::vector::swap() to swap the transparent meshes to the end of the mesh library, so they are rendered last
+* https://www.geeksforgeeks.org/difference-between-stdswap-and-stdvectorswap/
+* The std::vector::swap() function exchanges the contents of one vector with another.
+* It swaps the addresses(i.e.the containers exchange references to their data) of two
+* vectors rather than swapping each element one by one which is done in constant time O(1).
+*/
 
 void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 {
@@ -194,6 +215,17 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
 			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
 		}
+		// leave out the transparent mesh types, so they end up at the end of the mesh library and will be rendered last
+//		else if (type == MeshType::ALPHA_MESH)
+//		{
+//			std::string vertex_file = mesh["vertex_file"].as<std::string>();
+//			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
+//			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<AlphaMesh>(buffer_data.vertex_data, buffer_data.index_data);
+//
+//			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+//			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
+//			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+//		}
 		else if (type == MeshType::SKYBOX)
 		{
 			std::vector<float> vertex_data = Skybox::CreateSkyboxVertexData(g_SkyboxMeshResolution);
@@ -208,6 +240,25 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 			};
 
 			m_Scene->m_Skybox = std::make_shared<Skybox>(vertex_data, index_data, textureFilenames);
+		}
+	}
+
+	// do another round to read transparent meshes
+	for (auto mesh : meshes)
+	{
+		std::string mesh_name = mesh["Mesh"].as<std::string>();
+		MeshType type = mesh["MeshType"].as<MeshType>();
+		std::cout << "mesh name and type: " << mesh_name << ", " << MeshType_to_String(type) << "\n";
+
+		if (type == MeshType::ALPHA_MESH)
+		{
+			std::string vertex_file = mesh["vertex_file"].as<std::string>();
+			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
+			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<AlphaMesh>(buffer_data.vertex_data, buffer_data.index_data);
+
+			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
+			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
 		}
 	}
 }

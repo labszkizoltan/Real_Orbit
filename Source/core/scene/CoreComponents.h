@@ -39,12 +39,17 @@ struct MeshComponent
 	std::shared_ptr<Mesh> meshPtr;
 };
 
+struct MeshIndexComponent
+{
+	int idx = -1;
+};
+
 struct ColourComponent
 {
-	float r=0.0f;
-	float g=0.0f;
-	float b=0.0f;
-	float a=0.0f;
+	float r=0.7f;
+	float g=0.3f;
+	float b=0.3f;
+	float a=0.2f;
 };
 
 
@@ -79,11 +84,6 @@ struct GravitationalMassComponent
 };
 
 
-struct MeshIndexComponent
-{
-	int idx = -1;
-};
-
 //----- Entity lifetime -----//
 
 struct TimerComponent
@@ -94,7 +94,7 @@ struct TimerComponent
 
 struct HitPointComponent
 {
-	uint32_t HP;
+	float HP;
 };
 
 //----- Other -----//
@@ -114,5 +114,7 @@ struct TeamComponent_6 {};
 struct TeamComponent_7 {};
 struct TeamComponent_default {};
 
+
+struct ExplosionComponent { char something=0; };
 
 #endif // CORE_COMPONENTS_H

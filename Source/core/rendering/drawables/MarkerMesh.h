@@ -1,8 +1,8 @@
 
 /*
 * 
-#ifndef MARKER_MESH
-#define MARKER_MESH
+#ifndef MARKER_MESH_H
+#define MARKER_MESH_H
 
 #include <core/rendering/drawables/Mesh.h>
 #include <core/rendering/Buffer.h>
@@ -46,7 +46,7 @@ private:
 
 
 
-#endif // MARKER_MESH
+#endif // MARKER_MESH_H
 
 */
 

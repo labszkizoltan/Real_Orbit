@@ -39,6 +39,7 @@ public:
 	void RandomRocketLaunch(int meshIdx, Vec3D origin);
 	entt::entity GetTarget();
 	void EmitMesh(int meshIdx, TransformComponent transform);
+	void SpawnAsteroid();
 	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
 	void RemoveMesh(int meshIdx);
 

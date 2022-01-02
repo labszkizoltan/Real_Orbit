@@ -72,6 +72,10 @@ void Skybox::SetInstances(const std::vector<TransformComponent>& transforms)
 {
 }
 
+void Skybox::SetColourInstances(const std::vector<ColourComponent>& colours)
+{
+}
+
 void Skybox::DrawInstances(const std::vector<TransformComponent>& transforms)
 {
 	/*
@@ -85,6 +89,11 @@ void Skybox::DrawInstances(const std::vector<TransformComponent>& transforms)
 
 	glEnable(GL_DEPTH_TEST);
 	*/
+}
+
+bool Skybox::HasColourInstances()
+{
+	return false;
 }
 
 MeshType Skybox::GetMeshType()
