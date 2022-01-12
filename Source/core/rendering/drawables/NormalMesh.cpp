@@ -84,9 +84,9 @@ void NormalMesh::DrawInstances(const std::vector<TransformComponent>& transforms
 	Draw();
 }
 
-bool NormalMesh::HasColourInstances()
+int NormalMesh::GetColourInstances()
 {
-	return false;
+	return -1;
 }
 
 MeshType NormalMesh::GetMeshType()

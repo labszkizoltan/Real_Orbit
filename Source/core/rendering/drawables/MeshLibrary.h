@@ -18,6 +18,7 @@ public:
 	std::unordered_map<std::string, int> m_NameIndexLookup;
 	std::vector<std::shared_ptr<Mesh>> m_Meshes;
 	std::vector<std::vector<TransformComponent>> m_MeshTransforms;
+	std::vector<std::vector<ColourComponent>> m_ColourBuffers;
 };
 
 

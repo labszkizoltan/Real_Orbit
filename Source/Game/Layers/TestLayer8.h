@@ -39,7 +39,7 @@ public:
 	void RandomRocketLaunch(int meshIdx, Vec3D origin);
 	entt::entity GetTarget();
 	void EmitMesh(int meshIdx, TransformComponent transform);
-	void SpawnAsteroid();
+	void SpawnAsteroid(Vec3D center, Vec3D velocity, float spread);
 	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
 	void RemoveMesh(int meshIdx);
 
@@ -87,6 +87,26 @@ private:
 
 };
 
+
+template <typename UserDataType>
+struct targeting_data
+{
+	float dot_product;
+	UserDataType user_data;
+
+	bool operator<(const targeting_data<UserDataType>& other) const
+	{
+		return dot_product < other.dot_product; // this is the original
+//		return dot_product > other.dot_product;
+	}
+};
+
+template <typename UserDataType>
+std::ostream& operator<<(std::ostream& stream, const targeting_data<UserDataType>& td)
+{
+	stream << td.dot_product << "\t" << td.user_data << "\n";
+	return stream;
+}
 
 
 

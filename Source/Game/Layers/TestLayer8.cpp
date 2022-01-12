@@ -17,6 +17,8 @@
 
 #include "scene_descriptions.h"
 
+#include <queue> // the priority_queue uses it in the targeting function
+
 #define BIND_EVENT_FN(x) std::bind(&TestLayer8::x, this, std::placeholders::_1)
 
 OGLBufferData ParseVertexFile(const std::string& filename)
@@ -87,6 +89,7 @@ void TestLayer8::OnAttach()
 
 	// load background music
 	if (!m_Music.openFromFile("assets/audio/Adrift_by_Hayden_Folker.ogg"))
+//	if (!m_Music.openFromFile("assets/audio/Puritania.wav"))
 		LOG_ERROR("Audio not found: assets/audio/Adrift_by_Hayden_Folker.ogg");
 	m_Music.play();
 
@@ -111,6 +114,7 @@ void TestLayer8::OnUpdate(Timestep ts)
 	if (m_Music.getStatus() == sf::SoundSource::Status::Stopped)
 	{
 		m_Music.openFromFile("assets/audio/Adrift_by_Hayden_Folker.ogg");
+//		m_Music.openFromFile("assets/audio/Puritania.wav");
 		m_Music.play();
 	}
 
@@ -155,18 +159,23 @@ void TestLayer8::OnUpdate(Timestep ts)
 		}
 		*/
 
-		int asteroid_count = 30;
-		if (randomLaunchCounter % (asteroid_count * 80) == 0)
+		int asteroid_count = 120;
+		static float spawn_frequency = 20.0f;
+		if (randomLaunchCounter % (asteroid_count * (int)(spawn_frequency+10.0f)) == 0)
 		{
+//			spawn_frequency *= 0.9f;
+			Vec3D center = Vec3D(rand() % 50-25, rand() % 50 - 25, 0);
+			Vec3D velocity = -0.01 * center / center.length();
 			for(int i=0; i<asteroid_count; i++)
-				SpawnAsteroid();
+				SpawnAsteroid(500.0f * center/center.length(), velocity, 30.0f);
 		}
 
 		randomLaunchCounter++;
 	}
 
-	m_SceneRenderer.RenderScene();
+	// if the update-render order is swapped, something is un-initialized and the program fails at alpha mesh rendering
 	m_SceneUpdater.UpdateScene(m_SimulationSpeed*ts);
+	m_SceneRenderer.RenderScene();
 
 //	m_ImgProcessor->Blur(g_RendererBlurDepthSlot, Renderer::s_BlurBuffer); // this is not working, as expected
 	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
@@ -225,6 +234,10 @@ void TestLayer8::RandomRocketLaunch(int meshIdx, Vec3D origin)
 
 entt::entity TestLayer8::GetTarget()
 {
+	static int counter = 0;
+	int queue_size = 15;
+	std::priority_queue<targeting_data<entt::entity>> targeting_queue;
+
 	Vec3D pos = m_Scene->GetCamera().location;
 	Vec3D dir = m_Scene->GetCamera().orientation.f3;
 
@@ -233,48 +246,86 @@ entt::entity TestLayer8::GetTarget()
 	float maxScalarProd = -1.0f;
 
 	// exclude TargetComponent, so missiles wont target other missiles
-	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent, HitPointComponent>(entt::exclude<TargetComponent>);
+//	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent, HitPointComponent>(entt::exclude<TargetComponent>);
+	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent, AsteroidComponent>();
+	if(view.begin() == view.end())
+		return entt::null;
+
 	for (auto entity : view)
 	{
 		TransformComponent& entity_trf = view.get<TransformComponent>(entity);
 		Vec3D dx = entity_trf.location - pos;
 
 		float scalarProd = dx * dir / dx.length();
-		if (scalarProd > maxScalarProd)
+//		if (scalarProd > maxScalarProd)
+//		{
+//			maxScalarProd = scalarProd;
+//			result = entity;
+//		}
+
+		targeting_data<entt::entity> temp_td;
+		temp_td.dot_product = -scalarProd;
+		temp_td.user_data = entity;
+		if (queue_size > 0)
 		{
-			maxScalarProd = scalarProd;
-			result = entity;
+			targeting_queue.push(temp_td);
+			queue_size--;
 		}
+		else
+		{
+			if (temp_td < targeting_queue.top())
+//			if (targeting_queue.top() < temp_td)
+			{
+				targeting_queue.pop();
+				targeting_queue.push(temp_td);
+			}
+		}
+
 	}
 
-	return result;
+	for (int i = 0; i < std::min(counter, (int)targeting_queue.size()-1); i++)
+		targeting_queue.pop();
+
+	counter--;
+	counter = counter < 0 ? 15 : counter;
+
+	if (targeting_queue.size() == 0)
+		return entt::null;
+	else
+		return targeting_queue.top().user_data;
+
+//	return result;
 }
 
-void TestLayer8::SpawnAsteroid()
+void TestLayer8::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 {
 	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
 
 	TransformComponent transform;
-	transform.location = Vec3D(rand() % 50 + 500, rand() % 50, rand() % 50);
+	transform.location = center + Vec3D(rand() % 1000-500, rand() % 1000 - 500, rand() % 1000 - 500)* spread/1000.0f;
 	transform.orientation = Rotation((float)(rand() % 31415)/10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
 	transform.scale = (float)(rand() % 10 + 2)/20.0f;
 
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 1.0f;
-	dynProps.velocity = -0.01 * transform.location / transform.location.length();
+	dynProps.velocity = velocity;
 	dynProps.angular_velocity = 0.0001 * Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
 
 	Entity newEntity = m_Scene->CreateEntity("");
 	newEntity.AddComponent<TransformComponent>(transform);
 	newEntity.AddComponent<MeshIndexComponent>(asteroidIdx);
 	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	newEntity.AddComponent<HitPointComponent>(1.0f + (float)(rand()%10));
+//	newEntity.AddComponent<HitPointComponent>(1.0f + (float)(rand() % 10));
+	newEntity.AddComponent<HitPointComponent>(1.0f);
+	newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
+
+	
 }
 
 void TestLayer8::EmitMesh(int meshIdx, TransformComponent transform)
 {
 	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 1.0f;
+	dynProps.inertial_mass = 0.001f;
 	dynProps.velocity = 0.05f * transform.orientation.f3;
 	dynProps.angular_velocity = Vec3D();
 	transform.scale = 0.02f;
@@ -291,7 +342,7 @@ void TestLayer8::EmitMesh(int meshIdx, TransformComponent transform)
 void TestLayer8::LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target)
 {
 	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 1.0f;
+	dynProps.inertial_mass = 0.001f;
 //	dynProps.velocity = 0.01f * (transform.orientation.f1 + transform.orientation.f3);
 //	dynProps.velocity = 0.05f * transform.orientation.f3;
 	dynProps.velocity = 0.00000001f * transform.orientation.f3;
@@ -480,18 +531,19 @@ void TestLayer8::HandleUserInput(Timestep ts)
 	static int skip = 0;
 	if(Input::IsMouseButtonPressed(sf::Mouse::Left))
 	{
+		LaunchMissile(blueIdx, cam_trf, GetTarget());
+		//LaunchMissile(explosionIdx, cam_trf, GetTarget());
+		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
+
+	}
+	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip%2 == 0) 
+	{
 //		EmitMesh(orangeIdx, cam_trf);
 		if(skip%4==0)
 			EmitMesh(bulletIdx, cam_trf);
 		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) {
-			m_ShotSound.play(); 
+			m_ShotSound.play();
 		}
-	}
-	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip%2 == 0) 
-	{
-		LaunchMissile(blueIdx, cam_trf, GetTarget());
-		//LaunchMissile(explosionIdx, cam_trf, GetTarget());
-		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Middle) && skip % 2 == 1)
 	{

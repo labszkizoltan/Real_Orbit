@@ -50,6 +50,12 @@ struct ColourComponent
 	float g=0.3f;
 	float b=0.3f;
 	float a=0.2f;
+
+	ColourComponent()
+		: r(0.1f), g(0.1f), b(0.9f), a(0.2f) {}
+
+	ColourComponent(float R, float G, float B, float A)
+		: r(R), g(G), b(B), a(A) {}
 };
 
 
@@ -76,6 +82,10 @@ struct DynamicPropertiesComponent
 	Vec3D velocity;
 	Vec3D angular_velocity;
 //	Vec3D acceleration;
+
+	DynamicPropertiesComponent()
+		: inertial_mass(0), velocity(Vec3D()), angular_velocity(Vec3D()) {}
+
 };
 
 struct GravitationalMassComponent
@@ -104,17 +114,19 @@ struct TargetComponent
 	TargetComponent(entt::entity tgt) : targetEntity(tgt) {};
 };
 
-struct TeamComponent_0 {};
-struct TeamComponent_1 {};
-struct TeamComponent_2 {};
-struct TeamComponent_3 {};
-struct TeamComponent_4 {};
-struct TeamComponent_5 {};
-struct TeamComponent_6 {};
-struct TeamComponent_7 {};
-struct TeamComponent_default {};
+struct TeamComponent_0 { ColourComponent team_colour = { 0.3f, 0.9f, 0.3f, 1.0f }; };
+struct TeamComponent_1 { ColourComponent team_colour = { 0.9f, 0.3f, 0.3f, 1.0f }; };
+struct TeamComponent_2 { ColourComponent team_colour = { 0.3f, 0.3f, 0.9f, 1.0f }; };
+struct TeamComponent_3 { ColourComponent team_colour = { 0.9f, 0.9f, 0.3f, 1.0f }; };
+struct TeamComponent_4 { ColourComponent team_colour = { 0.9f, 0.5f, 0.1f, 1.0f }; };
+struct TeamComponent_5 { ColourComponent team_colour = { 0.3f, 0.9f, 0.9f, 1.0f }; };
+struct TeamComponent_6 { ColourComponent team_colour = { 0.5f, 0.1f, 0.9f, 1.0f }; };
+struct TeamComponent_7 { ColourComponent team_colour = { 0.5f, 0.3f, 0.1f, 1.0f }; };
+struct TeamComponent_default { ColourComponent team_colour = { 0.7f, 0.7f, 0.7f, 1.0f }; };
 
 
 struct ExplosionComponent { char something=0; };
+
+struct AsteroidComponent { char something = 0; };
 
 #endif // CORE_COMPONENTS_H

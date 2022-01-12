@@ -77,9 +77,9 @@ void BrightColouredMesh::DrawInstances(const std::vector<TransformComponent>& tr
 	Draw();
 }
 
-bool BrightColouredMesh::HasColourInstances()
+int BrightColouredMesh::GetColourInstances()
 {
-	return false;
+	return -1;
 }
 
 MeshType BrightColouredMesh::GetMeshType()

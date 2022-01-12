@@ -78,9 +78,10 @@ void AlphaMesh::DrawInstances(const std::vector<TransformComponent>& transforms)
 	Draw();
 }
 
-bool AlphaMesh::HasColourInstances()
+int AlphaMesh::GetColourInstances()
 {
-	return true;
+//	return 0;
+	return m_ColourBufferIndex;
 }
 
 MeshType AlphaMesh::GetMeshType()
@@ -101,4 +102,9 @@ BufferLayout AlphaMesh::GetInstanceLayout()
 MeshType AlphaMesh::GetStaticMeshType()
 {
 	return MeshType::ALPHA_MESH;
+}
+
+void AlphaMesh::SetColourBufferIndex(int idx)
+{
+	m_ColourBufferIndex = idx;
 }

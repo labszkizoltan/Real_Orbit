@@ -22,12 +22,14 @@ public:
 	virtual void SetInstances(const std::vector<TransformComponent>& transforms) override;
 	virtual void SetColourInstances(const std::vector<ColourComponent>& colours) override;
 	virtual void DrawInstances(const std::vector<TransformComponent>& transforms) override;
-	virtual bool HasColourInstances() override;
+	virtual int GetColourInstances() override;
 	virtual MeshType GetMeshType() override;
 	virtual BufferLayout GetVertexLayout() override;
 	virtual BufferLayout GetInstanceLayout() override;
 
 	static MeshType GetStaticMeshType();
+
+	void SetColourBufferIndex(int idx);
 
 private:
 	VertexArray m_VertexArray;
@@ -35,6 +37,7 @@ private:
 	InstanceBuffer m_InstanceBuffer;
 	ColourInstanceBuffer m_ColourInstanceBuffer;
 	IndexBuffer m_IndexBuffer;
+	int m_ColourBufferIndex = -1;
 
 private:
 	static BufferLayout s_VertexLayout;

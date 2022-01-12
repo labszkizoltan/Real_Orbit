@@ -20,10 +20,13 @@ public:
 	std::shared_ptr<Scene> GetScene() { return m_Scene; }
 
 private:
+	void FillDistanceMatrix();
 	void SpawnExplosion(TransformComponent trf, DynamicPropertiesComponent dyn);
 
 private:
 	std::shared_ptr<Scene> m_Scene = nullptr;
+
+	std::vector<float> m_Distances;
 
 	// just quickly hacking in explosion sounds:
 	sf::SoundBuffer m_ExplosionSoundBuffer;

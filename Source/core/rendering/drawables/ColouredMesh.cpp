@@ -77,9 +77,9 @@ void ColouredMesh::DrawInstances(const std::vector<TransformComponent>& transfor
 	Draw();
 }
 
-bool ColouredMesh::HasColourInstances()
+int ColouredMesh::GetColourInstances()
 {
-	return false;
+	return -1;
 }
 
 MeshType ColouredMesh::GetMeshType()

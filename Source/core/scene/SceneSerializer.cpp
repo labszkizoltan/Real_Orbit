@@ -85,6 +85,16 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			deserializedEntity.AddComponent<TransformComponent>(transformResult);
 		}
 
+
+		//----- ColourComponent -----//
+		ColourComponent colResult;
+		auto col_com = entity["ColourComponent"];
+		if (col_com)
+		{
+			colResult = col_com.as<ColourComponent>();
+			deserializedEntity.AddComponent<ColourComponent>(colResult);
+		}
+
 		//----- MeshComponent -----//
 		auto mesh_com = entity["MeshComponent"];
 		if (mesh_com)
@@ -254,11 +264,14 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 		{
 			std::string vertex_file = mesh["vertex_file"].as<std::string>();
 			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
-			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<AlphaMesh>(buffer_data.vertex_data, buffer_data.index_data);
+			std::shared_ptr<AlphaMesh> temp_mesh_ptr = std::make_shared<AlphaMesh>(buffer_data.vertex_data, buffer_data.index_data);
+			temp_mesh_ptr->SetColourBufferIndex(m_Scene->m_MeshLibrary.m_ColourBuffers.size());
+			std::shared_ptr<Mesh> mesh_ptr = temp_mesh_ptr;
 
 			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
 			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
 			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+			m_Scene->m_MeshLibrary.m_ColourBuffers.push_back(std::vector<ColourComponent>());
 		}
 	}
 }
@@ -389,12 +402,39 @@ namespace YAML {
 
 
 	template<>
+	struct convert<ColourComponent>
+	{
+		static Node encode(const ColourComponent v)
+		{
+			Node node;
+			node.push_back(v.r);
+			node.push_back(v.g);
+			node.push_back(v.b);
+			node.push_back(v.a);
+			return node;
+		}
+
+		static bool decode(const Node& node, ColourComponent& v)
+		{
+			if (!node.IsSequence() || node.size() != 4)
+				return false;
+
+			v.r = node[0].as<float>();
+			v.g = node[1].as<float>();
+			v.b = node[2].as<float>();
+			v.a = node[3].as<float>();
+			return true;
+		}
+
+	};
+
+
+	template<>
 	struct convert<MeshType>
 	{
 		static Node encode(const MeshType t)
 		{
 			Node node;
-//			node["MeshType"] = MeshType_to_String(t);
 			node["MeshType"] = MeshType_to_String(t);
 			return node;
 		}

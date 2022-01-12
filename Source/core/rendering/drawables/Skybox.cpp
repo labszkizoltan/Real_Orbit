@@ -91,9 +91,9 @@ void Skybox::DrawInstances(const std::vector<TransformComponent>& transforms)
 	*/
 }
 
-bool Skybox::HasColourInstances()
+int Skybox::GetColourInstances()
 {
-	return false;
+	return -1;
 }
 
 MeshType Skybox::GetMeshType()

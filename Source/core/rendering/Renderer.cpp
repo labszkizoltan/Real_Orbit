@@ -51,7 +51,7 @@ int Renderer::Init()
 	SetCamera(camera_trf);
 	SetZoomLevel(g_InitialZoomLevel);
 	SetLightPosition(Vec3D(0.0f, 0.0f, -3.0f));
-	SetMinMaxRange(0.05f, 300.0f);
+	SetMinMaxRange(0.05f, 1000.0f);
 	s_ShaderLibrary.SetTextureSlots();
 
 	glViewport(0, 0, Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
