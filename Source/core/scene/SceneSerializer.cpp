@@ -108,6 +108,17 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 				std::shared_ptr<Mesh> meshPtr = m_Scene->m_MeshLibrary.m_Meshes[meshIdx];
 				m_Scene->m_MeshLibrary.m_MeshTransforms[meshIdx].push_back(transformResult);
 				deserializedEntity.AddComponent<MeshIndexComponent>(meshIdx);
+
+				// if entity doesnt have a colour component, but should, give it a default one
+				if (meshPtr->GetColourInstances() != -1 && !deserializedEntity.HasComponent<ColourComponent>())
+					deserializedEntity.AddComponent<ColourComponent>(ColourComponent(1.0f, 1.0f, 1.0f, 0.1f));
+					//deserializedEntity.AddComponent<ColourComponent>(ColourComponent(0.0f, 0.0f, 0.0f, 0.1f));
+
+				if (deserializedEntity.HasComponent<ColourComponent>())
+				{
+					int colBufIdx = meshPtr->GetColourInstances();
+					m_Scene->m_MeshLibrary.m_ColourBuffers[colBufIdx].push_back(deserializedEntity.GetComponent<ColourComponent>());
+				}
 			}
 		}
 
@@ -140,7 +151,7 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			deserializedEntity.AddComponent<HitPointComponent>(result);
 		}
 
-
+//		std::cout << "entity de-serialized\n";
 	}
 }
 

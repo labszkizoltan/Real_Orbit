@@ -80,7 +80,6 @@ void AlphaMesh::DrawInstances(const std::vector<TransformComponent>& transforms)
 
 int AlphaMesh::GetColourInstances()
 {
-//	return 0;
 	return m_ColourBufferIndex;
 }
 

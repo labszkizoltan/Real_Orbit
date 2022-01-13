@@ -54,9 +54,9 @@ void SceneUpdater::UpdateScene(Timestep ts)
 	for (auto explosion : explosions)
 	{
 		TransformComponent& trf = m_Scene->m_Registry.get<TransformComponent>(explosion);
-		trf.scale += ts / 500.0f;
+		trf.scale += ts / 200.0f;
 		ColourComponent& col = m_Scene->m_Registry.get<ColourComponent>(explosion);
-		col.a = 0.5f / (trf.scale * trf.scale);
+		col.a = 0.4f / (trf.scale * trf.scale * trf.scale);
 	}
 
 	auto missiles = m_Scene->m_Registry.view<TargetComponent, TransformComponent, DynamicPropertiesComponent>();
@@ -258,7 +258,9 @@ void SceneUpdater::SpawnExplosion(TransformComponent trf, DynamicPropertiesCompo
 	Entity newEntity = m_Scene->CreateEntity("");
 	newEntity.AddComponent<TransformComponent>(trf);
 	newEntity.AddComponent<MeshIndexComponent>(explosionIdx);
-	newEntity.AddComponent<ColourComponent>(ColourComponent(0.7f, 0.3f, 0.3f, 0.8f));
+//	newEntity.AddComponent<ColourComponent>(ColourComponent(0.7f, 0.3f, 0.3f, 0.8f)); // usual orange explosion
+//	newEntity.AddComponent<ColourComponent>(ColourComponent(0.3f, 0.8f, 0.5f, 0.8f));
+	newEntity.AddComponent<ColourComponent>(ColourComponent(float(rand() % 1000) / 1000.0f, float(rand() % 1000) / 1000.0f, float(rand() % 1000) / 1000.0f, 0.8f));
 //	newEntity.AddComponent<ColourComponent>(ColourComponent());
 	newEntity.AddComponent<DynamicPropertiesComponent>(dyn);
 	newEntity.AddComponent<TimerComponent>(TimerComponent(3000.0f));

@@ -160,8 +160,8 @@ void TestLayer8::OnUpdate(Timestep ts)
 		*/
 
 		int asteroid_count = 120;
-		static float spawn_frequency = 20.0f;
-		if (randomLaunchCounter % (asteroid_count * (int)(spawn_frequency+10.0f)) == 0)
+		static float spawn_frequency = 1200.0f;
+		if (randomLaunchCounter % (int)spawn_frequency == 0)
 		{
 //			spawn_frequency *= 0.9f;
 			Vec3D center = Vec3D(rand() % 50-25, rand() % 50 - 25, 0);
@@ -174,8 +174,8 @@ void TestLayer8::OnUpdate(Timestep ts)
 	}
 
 	// if the update-render order is swapped, something is un-initialized and the program fails at alpha mesh rendering
-	m_SceneUpdater.UpdateScene(m_SimulationSpeed*ts);
 	m_SceneRenderer.RenderScene();
+	m_SceneUpdater.UpdateScene(m_SimulationSpeed*ts);
 
 //	m_ImgProcessor->Blur(g_RendererBlurDepthSlot, Renderer::s_BlurBuffer); // this is not working, as expected
 	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
