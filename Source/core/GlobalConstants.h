@@ -3,6 +3,7 @@
 #define GLOBAL_CONSTANTS_H
 
 const float g_InitialZoomLevel = 1.5f;
+const float g_MaxZoomLevel = 1024.0f;
 
 const int g_SkyboxMeshResolution = 11; // used in the SceneSerializer
 

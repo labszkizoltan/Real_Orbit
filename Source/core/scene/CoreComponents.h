@@ -129,4 +129,7 @@ struct ExplosionComponent { char something=0; };
 
 struct AsteroidComponent { char something = 0; };
 
+struct MarkerComponent { ColourComponent marker_colour = { 0.0f, 0.0f, 1.0f, 1.0f }; };
+
+
 #endif // CORE_COMPONENTS_H

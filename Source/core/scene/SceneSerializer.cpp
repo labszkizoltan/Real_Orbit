@@ -16,6 +16,7 @@
 #include <core/rendering/drawables/BrightColouredMesh.h>
 #include <core/rendering/drawables/NormalMesh.h>
 #include <core/rendering/drawables/AlphaMesh.h>
+#include <core/rendering/drawables/MarkerMesh.h>
 #include <core/rendering/drawables/Skybox.h>
 
 SceneSerializer::SceneSerializer()
@@ -285,6 +286,19 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 			m_Scene->m_MeshLibrary.m_ColourBuffers.push_back(std::vector<ColourComponent>());
 		}
 	}
+
+	// regardless of being defined in the scene file, add the default marker mesh:
+	{
+		std::shared_ptr<MarkerMesh> temp_mesh_ptr = std::make_shared<MarkerMesh>();
+		temp_mesh_ptr->SetColourBufferIndex(m_Scene->m_MeshLibrary.m_ColourBuffers.size());
+		std::shared_ptr<Mesh> mesh_ptr = temp_mesh_ptr;
+
+		m_Scene->m_MeshLibrary.m_NameIndexLookup["DefaultMarker"] = mesh_idx; mesh_idx++;
+		m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
+		m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+		m_Scene->m_MeshLibrary.m_ColourBuffers.push_back(std::vector<ColourComponent>());
+	}
+
 }
 
 /*

@@ -159,15 +159,20 @@ void TestLayer8::OnUpdate(Timestep ts)
 		}
 		*/
 
-		int asteroid_count = 120;
-		static float spawn_frequency = 1200.0f;
-		if (randomLaunchCounter % (int)spawn_frequency == 0)
+		int asteroid_count = 128;
+		float spawn_frequency = 10000.0f;
+		static float asteroid_spawn_timer = spawn_frequency; // in milli seconds
+		asteroid_spawn_timer -= m_SimulationSpeed * ts;
+//		if (randomLaunchCounter % (int)spawn_frequency == 0)
+		if (asteroid_spawn_timer < 0.0f)
 		{
+			asteroid_spawn_timer = spawn_frequency;
 //			spawn_frequency *= 0.9f;
-			Vec3D center = Vec3D(rand() % 50-25, rand() % 50 - 25, 0);
+//			Vec3D center = Vec3D(rand() % 50 - 25, rand() % 50 - 25, 0);
+			Vec3D center = Vec3D(50, 0, 0);
 			Vec3D velocity = -0.01 * center / center.length();
 			for(int i=0; i<asteroid_count; i++)
-				SpawnAsteroid(500.0f * center/center.length(), velocity, 30.0f);
+				SpawnAsteroid(500.0f * center/center.length(), velocity, 80.0f);
 		}
 
 		randomLaunchCounter++;
@@ -304,6 +309,9 @@ void TestLayer8::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 	TransformComponent transform;
 	transform.location = center + Vec3D(rand() % 1000-500, rand() % 1000 - 500, rand() % 1000 - 500)* spread/1000.0f;
 	transform.orientation = Rotation((float)(rand() % 31415)/10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
+//	transform.orientation.f1 *= 1.0f + (float)(rand() % 1024) / 1024.0f;
+//	transform.orientation.f2 *= 1.0f + (float)(rand() % 1024) / 1024.0f;
+//	transform.orientation.f3 *= 1.0f + (float)(rand() % 1024) / 1024.0f;
 	transform.scale = (float)(rand() % 10 + 2)/20.0f;
 
 	DynamicPropertiesComponent dynProps;
@@ -328,7 +336,7 @@ void TestLayer8::EmitMesh(int meshIdx, TransformComponent transform)
 	dynProps.inertial_mass = 0.001f;
 	dynProps.velocity = 0.05f * transform.orientation.f3;
 	dynProps.angular_velocity = Vec3D();
-	transform.scale = 0.02f;
+	transform.scale = 0.1f; // 0.02f;
 	transform.location += 0.1*(transform.orientation.f3 - transform.orientation.f2);
 
 	Entity newEntity = m_Scene->CreateEntity("");
@@ -437,7 +445,7 @@ bool TestLayer8::MouseWheelScrolled(Event& e)
 
 	m_ZoomLevel *= event.mouseWheelScroll.delta > 0 ? 1.25f : 0.8f;
 	m_ZoomLevel = m_ZoomLevel < g_InitialZoomLevel ? g_InitialZoomLevel : m_ZoomLevel;
-	m_ZoomLevel = m_ZoomLevel > 128.0f ? 128.0f : m_ZoomLevel;
+	m_ZoomLevel = m_ZoomLevel > g_MaxZoomLevel ? g_MaxZoomLevel : m_ZoomLevel;
 
 	Renderer::SetZoomLevel(m_ZoomLevel);
 
@@ -531,6 +539,8 @@ void TestLayer8::HandleUserInput(Timestep ts)
 	static int skip = 0;
 	if(Input::IsMouseButtonPressed(sf::Mouse::Left))
 	{
+		LaunchMissile(blueIdx, cam_trf, GetTarget());
+		LaunchMissile(blueIdx, cam_trf, GetTarget());
 		LaunchMissile(blueIdx, cam_trf, GetTarget());
 		//LaunchMissile(explosionIdx, cam_trf, GetTarget());
 		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }

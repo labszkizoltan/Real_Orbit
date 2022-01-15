@@ -56,7 +56,7 @@ void SceneUpdater::UpdateScene(Timestep ts)
 		TransformComponent& trf = m_Scene->m_Registry.get<TransformComponent>(explosion);
 		trf.scale += ts / 200.0f;
 		ColourComponent& col = m_Scene->m_Registry.get<ColourComponent>(explosion);
-		col.a = 0.4f / (trf.scale * trf.scale * trf.scale);
+		col.a = 1.0f / (trf.scale * trf.scale); // * trf.scale);
 	}
 
 	auto missiles = m_Scene->m_Registry.view<TargetComponent, TransformComponent, DynamicPropertiesComponent>();
@@ -162,6 +162,18 @@ void SceneUpdater::UpdateScene(Timestep ts)
 		}
 	}
 
+	// for testing purposes, try to add markers to the asteroids
+	static int markerIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DefaultMarker"];
+	static std::shared_ptr<Mesh> marker_mesh = m_Scene->m_MeshLibrary.m_Meshes[markerIdx];
+	static int markerColBufIdx = marker_mesh->GetColourInstances();
+	static const ColourComponent marker_colour = ColourComponent(0,0,1,1);
+	for (auto asteroid : asteroids)
+	{
+		TransformComponent& asteroidTrf = asteroids.get<TransformComponent>(asteroid);
+		m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(asteroidTrf);
+		m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(marker_colour);
+	}
+
 	/*
 	auto grav_masses = m_Scene->m_Registry.view<TransformComponent, GravitationalMassComponent>();
 	auto view = m_Scene->m_Registry.group<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>();
@@ -260,10 +272,11 @@ void SceneUpdater::SpawnExplosion(TransformComponent trf, DynamicPropertiesCompo
 	newEntity.AddComponent<MeshIndexComponent>(explosionIdx);
 //	newEntity.AddComponent<ColourComponent>(ColourComponent(0.7f, 0.3f, 0.3f, 0.8f)); // usual orange explosion
 //	newEntity.AddComponent<ColourComponent>(ColourComponent(0.3f, 0.8f, 0.5f, 0.8f));
-	newEntity.AddComponent<ColourComponent>(ColourComponent(float(rand() % 1000) / 1000.0f, float(rand() % 1000) / 1000.0f, float(rand() % 1000) / 1000.0f, 0.8f));
+//	newEntity.AddComponent<ColourComponent>(ColourComponent(float(rand() % 1000) / 1000.0f, float(rand() % 1000) / 1000.0f, float(rand() % 1000) / 1000.0f, 0.8f));
+	newEntity.AddComponent<ColourComponent>(ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
 //	newEntity.AddComponent<ColourComponent>(ColourComponent());
 	newEntity.AddComponent<DynamicPropertiesComponent>(dyn);
-	newEntity.AddComponent<TimerComponent>(TimerComponent(3000.0f));
+	newEntity.AddComponent<TimerComponent>(TimerComponent(5000.0f));
 	newEntity.AddComponent<ExplosionComponent>(ExplosionComponent());
 
 	

@@ -168,6 +168,7 @@
     <ClCompile Include="Source\core\rendering\drawables\AlphaMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\BrightColouredMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\ColouredMesh.cpp" />
+    <ClCompile Include="Source\core\rendering\drawables\MarkerMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\Mesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\MeshLibrary.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\NormalMesh.cpp" />
