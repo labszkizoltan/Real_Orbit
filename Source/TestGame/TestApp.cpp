@@ -1,13 +1,13 @@
 
 #include <core/Application.h>
-//#include <Game/Layers/TestLayer.h>
-//#include <Game/Layers/TestLayer2.h>
-//#include <Game/Layers/TestLayer3_entities.h>
-//#include <Game/Layers/TestLayer4_perspCamTest.h>
-//#include <Game/Layers/TestLayer5.h>
-//#include <Game/Layers/TestLayer6.h>
-//#include <Game/Layers/TestLayer7.h>
-#include <Game/Layers/TestLayer8.h>
+//#include <TestGame/Layers/TestLayer.h>
+//#include <TestGame/Layers/TestLayer2.h>
+//#include <TestGame/Layers/TestLayer3_entities.h>
+//#include <TestGame/Layers/TestLayer4_perspCamTest.h>
+//#include <TestGame/Layers/TestLayer5.h>
+//#include <TestGame/Layers/TestLayer6.h>
+//#include <TestGame/Layers/TestLayer7.h>
+#include <TestGame/Layers/TestLayer8.h>
 
 
 class TestApplication : public Application
@@ -34,11 +34,12 @@ public:
 
 
 
-
+/*
 Application* CreateApplication()
 {
 	return new TestApplication();
 }
+*/
 
 
 

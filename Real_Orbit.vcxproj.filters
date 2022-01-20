@@ -126,9 +126,6 @@
     <ClInclude Include="Source\core\rendering\drawables\MeshLibrary.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Game\Layers\scene_descriptions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source\utils\OctTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -139,9 +136,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_colour_shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Game\Layers\TestLayer8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\core\scene\SceneSerializer.h">
@@ -186,11 +180,14 @@
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_marker_shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Game_v1\Layers\InGame_layer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game_v1\Layers\scene_descriptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Game\GameApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\core\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -278,9 +275,6 @@
     <ClCompile Include="Source\core\rendering\InstanceBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Game\Layers\TestLayer8.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\core\scene\SceneSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -312,6 +306,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\core\rendering\drawables\MarkerMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game_v1\GameApp_v1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game_v1\Layers\InGame_layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

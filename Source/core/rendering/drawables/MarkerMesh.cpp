@@ -8,8 +8,8 @@ BufferLayout MarkerMesh::s_VertexLayout = {
 		{ShaderDataType::Float3, "aPos"}
 };
 
-std::vector<Vec3D> MarkerMesh::s_DefaultMarkerVertices = { {0,0,0}, {-0.05,-0.03,0}, {0.05,-0.03,0} };
-// std::vector<Vec3D> MarkerMesh::s_DefaultMarkerVertices = { {0.0f, -0.005f, 0.0f}, {-0.05f, -0.035f, 0.0f}, {0.05f, -0.035f, 0.0f} };
+// std::vector<Vec3D> MarkerMesh::s_DefaultMarkerVertices = { {0,0,0}, {-0.05,-0.03,0}, {0.05,-0.03,0} };
+std::vector<Vec3D> MarkerMesh::s_DefaultMarkerVertices = { {0.0f, -0.005f, 0.0f}, {-0.05f, -0.035f, 0.0f}, {0.05f, -0.035f, 0.0f} };
 std::vector<uint32_t> MarkerMesh::s_DefaultMarkerIndices = { 0,2,1 };
 
 MarkerMesh::MarkerMesh()

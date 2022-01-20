@@ -60,11 +60,10 @@ const char* instanced_marker_shader_vertexSrc =
 "		1.0f\n"
 "); \n"
 
-"	float yDisplacement = -0.005; \n"
-"	gl_Position = vec4(aPos.x / aspect_ratio, aPos.y + yDisplacement, aPos.z, 0) + centerPos; \n"
+"	gl_Position = vec4(aPos.x / aspect_ratio, aPos.y, aPos.z, 0) + centerPos; \n"
 
-//"	outColor = aInstanceColour; \n"
-"	outColor = aInstanceColour*(1-gl_Position.z)/2; \n"
+"	outColor = aInstanceColour; \n"
+//"	outColor = aInstanceColour*(1-gl_Position.z)/2; \n"
 "}\0";
 
 
