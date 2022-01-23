@@ -11,6 +11,7 @@
 #include <utils/Matrix_3D.h>
 #include <core/scene/Entity.h>
 #include <core/scene/CoreComponents.h>
+#include <Game_v1/Components/GameComponents.h>
 
 #include <core/rendering/drawables/ColouredMesh.h>
 #include <core/rendering/drawables/BrightColouredMesh.h>

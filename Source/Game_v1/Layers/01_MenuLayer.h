@@ -1,6 +1,6 @@
 
-#ifndef INGAME_LAYER_H
-#define INGAME_LAYER_H
+#ifndef MENU_LAYER_H
+#define MENU_LAYER_H
 
 
 #include <core/Core.h>
@@ -23,23 +23,28 @@
 #include <SFML/Audio.hpp>
 
 
-class InGame_layer : public Layer
+class Menu_layer : public Layer
 {
 public:
-	InGame_layer();
-	virtual ~InGame_layer() = default;
+	Menu_layer();
+	virtual ~Menu_layer() = default;
 
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
 	virtual void OnUpdate(Timestep ts) override;
 	virtual void OnEvent(Event& event) override;
 
+	virtual void Activate() override;
+	virtual void DeActivate() override;
+
+	/*
 	void RandomRocketLaunch(int meshIdx, Vec3D origin);
 	entt::entity GetTarget();
 	void EmitMesh(int meshIdx, TransformComponent transform);
 	void SpawnAsteroid(Vec3D center, Vec3D velocity, float spread);
 	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
 	void RemoveMesh(int meshIdx);
+	*/
 
 private:
 	bool OnWindowResize(Event& e);
@@ -70,9 +75,6 @@ private:
 	bool m_InFocus = true;
 
 	sf::Music m_Music;
-	sf::SoundBuffer m_ShotSoundBuffer;
-	sf::Sound m_ShotSound;
-	sf::Sound m_ExplosionSound;
 
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;
@@ -80,30 +82,4 @@ private:
 
 };
 
-
-
-template <typename UserDataType>
-struct targeting_data
-{
-	float dot_product;
-	UserDataType user_data;
-
-	bool operator<(const targeting_data<UserDataType>& other) const
-	{
-		return dot_product < other.dot_product; // this is the original
-//		return dot_product > other.dot_product;
-	}
-};
-
-template <typename UserDataType>
-std::ostream& operator<<(std::ostream& stream, const targeting_data<UserDataType>& td)
-{
-	stream << td.dot_product << "\t" << td.user_data << "\n";
-	return stream;
-}
-
-
-
-
-
-#endif // INGAME_LAYER_H
+#endif // MENU_LAYER_H

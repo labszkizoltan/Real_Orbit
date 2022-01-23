@@ -1,6 +1,7 @@
 
-#include "InGame_layer.h"
+#include "01_MenuLayer.h"
 #include <core/Application.h>
+#include <Game_v1/GameApp_v1.h>
 #include <SFML/Window/Event.hpp>
 
 #include <core/rendering/Renderer.h>
@@ -10,59 +11,24 @@
 
 #include <core/scene/SceneSerializer.h>
 #include <core/scene/CoreComponents.h>
-
+#include <Game_v1/Components/GameComponents.h>
 
 #include <utils/Vector_3D.h>
 #include <glad/glad.h>
 
 //#include "scene_descriptions.h"
 
-#include <queue> // the priority_queue uses it in the targeting function
+#define BIND_EVENT_FN(x) std::bind(&Menu_layer::x, this, std::placeholders::_1)
 
-#define BIND_EVENT_FN(x) std::bind(&InGame_layer::x, this, std::placeholders::_1)
-
-OGLBufferData ParseVertexFile(const std::string& filename)
+Menu_layer::Menu_layer()
+	: Layer("Menu_layer")
 {
-	OGLBufferData result;
-	std::ifstream myfile(filename.c_str());
-	if (!myfile.is_open())
-	{
-		LOG_CORE_WARN("InGame_layer::ParseVertexFile() was unable to open file: {0}", filename);
-		return result;
-	}
-
-	int v_count = 0, i_count = 0;
-
-	myfile >> v_count;
-	myfile >> i_count;
-
-	result.vertex_data.resize(v_count);
-	result.index_data.resize(i_count);
-
-	for (int i = 0; i < (v_count); i++)
-		myfile >> result.vertex_data[i];
-
-	for (int i = 0; i < i_count; i++)
-		myfile >> result.index_data[i];
-
-	myfile.close();
-
-	if (result.vertex_data.size() == 0 || result.index_data.size() == 0)
-		LOG_CORE_WARN("InGame_layer::ParseVertexFile(): vertex or index data missing from file: ", filename);
-
-	return result;
+	LOG_INFO("Menu_layer constructed");
 }
 
-
-InGame_layer::InGame_layer()
-	: Layer("InGame_layer")
+void Menu_layer::OnAttach()
 {
-	LOG_INFO("InGame_layer constructed");
-}
-
-void InGame_layer::OnAttach()
-{
-	LOG_INFO("InGame_layer attached");
+	LOG_INFO("Menu_layer attached");
 
 	FrameBufferSpecification fbSpec;
 	fbSpec.Width = Application::Get().GetWindow().GetWidth();
@@ -73,7 +39,7 @@ void InGame_layer::OnAttach()
 
 	SceneSerializer serializer(m_Scene);
 	//	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_3.yaml");
-	serializer.DeSerialize_file("assets/scenes/test_scene_3.yaml");
+	serializer.DeSerialize_file("assets/scenes/01_MenuLayer.yaml");
 
 	m_SceneRenderer.SetScene(m_Scene);
 	m_SceneUpdater.SetScene(m_Scene);
@@ -84,99 +50,31 @@ void InGame_layer::OnAttach()
 	m_ImgProcessor = std::make_unique<ImageProcessor>();
 	m_ImgProcessor->SetMipMapLevel(4);
 
-
-
-
 	// load background music
-	if (!m_Music.openFromFile("assets/audio/Adrift_by_Hayden_Folker.ogg"))
-		//	if (!m_Music.openFromFile("assets/audio/Puritania.wav"))
-		LOG_ERROR("Audio not found: assets/audio/Adrift_by_Hayden_Folker.ogg");
+	/*
+	if (!m_Music.openFromFile("assets/audio/Kevin_MacLeod-Broken_Reality.wav"))
+		LOG_ERROR("Audio not found: assets/audio/Kevin_MacLeod-Broken_Reality.wav");
 	m_Music.play();
-
-	// Load a sound to play
-	if (!m_ShotSoundBuffer.loadFromFile("assets/audio/SciFi_weapon_MultiShot_1.wav"))
-		LOG_ERROR("Audio not found: assets/audio/SciFi_weapon_MultiShot_1.wav");
-	m_ShotSound.setBuffer(m_ShotSoundBuffer);
-	m_ShotSound.setVolume(60.0f);
-
-
+	*/
 
 }
 
-void InGame_layer::OnDetach()
+void Menu_layer::OnDetach()
 {
-	LOG_INFO("InGame_layer detached");
+	LOG_INFO("Menu_layer detached");
 }
 
-void InGame_layer::OnUpdate(Timestep ts)
+void Menu_layer::OnUpdate(Timestep ts)
 {
 	// if music finished, start again
 	if (m_Music.getStatus() == sf::SoundSource::Status::Stopped)
 	{
-		m_Music.openFromFile("assets/audio/Adrift_by_Hayden_Folker.ogg");
+		m_Music.openFromFile("assets/audio/Kevin_MacLeod-Broken_Reality.wav");
 		//		m_Music.openFromFile("assets/audio/Puritania.wav");
 		m_Music.play();
 	}
 
 	HandleUserInput(ts);
-	{
-		static int randomLaunchCounter = 0;
-		static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
-		static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
-		static int yellowIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
-		//if (randomLaunchCounter % 1000 < 50)
-		//if (randomLaunchCounter % 8 == 0)
-		//{
-		//	RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-		//	RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-		//}
-		/*
-		if (randomLaunchCounter % 1000 < 50)
-		{
-			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-			RandomRocketLaunch(blueIdx, Vec3D(-20, 20, -300));
-		}
-		if ((randomLaunchCounter+500) % 1000 < 50)
-		{
-			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-			RandomRocketLaunch(yellowIdx, Vec3D(20, -20, 300));
-		}
-		*/
-
-		int asteroid_count = 128;
-		float spawn_frequency = 10000.0f;
-		static float asteroid_spawn_timer = spawn_frequency; // in milli seconds
-		asteroid_spawn_timer -= m_SimulationSpeed * ts;
-		//		if (randomLaunchCounter % (int)spawn_frequency == 0)
-		if (asteroid_spawn_timer < 0.0f)
-		{
-			asteroid_spawn_timer = spawn_frequency;
-			//			spawn_frequency *= 0.9f;
-			//			Vec3D center = Vec3D(rand() % 50 - 25, rand() % 50 - 25, 0);
-			Vec3D center = Vec3D(50, 0, 0);
-			Vec3D velocity = -0.01 * center / center.length();
-			for (int i = 0; i < asteroid_count; i++)
-				SpawnAsteroid(500.0f * center / center.length(), velocity, 80.0f);
-		}
-
-		randomLaunchCounter++;
-	}
 
 	// if the update-render order is swapped, something is un-initialized and the program fails at alpha mesh rendering
 	m_SceneRenderer.RenderScene();
@@ -195,9 +93,9 @@ void InGame_layer::OnUpdate(Timestep ts)
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }
 
-void InGame_layer::OnEvent(Event& event)
+void Menu_layer::OnEvent(Event& event)
 {
-	//	LOG_INFO("InGame_layer event received");
+	//	LOG_INFO("Menu_layer event received");
 
 	event.Dispatch<sf::Event::EventType::Resized>(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
 	event.Dispatch<sf::Event::EventType::LostFocus>(BIND_EVENT_FN(OnLoosingFocus));
@@ -210,7 +108,23 @@ void InGame_layer::OnEvent(Event& event)
 	//	event.Dispatch<sf::Event::EventType::MouseMoved>			(BIND_EVENT_FN(OnMouseMoved));
 }
 
-void InGame_layer::RandomRocketLaunch(int meshIdx, Vec3D origin)
+
+void Menu_layer::Activate()
+{
+	m_Music.play();
+	m_IsActive = true;
+}
+
+void Menu_layer::DeActivate()
+{
+	Application& app = Application::Get();
+	((GameApplication*)(&app))->ActitivateLayer(GameLayers::INGAME_LAYER);
+	m_Music.pause();
+	m_IsActive = false;
+}
+
+/*
+void Menu_layer::RandomRocketLaunch(int meshIdx, Vec3D origin)
 {
 	// get a random target
 //	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>(entt::exclude<TimerComponent>);
@@ -237,12 +151,8 @@ void InGame_layer::RandomRocketLaunch(int meshIdx, Vec3D origin)
 	LaunchMissile(meshIdx, trf, target);
 }
 
-entt::entity InGame_layer::GetTarget()
+entt::entity Menu_layer::GetTarget()
 {
-	static int counter = 0;
-	int queue_size = 15;
-	std::priority_queue<targeting_data<entt::entity>> targeting_queue;
-
 	Vec3D pos = m_Scene->GetCamera().location;
 	Vec3D dir = m_Scene->GetCamera().orientation.f3;
 
@@ -251,58 +161,24 @@ entt::entity InGame_layer::GetTarget()
 	float maxScalarProd = -1.0f;
 
 	// exclude TargetComponent, so missiles wont target other missiles
-//	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent, HitPointComponent>(entt::exclude<TargetComponent>);
-	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent, AsteroidComponent>();
-	if (view.begin() == view.end())
-		return entt::null;
-
+	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>(entt::exclude<TargetComponent>);
 	for (auto entity : view)
 	{
 		TransformComponent& entity_trf = view.get<TransformComponent>(entity);
 		Vec3D dx = entity_trf.location - pos;
 
 		float scalarProd = dx * dir / dx.length();
-		//		if (scalarProd > maxScalarProd)
-		//		{
-		//			maxScalarProd = scalarProd;
-		//			result = entity;
-		//		}
-
-		targeting_data<entt::entity> temp_td;
-		temp_td.dot_product = -scalarProd;
-		temp_td.user_data = entity;
-		if (queue_size > 0)
+		if (scalarProd > maxScalarProd)
 		{
-			targeting_queue.push(temp_td);
-			queue_size--;
+			maxScalarProd = scalarProd;
+			result = entity;
 		}
-		else
-		{
-			if (temp_td < targeting_queue.top())
-				//			if (targeting_queue.top() < temp_td)
-			{
-				targeting_queue.pop();
-				targeting_queue.push(temp_td);
-			}
-		}
-
 	}
 
-	for (int i = 0; i < std::min(counter, (int)targeting_queue.size() - 1); i++)
-		targeting_queue.pop();
-
-	counter--;
-	counter = counter < 0 ? 15 : counter;
-
-	if (targeting_queue.size() == 0)
-		return entt::null;
-	else
-		return targeting_queue.top().user_data;
-
-	//	return result;
+	return result;
 }
 
-void InGame_layer::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
+void Menu_layer::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 {
 	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
 
@@ -330,7 +206,7 @@ void InGame_layer::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 
 }
 
-void InGame_layer::EmitMesh(int meshIdx, TransformComponent transform)
+void Menu_layer::EmitMesh(int meshIdx, TransformComponent transform)
 {
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 0.001f;
@@ -347,7 +223,7 @@ void InGame_layer::EmitMesh(int meshIdx, TransformComponent transform)
 	newEntity.AddComponent<HitPointComponent>(1.0f);
 }
 
-void InGame_layer::LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target)
+void Menu_layer::LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target)
 {
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 0.001f;
@@ -366,40 +242,41 @@ void InGame_layer::LaunchMissile(int meshIdx, TransformComponent transform, entt
 	newEntity.AddComponent<TargetComponent>(target);
 }
 
-void InGame_layer::RemoveMesh(int meshIdx)
+void Menu_layer::RemoveMesh(int meshIdx)
 {
 	if (m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].size() > 0)
 		m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].pop_back();
 }
+*/
 
 
 /***********************************
 ***** Private member functions *****
 ************************************/
 
-bool InGame_layer::OnWindowResize(Event& e)
+bool Menu_layer::OnWindowResize(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::OnLoosingFocus(Event& e)
+bool Menu_layer::OnLoosingFocus(Event& e)
 {
 	m_InFocus = false;
 	return false;
 }
 
-bool InGame_layer::OnGainingFocus(Event& e)
+bool Menu_layer::OnGainingFocus(Event& e)
 {
 	m_InFocus = true;
 	return false;
 }
 
-bool InGame_layer::OnTextEntered(Event& e)
+bool Menu_layer::OnTextEntered(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::OnKeyPressed(Event& e)
+bool Menu_layer::OnKeyPressed(Event& e)
 {
 	sf::Event& event = e.GetEvent();
 	if (event.key.code == sf::Keyboard::Key::Escape)
@@ -422,12 +299,12 @@ bool InGame_layer::OnKeyPressed(Event& e)
 	return false;
 }
 
-bool InGame_layer::OnKeyReleased(Event& e)
+bool Menu_layer::OnKeyReleased(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::MouseWheelScrolled(Event& e)
+bool Menu_layer::MouseWheelScrolled(Event& e)
 {
 	sf::Event& event = e.GetEvent();
 
@@ -440,18 +317,27 @@ bool InGame_layer::MouseWheelScrolled(Event& e)
 	return false;
 }
 
-bool InGame_layer::OnMouseButtonPressed(Event& e)
+bool Menu_layer::OnMouseButtonPressed(Event& e)
+{
+	sf::Event& event = e.GetEvent();
+	if (event.mouseButton.button == sf::Mouse::Left)
+	{
+		DeActivate();
+
+	}
+
+
+	return false;
+}
+
+bool Menu_layer::OnMouseButtonReleased(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::OnMouseButtonReleased(Event& e)
+bool Menu_layer::OnMouseMoved(Event& e)
 {
-	return false;
-}
-
-bool InGame_layer::OnMouseMoved(Event& e)
-{
+	/*
 	static int center_x = Application::Get().GetWindow().GetWidth() / 2;
 	static int center_y = Application::Get().GetWindow().GetHeight() / 2;
 
@@ -479,20 +365,21 @@ bool InGame_layer::OnMouseMoved(Event& e)
 		sf::Mouse::setPosition(sf::Vector2i(center_x, center_y), Application::Get().GetWindow().GetNativeWindow());
 	}
 
+	*/
 	return false;
 }
 
-bool InGame_layer::OnMouseEntered(Event& e)
+bool Menu_layer::OnMouseEntered(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::OnMouseLeft(Event& e)
+bool Menu_layer::OnMouseLeft(Event& e)
 {
 	return false;
 }
 
-void InGame_layer::HandleUserInput(Timestep ts)
+void Menu_layer::HandleUserInput(Timestep ts)
 {
 	TransformComponent& cam_trf = m_Scene->GetCamera();
 	//	static TransformComponent cam_trf = TransformComponent();
@@ -519,46 +406,6 @@ void InGame_layer::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { cam_velocity *= 1.1f; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
 
-	static int orangeIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["OrangeSphere"];
-	static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
-	static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
-	static int yellowIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
-	static int explosionIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Explosion"];
-	static int skip = 0;
-	if (Input::IsMouseButtonPressed(sf::Mouse::Left))
-	{
-		LaunchMissile(blueIdx, cam_trf, GetTarget());
-		LaunchMissile(blueIdx, cam_trf, GetTarget());
-		LaunchMissile(blueIdx, cam_trf, GetTarget());
-		//LaunchMissile(explosionIdx, cam_trf, GetTarget());
-		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
-
-	}
-	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip % 2 == 0)
-	{
-		//		EmitMesh(orangeIdx, cam_trf);
-		if (skip % 4 == 0)
-			EmitMesh(bulletIdx, cam_trf);
-		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) {
-			m_ShotSound.play();
-		}
-	}
-	if (Input::IsMouseButtonPressed(sf::Mouse::Middle) && skip % 2 == 1)
-	{
-		LaunchMissile(yellowIdx, cam_trf, GetTarget());
-		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
-	}
-	if (!Input::IsMouseButtonPressed(sf::Mouse::Left) && !Input::IsMouseButtonPressed(sf::Mouse::Right) && !Input::IsMouseButtonPressed(sf::Mouse::Middle))
-		m_ShotSound.stop();
-
-	skip++;
-
-
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Space))
-	{
-		TransformComponent& light_trf = m_Scene->GetLight();
-		light_trf.location = cam_trf.location;
-	}
 
 	// move with as the mouse changes position
 	if (m_InFocus)
@@ -597,14 +444,14 @@ void InGame_layer::HandleUserInput(Timestep ts)
 
 }
 
-void InGame_layer::ZoomIn()
+void Menu_layer::ZoomIn()
 {
 	m_ZoomLevel *= 1.05f;
 	m_ZoomLevel = m_ZoomLevel > 128.0f ? 128.0f : m_ZoomLevel;
 	Renderer::SetZoomLevel(m_ZoomLevel);
 }
 
-void InGame_layer::ZoomOut()
+void Menu_layer::ZoomOut()
 {
 	m_ZoomLevel /= 1.05f;
 	m_ZoomLevel = m_ZoomLevel < g_InitialZoomLevel ? g_InitialZoomLevel : m_ZoomLevel;

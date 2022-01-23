@@ -47,7 +47,8 @@ private:
 	bool OnMouseLeft(Event& e);
 
 
-private:
+//private:
+protected: // perhaps this will make these variables accessible from the derived game application classes
 	std::unique_ptr<Window> m_Window;
 	bool m_Running = true;
 	bool m_Minimized = false;

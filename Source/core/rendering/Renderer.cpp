@@ -25,7 +25,6 @@ int Renderer::Init()
 	if (!result)
 		std::cout << "Failed to initialize OpenGL context\n";
 
-
 	// Create the required framebuffers
 	result = InitFramebuffers();
 	if (!result)
@@ -153,7 +152,7 @@ int Renderer::InitFramebuffers()
 	s_DepthBuffer->GetDepthAttachment()->SetSlot(g_RendererShadowDepthSlot);
 	s_DepthBuffer->Unbind();
 
-	// Create the framebuffer for the double colour attachment buffer:
+	// Create the framebuffer for the double colour attachment buffer (this is the main draw buffer):
 	FrameBufferSpecification fbSpec;
 	fbSpec.Width = Application::Get().GetWindow().GetWidth();
 	fbSpec.Height = Application::Get().GetWindow().GetHeight();

@@ -163,10 +163,10 @@ void SceneUpdater::UpdateScene(Timestep ts)
 	}
 
 	// for testing purposes, try to add markers to the asteroids
-	static int markerIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DefaultMarker"];
-	static std::shared_ptr<Mesh> marker_mesh = m_Scene->m_MeshLibrary.m_Meshes[markerIdx];
-	static int markerColBufIdx = marker_mesh->GetColourInstances();
-	static const ColourComponent marker_colour = ColourComponent(0,0,1,1);
+	/*static*/ int markerIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DefaultMarker"];
+	/*static*/ std::shared_ptr<Mesh> marker_mesh = m_Scene->m_MeshLibrary.m_Meshes[markerIdx];
+	/*static*/ int markerColBufIdx = marker_mesh->GetColourInstances();
+	/*static const*/ ColourComponent marker_colour = ColourComponent(0,0,1,1);
 	for (auto asteroid : asteroids)
 	{
 		TransformComponent& asteroidTrf = asteroids.get<TransformComponent>(asteroid);

@@ -145,9 +145,9 @@ bool Application::OnWindowResize(Event& e)
 	glViewport(0, 0, event.size.width, event.size.height);
 	Renderer::SetAspectRatio((float)event.size.width / (float)event.size.height);
 
-	// Temporarly setting this to false, otherwise this event cant propagate to TestLayer2 and the aspect ratio cannot be changed upon window resizing
-//	return true;
-	return false;
+	return true;
+//	Temporarly setting this to false, otherwise this event cant propagate to TestLayer2 and the aspect ratio cannot be changed upon window resizing
+//	return false;
 }
 
 bool Application::OnLoosingFocus(Event& e)
@@ -225,7 +225,3 @@ bool Application::OnMouseLeft(Event& e)
 	return false;
 }
 
-
-//#################################################################
-//#################################################################
-//#################################################################

@@ -46,7 +46,8 @@ void LayerStack::OnUpdate(Timestep t)
 {
 	for (int i = 0; i < m_Layers.size(); i++)
 	{
-		m_Layers[i]->OnUpdate(t);
+		if(m_Layers[i]->IsActive())
+			m_Layers[i]->OnUpdate(t);
 	}
 }
 
@@ -57,9 +58,29 @@ void LayerStack::OnEvent(Event& e)
 		if (e.IsHandled())
 			return;
 		
-		m_Layers[i]->OnEvent(e);
+		if (m_Layers[i]->IsActive())
+			m_Layers[i]->OnEvent(e);
 	}
 }
+
+void LayerStack::ActivateLayer(int idx)
+{
+	if (idx >= 0 && idx < m_Layers.size())
+		m_Layers[idx]->Activate();
+}
+
+/*
+Layer* LayerStack::GetActiveLayer()
+{
+	return m_Layers[m_ActiveIndex];
+}
+
+void LayerStack::SetActiveLayer(int idx)
+{
+	if (idx >= 0 && idx < m_Layers.size())
+		m_ActiveIndex = idx;
+}
+*/
 
 
 

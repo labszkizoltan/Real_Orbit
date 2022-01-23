@@ -1,23 +1,28 @@
 
-#include <core/Application.h>
-#include <Game_v1/Layers/InGame_layer.h>
+#include "GameApp_v1.h"
+#include <Game_v1/Layers/01_MenuLayer.h>
+#include <Game_v1/Layers/02_InGame_layer.h>
 
-
-class GameApplication : public Application
+GameApplication::GameApplication()
 {
-public:
-	GameApplication()
-	{
-		PushLayer(new InGame_layer()); // test rebuilding
-	}
+	Menu_layer* menuLayer = new Menu_layer();
+	InGame_layer* ingameLayer = new InGame_layer();
 
-	~GameApplication()
-	{
-	}
+	PushLayer(menuLayer);
+	PushLayer(ingameLayer); // test rebuilding
 
+	menuLayer->Activate();
+	ingameLayer->DeActivate();
+}
 
-};
+GameApplication::~GameApplication()
+{
+}
 
+void GameApplication::ActitivateLayer(GameLayers layer)
+{
+	m_LayerStack.ActivateLayer((int)layer);
+}
 
 
 
@@ -25,6 +30,7 @@ Application* CreateApplication()
 {
 	return new GameApplication();
 }
+
 
 
 

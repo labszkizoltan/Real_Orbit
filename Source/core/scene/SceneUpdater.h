@@ -4,6 +4,7 @@
 
 #include "Scene.h"
 
+#include <Game_v1/Components/GameComponents.h>
 
 #include <SFML/Audio.hpp> // just quickly hacking in explosion sounds
 
