@@ -189,6 +189,7 @@
     <ClCompile Include="Source\core\scene\SceneSerializer.cpp" />
     <ClCompile Include="Source\core\scene\SceneUpdater.cpp" />
     <ClCompile Include="Source\core\Window.cpp" />
+    <ClCompile Include="Source\Game_v1\Common\MenuStateManager.cpp" />
     <ClCompile Include="Source\Game_v1\GameApp_v1.cpp" />
     <ClCompile Include="Source\Game_v1\Layers\01_MenuLayer.cpp" />
     <ClCompile Include="Source\Game_v1\Layers\02_InGame_layer.cpp" />
@@ -199,6 +200,7 @@
     <ClCompile Include="Source\utils\Vector_3D.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Source\core\Application.h" />
     <ClInclude Include="Source\core\Core.h" />
     <ClInclude Include="Source\core\events\Event.h" />
@@ -249,6 +251,7 @@
     <ClInclude Include="Source\core\scene\SceneUpdater.h" />
     <ClInclude Include="Source\core\Timestep.h" />
     <ClInclude Include="Source\core\Window.h" />
+    <ClInclude Include="Source\Game_v1\Common\MenuStateManager.h" />
     <ClInclude Include="Source\Game_v1\Components\GameComponents.h" />
     <ClInclude Include="Source\Game_v1\GameApp_v1.h" />
     <ClInclude Include="Source\Game_v1\Layers\02_InGame_layer.h" />
@@ -263,6 +266,12 @@
   <ItemGroup>
     <None Include="Source\core\rendering\shader_source_files\basic_3D_fragment_shd.glsl" />
     <None Include="Source\core\rendering\shader_source_files\basic_3D_vertex_shd.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Real_Orbit.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\AssetFactory\Textures\menu\Logo.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -22,6 +22,9 @@
 
 #include <SFML/Audio.hpp>
 
+#include <Game_v1/Common/MenuStateManager.h>
+
+//class StateManager;
 
 class Menu_layer : public Layer
 {
@@ -36,15 +39,6 @@ public:
 
 	virtual void Activate() override;
 	virtual void DeActivate() override;
-
-	/*
-	void RandomRocketLaunch(int meshIdx, Vec3D origin);
-	entt::entity GetTarget();
-	void EmitMesh(int meshIdx, TransformComponent transform);
-	void SpawnAsteroid(Vec3D center, Vec3D velocity, float spread);
-	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
-	void RemoveMesh(int meshIdx);
-	*/
 
 private:
 	bool OnWindowResize(Event& e);
@@ -64,10 +58,12 @@ private:
 	void ZoomIn();
 	void ZoomOut();
 
+	void InitStates();
+
 private:
 	float m_ElapsedTime = 0.0f;
 	float m_SimulationSpeed = 1.0f;
-	float m_ZoomLevel = g_InitialZoomLevel;
+	float m_ZoomLevel = 200;
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
@@ -78,8 +74,12 @@ private:
 
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;
-	bool m_CameraContinuousRotation = false;
+	StateManager m_StateManager;
 
+
+	friend class StateManager;
 };
+
+
 
 #endif // MENU_LAYER_H

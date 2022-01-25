@@ -195,6 +195,12 @@
     <ClInclude Include="Source\Game_v1\GameApp_v1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Game_v1\Common\MenuStateManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\core\Application.cpp">
@@ -326,9 +332,22 @@
     <ClCompile Include="Source\Game_v1\Layers\01_MenuLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Game_v1\Common\MenuStateManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\core\rendering\shader_source_files\basic_3D_vertex_shd.glsl" />
     <None Include="Source\core\rendering\shader_source_files\basic_3D_fragment_shd.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Real_Orbit.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\AssetFactory\Textures\menu\Logo.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

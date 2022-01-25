@@ -30,16 +30,14 @@ void Menu_layer::OnAttach()
 {
 	LOG_INFO("Menu_layer attached");
 
-	FrameBufferSpecification fbSpec;
-	fbSpec.Width = Application::Get().GetWindow().GetWidth();
-	fbSpec.Height = Application::Get().GetWindow().GetHeight();
-	fbSpec.Samples = 1;
-
 	m_Scene = std::make_shared<Scene>();
 
 	SceneSerializer serializer(m_Scene);
 	//	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_3.yaml");
 	serializer.DeSerialize_file("assets/scenes/01_MenuLayer.yaml");
+
+	InitStates();
+	m_StateManager.SetState(m_StateManager.m_CurrentState);
 
 	m_SceneRenderer.SetScene(m_Scene);
 	m_SceneUpdater.SetScene(m_Scene);
@@ -111,8 +109,9 @@ void Menu_layer::OnEvent(Event& event)
 
 void Menu_layer::Activate()
 {
-	m_Music.play();
 	m_IsActive = true;
+	m_Music.play();
+	Renderer::SetZoomLevel(m_ZoomLevel);
 }
 
 void Menu_layer::DeActivate()
@@ -122,132 +121,6 @@ void Menu_layer::DeActivate()
 	m_Music.pause();
 	m_IsActive = false;
 }
-
-/*
-void Menu_layer::RandomRocketLaunch(int meshIdx, Vec3D origin)
-{
-	// get a random target
-//	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>(entt::exclude<TimerComponent>);
-	auto poolOfTargets = m_Scene->m_Registry.view<TransformComponent>(entt::exclude<TimerComponent>);
-	int size = poolOfTargets.size_hint();
-	int idx = rand() % size;
-
-	entt::entity target = entt::null;
-	while (target == entt::null)
-	{
-		for (auto entity : poolOfTargets)
-		{
-			if (idx == 0)
-			{
-				target = entity;
-				break;
-			}
-			idx--;
-		}
-	}
-
-	TransformComponent trf;
-	trf.location = origin;
-	LaunchMissile(meshIdx, trf, target);
-}
-
-entt::entity Menu_layer::GetTarget()
-{
-	Vec3D pos = m_Scene->GetCamera().location;
-	Vec3D dir = m_Scene->GetCamera().orientation.f3;
-
-	entt::entity result = entt::null;
-
-	float maxScalarProd = -1.0f;
-
-	// exclude TargetComponent, so missiles wont target other missiles
-	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>(entt::exclude<TargetComponent>);
-	for (auto entity : view)
-	{
-		TransformComponent& entity_trf = view.get<TransformComponent>(entity);
-		Vec3D dx = entity_trf.location - pos;
-
-		float scalarProd = dx * dir / dx.length();
-		if (scalarProd > maxScalarProd)
-		{
-			maxScalarProd = scalarProd;
-			result = entity;
-		}
-	}
-
-	return result;
-}
-
-void Menu_layer::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
-{
-	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
-
-	TransformComponent transform;
-	transform.location = center + Vec3D(rand() % 1000 - 500, rand() % 1000 - 500, rand() % 1000 - 500) * spread / 1000.0f;
-	transform.orientation = Rotation((float)(rand() % 31415) / 10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
-	//	transform.orientation.f1 *= 1.0f + (float)(rand() % 1024) / 1024.0f;
-	//	transform.orientation.f2 *= 1.0f + (float)(rand() % 1024) / 1024.0f;
-	//	transform.orientation.f3 *= 1.0f + (float)(rand() % 1024) / 1024.0f;
-	transform.scale = (float)(rand() % 10 + 2) / 20.0f;
-
-	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 1.0f;
-	dynProps.velocity = velocity;
-	dynProps.angular_velocity = 0.0001 * Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
-
-	Entity newEntity = m_Scene->CreateEntity("");
-	newEntity.AddComponent<TransformComponent>(transform);
-	newEntity.AddComponent<MeshIndexComponent>(asteroidIdx);
-	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	//	newEntity.AddComponent<HitPointComponent>(1.0f + (float)(rand() % 10));
-	newEntity.AddComponent<HitPointComponent>(1.0f);
-	newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
-
-
-}
-
-void Menu_layer::EmitMesh(int meshIdx, TransformComponent transform)
-{
-	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 0.001f;
-	dynProps.velocity = 0.05f * transform.orientation.f3;
-	dynProps.angular_velocity = Vec3D();
-	transform.scale = 0.1f; // 0.02f;
-	transform.location += 0.1 * (transform.orientation.f3 - transform.orientation.f2);
-
-	Entity newEntity = m_Scene->CreateEntity("");
-	newEntity.AddComponent<TransformComponent>(transform);
-	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
-	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	newEntity.AddComponent<TimerComponent>(TimerComponent(10000.0f)); // provide ttl in mili seconds
-	newEntity.AddComponent<HitPointComponent>(1.0f);
-}
-
-void Menu_layer::LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target)
-{
-	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 0.001f;
-	//	dynProps.velocity = 0.01f * (transform.orientation.f1 + transform.orientation.f3);
-	//	dynProps.velocity = 0.05f * transform.orientation.f3;
-	dynProps.velocity = 0.00000001f * transform.orientation.f3;
-	dynProps.angular_velocity = Vec3D();
-	transform.scale = 0.01f;
-	transform.location += 0.1 * (transform.orientation.f3 + transform.orientation.f1);
-
-	Entity newEntity = m_Scene->CreateEntity("");
-	newEntity.AddComponent<TransformComponent>(transform);
-	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
-	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	newEntity.AddComponent<TimerComponent>(TimerComponent(20000.0f)); // provide ttl in mili seconds
-	newEntity.AddComponent<TargetComponent>(target);
-}
-
-void Menu_layer::RemoveMesh(int meshIdx)
-{
-	if (m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].size() > 0)
-		m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].pop_back();
-}
-*/
 
 
 /***********************************
@@ -283,16 +156,19 @@ bool Menu_layer::OnKeyPressed(Event& e)
 	{
 		Application::Get().Close();
 	}
-	else if (event.key.code == sf::Keyboard::Key::Space)
-		m_SimulationSpeed = 0.0f;
-	else if (event.key.code == sf::Keyboard::Key::Num1)
-		m_SimulationSpeed = 0.2f;
-	else if (event.key.code == sf::Keyboard::Key::Num2)
-		m_SimulationSpeed = 1.0f;
-	else if (event.key.code == sf::Keyboard::Key::Num3)
-		m_SimulationSpeed = 5.0f;
-	else if (event.key.code == sf::Keyboard::Key::C)
-		m_CameraContinuousRotation = !m_CameraContinuousRotation;
+	else if (event.key.code == sf::Keyboard::Key::Left)
+		m_StateManager.SetState(m_StateManager.GetPreviousState());
+	else if (event.key.code == sf::Keyboard::Key::Right)
+		m_StateManager.SetState(m_StateManager.GetNextState());
+	else if (event.key.code == sf::Keyboard::Key::Up)
+		m_StateManager.SetState(m_StateManager.GetPreviousState());
+	else if (event.key.code == sf::Keyboard::Key::Down)
+		m_StateManager.SetState(m_StateManager.GetNextState());
+	else if (event.key.code == sf::Keyboard::Key::Enter)
+		m_StateManager.SetState(m_StateManager.GetChildState());
+	else if (event.key.code == sf::Keyboard::Key::BackSpace)
+		m_StateManager.SetState(m_StateManager.GetParentState());
+
 
 	LOG_INFO("TestLayer received KeyPressed evet: {0}", event.key.code);
 
@@ -323,7 +199,14 @@ bool Menu_layer::OnMouseButtonPressed(Event& e)
 	if (event.mouseButton.button == sf::Mouse::Left)
 	{
 		DeActivate();
-
+	}
+	else if (event.mouseButton.button == sf::Mouse::Right)
+	{
+		TransformComponent& trf = m_Scene->GetCamera();
+		std::cout << trf.location << "\n";
+		std::cout << trf.orientation << "\n";
+		std::cout << m_ZoomLevel << "\n";
+		std::cout << "camera stop\n";
 	}
 
 
@@ -337,35 +220,6 @@ bool Menu_layer::OnMouseButtonReleased(Event& e)
 
 bool Menu_layer::OnMouseMoved(Event& e)
 {
-	/*
-	static int center_x = Application::Get().GetWindow().GetWidth() / 2;
-	static int center_y = Application::Get().GetWindow().GetHeight() / 2;
-
-	sf::Event& event = e.GetEvent();
-	std::cout << "new mouse x: " << event.mouseMove.x << "\n";
-	std::cout << "new mouse y: " << event.mouseMove.y << "\n";
-	if (m_InFocus)
-	{
-		TransformComponent& cam_trf = m_Scene->GetCamera();
-		static const float r_min_square = 50.0f * 50.0f;
-
-		int dx = event.mouseMove.x - center_x;
-		int dy = event.mouseMove.y - center_y;
-		//		float moveLengthSqr = dx * dx + dy * dy;
-		float moveLength = sqrt(dx * dx + dy * dy);
-		Vec3D rotationAxis = dy * cam_trf.orientation.f1 + dx * cam_trf.orientation.f2;
-		//		Mat_3D rotationMatrix = Rotation(0.0001f * moveLengthSqr / m_ZoomLevel, rotationAxis); // angle is divided by zoom level to slow down turning when really zoomed into something
-		Mat_3D rotationMatrix = Rotation(0.005f * moveLength / m_ZoomLevel, rotationAxis);
-
-		cam_trf.orientation = rotationMatrix * cam_trf.orientation;
-
-		// re-center mouse
-		static int center_x = Application::Get().GetWindow().GetWidth() / 2;
-		static int center_y = Application::Get().GetWindow().GetHeight() / 2;
-		sf::Mouse::setPosition(sf::Vector2i(center_x, center_y), Application::Get().GetWindow().GetNativeWindow());
-	}
-
-	*/
 	return false;
 }
 
@@ -382,10 +236,8 @@ bool Menu_layer::OnMouseLeft(Event& e)
 void Menu_layer::HandleUserInput(Timestep ts)
 {
 	TransformComponent& cam_trf = m_Scene->GetCamera();
-	//	static TransformComponent cam_trf = TransformComponent();
-	//	TransformComponent& cam_trf = m_Camera;
 
-	static float cam_velocity = 0.001f;
+	static float cam_velocity = 0.0005f;
 	// moves
 	if (Input::IsKeyPressed(sf::Keyboard::Key::W)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f3; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::S)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f3; }
@@ -396,51 +248,11 @@ void Menu_layer::HandleUserInput(Timestep ts)
 	// rotations
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Up)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f1) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Down)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f1) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Left)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Right)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::P)) { ZoomIn(); }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::O)) { ZoomOut(); }
 
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { cam_velocity *= 1.1f; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
-
-
-	// move with as the mouse changes position
-	if (m_InFocus)
-	{
-		if (!m_CameraContinuousRotation)
-		{
-			sf::Vector2i mousePos = Input::GetMousePosition();
-			static int center_x = Application::Get().GetWindow().GetWidth() / 2;
-			static int center_y = Application::Get().GetWindow().GetHeight() / 2;
-
-			int dx = mousePos.x - center_x;
-			int dy = mousePos.y - center_y;
-
-			float radiusFromCenter = sqrt(dx * dx + dy * dy);
-			float radiusFromCenterSqr = dx * dx + dy * dy;
-			Vec3D rotationAxis = dy * cam_trf.orientation.f1 + dx * cam_trf.orientation.f2;
-			Mat_3D rotationMatrix = Rotation(ts * (0.00025f * radiusFromCenter + 0.0000001f * radiusFromCenterSqr) / m_ZoomLevel, rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
-	//		Mat_3D rotationMatrix = Rotation(0.0001f * ts * radiusFromCenter / m_ZoomLevel, rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
-
-			cam_trf.orientation = rotationMatrix * cam_trf.orientation;
-			sf::Mouse::setPosition(sf::Vector2i(center_x, center_y), Application::Get().GetWindow().GetNativeWindow());
-		}
-		else
-		{
-			float r_min_square = 50.0f * 50.0f;
-			sf::Vector2i mousePos = Input::GetMousePosition();
-			mousePos.x -= Application::Get().GetWindow().GetWidth() / 2;
-			mousePos.y -= Application::Get().GetWindow().GetHeight() / 2;
-			float radiusFromCenter_square = (mousePos.x * mousePos.x + mousePos.y * mousePos.y);
-			Vec3D rotationAxis = mousePos.y * cam_trf.orientation.f1 + mousePos.x * cam_trf.orientation.f2;
-			Mat_3D rotationMatrix = Rotation(0.00000001f * ts * std::max(0.0f, radiusFromCenter_square - r_min_square) / m_ZoomLevel, rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
-
-			cam_trf.orientation = rotationMatrix * cam_trf.orientation;
-		}
-	}
 
 }
 
@@ -457,3 +269,119 @@ void Menu_layer::ZoomOut()
 	m_ZoomLevel = m_ZoomLevel < g_InitialZoomLevel ? g_InitialZoomLevel : m_ZoomLevel;
 	Renderer::SetZoomLevel(m_ZoomLevel);
 }
+
+void Menu_layer::InitStates()
+{
+	m_StateManager.m_MenuLayer = this;
+	m_StateManager.m_CurrentState = 0;
+
+	MenuState tmp_state;
+
+	// Main menu (0)
+	tmp_state.camera_location.location = Vec3D(0.31f, 0.44f, -13.0f);
+	tmp_state.camera_location.orientation = Identity(1.0f);
+	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
+
+	tmp_state.state_type = MenuStateType::MAIN_MENU;
+
+	tmp_state.parent_state = -1;
+	tmp_state.next_state = 1;
+	tmp_state.previous_state = 0;
+	tmp_state.child_state = 1;
+
+	m_StateManager.m_States.push_back(tmp_state);
+
+	// Main menu - level select (1)
+	tmp_state.camera_location.location = Vec3D(-0.315f, 0.315f, -13.0f);
+	tmp_state.camera_location.orientation = Identity(1.0f);
+	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
+
+	tmp_state.state_type = MenuStateType::MAIN_MENU;
+
+	tmp_state.parent_state = 0;
+	tmp_state.next_state = 2;
+	tmp_state.previous_state = 3;
+	tmp_state.child_state = 4;
+
+	m_StateManager.m_States.push_back(tmp_state);
+
+	// Main options (2)
+	tmp_state.camera_location.location = Vec3D(-0.065f, 0.315f, -13.0f);
+	tmp_state.camera_location.orientation = Identity(1.0f);
+	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
+
+	tmp_state.state_type = MenuStateType::MAIN_MENU;
+
+	tmp_state.parent_state = 0;
+	tmp_state.next_state = 3;
+	tmp_state.previous_state = 1;
+	tmp_state.child_state = -1;
+
+	m_StateManager.m_States.push_back(tmp_state);
+
+	// Main quit (3)
+	tmp_state.camera_location.location = Vec3D(0.185f, 0.315f, -13.0f);
+	tmp_state.camera_location.orientation = Identity(1.0f);
+	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
+
+	tmp_state.state_type = MenuStateType::MAIN_MENU;
+
+	tmp_state.parent_state = 0;
+	tmp_state.next_state = 1;
+	tmp_state.previous_state = 2;
+	tmp_state.child_state = -1;
+
+	m_StateManager.m_States.push_back(tmp_state);
+
+	// Earth mission (4):
+	tmp_state.camera_location.location = Vec3D(-0.44f, 0.44f, -13.0f);
+	tmp_state.camera_location.orientation = Identity(1.0f);
+	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
+
+	tmp_state.state_type = MenuStateType::LEVEL_SELECT;
+
+	tmp_state.parent_state = 1;
+	tmp_state.next_state = 5;
+	tmp_state.previous_state = 6;
+	tmp_state.child_state = -1;
+
+	m_StateManager.m_States.push_back(tmp_state);
+
+	// Moon mission (5):
+	tmp_state.camera_location.location = Vec3D(-0.19f, 0.44f, -13.0f);
+	tmp_state.camera_location.orientation = Identity(1.0f);
+	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
+
+	tmp_state.state_type = MenuStateType::LEVEL_SELECT;
+
+	tmp_state.parent_state = 1;
+	tmp_state.next_state = 6;
+	tmp_state.previous_state = 4;
+	tmp_state.child_state = -1;
+
+	m_StateManager.m_States.push_back(tmp_state);
+
+	// Mars mission (6):
+	tmp_state.camera_location.location = Vec3D(0.06f, 0.44f, -13.0f);
+	tmp_state.camera_location.orientation = Identity(1.0f);
+	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
+
+	tmp_state.state_type = MenuStateType::LEVEL_SELECT;
+
+	tmp_state.parent_state = 1;
+	tmp_state.next_state = 4;
+	tmp_state.previous_state = 5;
+	tmp_state.child_state = -1;
+
+	m_StateManager.m_States.push_back(tmp_state);
+
+
+}
+
+
+
+
+
+
+
+

@@ -180,8 +180,9 @@ void InGame_layer::OnEvent(Event& event)
 
 void InGame_layer::Activate()
 {
-	m_Music.play();
 	m_IsActive = true;
+	m_Music.play();
+	Renderer::SetZoomLevel(m_ZoomLevel);
 }
 
 void InGame_layer::DeActivate()
