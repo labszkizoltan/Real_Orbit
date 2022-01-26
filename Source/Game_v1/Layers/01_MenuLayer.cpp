@@ -152,26 +152,18 @@ bool Menu_layer::OnTextEntered(Event& e)
 bool Menu_layer::OnKeyPressed(Event& e)
 {
 	sf::Event& event = e.GetEvent();
-	if (event.key.code == sf::Keyboard::Key::Escape)
-	{
+	if ((m_StateManager.m_CurrentState == 0) && (event.key.code == sf::Keyboard::Key::Escape))
 		Application::Get().Close();
-	}
-	else if (event.key.code == sf::Keyboard::Key::Left)
+
+	if ((event.key.code == sf::Keyboard::Key::Left) || (event.key.code == sf::Keyboard::Key::Up))
 		m_StateManager.SetState(m_StateManager.GetPreviousState());
-	else if (event.key.code == sf::Keyboard::Key::Right)
-		m_StateManager.SetState(m_StateManager.GetNextState());
-	else if (event.key.code == sf::Keyboard::Key::Up)
-		m_StateManager.SetState(m_StateManager.GetPreviousState());
-	else if (event.key.code == sf::Keyboard::Key::Down)
+	else if ((event.key.code == sf::Keyboard::Key::Right) || (event.key.code == sf::Keyboard::Key::Down))
 		m_StateManager.SetState(m_StateManager.GetNextState());
 	else if (event.key.code == sf::Keyboard::Key::Enter)
-		m_StateManager.SetState(m_StateManager.GetChildState());
-	else if (event.key.code == sf::Keyboard::Key::BackSpace)
+		m_StateManager.ActivateState();
+	else if ((event.key.code == sf::Keyboard::Key::BackSpace) || (event.key.code == sf::Keyboard::Key::Escape))
 		m_StateManager.SetState(m_StateManager.GetParentState());
-
-
-	LOG_INFO("TestLayer received KeyPressed evet: {0}", event.key.code);
-
+	
 	return false;
 }
 
@@ -196,11 +188,7 @@ bool Menu_layer::MouseWheelScrolled(Event& e)
 bool Menu_layer::OnMouseButtonPressed(Event& e)
 {
 	sf::Event& event = e.GetEvent();
-	if (event.mouseButton.button == sf::Mouse::Left)
-	{
-		DeActivate();
-	}
-	else if (event.mouseButton.button == sf::Mouse::Right)
+	if (event.mouseButton.button == sf::Mouse::Right)
 	{
 		TransformComponent& trf = m_Scene->GetCamera();
 		std::cout << trf.location << "\n";
@@ -282,12 +270,14 @@ void Menu_layer::InitStates()
 	tmp_state.camera_location.orientation = Identity(1.0f);
 	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
 
-	tmp_state.state_type = MenuStateType::MAIN_MENU;
-
 	tmp_state.parent_state = -1;
 	tmp_state.next_state = 1;
 	tmp_state.previous_state = 0;
 	tmp_state.child_state = 1;
+	tmp_state.activation_function = [this]() {
+		std::cout << "main menu activation was called\n";
+		m_StateManager.SetState(m_StateManager.GetChildState());
+	};
 
 	m_StateManager.m_States.push_back(tmp_state);
 
@@ -296,12 +286,14 @@ void Menu_layer::InitStates()
 	tmp_state.camera_location.orientation = Identity(1.0f);
 	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
 
-	tmp_state.state_type = MenuStateType::MAIN_MENU;
-
 	tmp_state.parent_state = 0;
 	tmp_state.next_state = 2;
 	tmp_state.previous_state = 3;
 	tmp_state.child_state = 4;
+	tmp_state.activation_function = [this]() {
+		std::cout << "level select activation was called\n";
+		m_StateManager.SetState(m_StateManager.GetChildState());
+	};
 
 	m_StateManager.m_States.push_back(tmp_state);
 
@@ -310,12 +302,14 @@ void Menu_layer::InitStates()
 	tmp_state.camera_location.orientation = Identity(1.0f);
 	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
 
-	tmp_state.state_type = MenuStateType::MAIN_MENU;
-
 	tmp_state.parent_state = 0;
 	tmp_state.next_state = 3;
 	tmp_state.previous_state = 1;
 	tmp_state.child_state = -1;
+	tmp_state.activation_function = [this]() {
+		std::cout << "options activation was called\n";
+		m_StateManager.SetState(m_StateManager.GetChildState());
+	};
 
 	m_StateManager.m_States.push_back(tmp_state);
 
@@ -324,12 +318,14 @@ void Menu_layer::InitStates()
 	tmp_state.camera_location.orientation = Identity(1.0f);
 	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
 
-	tmp_state.state_type = MenuStateType::MAIN_MENU;
-
 	tmp_state.parent_state = 0;
 	tmp_state.next_state = 1;
 	tmp_state.previous_state = 2;
 	tmp_state.child_state = -1;
+	tmp_state.activation_function = []() {
+		std::cout << "quit activation was called\n";
+		Application::Get().Close();
+	};
 
 	m_StateManager.m_States.push_back(tmp_state);
 
@@ -338,12 +334,14 @@ void Menu_layer::InitStates()
 	tmp_state.camera_location.orientation = Identity(1.0f);
 	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
 
-	tmp_state.state_type = MenuStateType::LEVEL_SELECT;
-
 	tmp_state.parent_state = 1;
 	tmp_state.next_state = 5;
 	tmp_state.previous_state = 6;
 	tmp_state.child_state = -1;
+	tmp_state.activation_function = [this]() {
+		std::cout << "earth mission activation was called\n";
+		DeActivate();
+	};
 
 	m_StateManager.m_States.push_back(tmp_state);
 
@@ -352,12 +350,13 @@ void Menu_layer::InitStates()
 	tmp_state.camera_location.orientation = Identity(1.0f);
 	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
 
-	tmp_state.state_type = MenuStateType::LEVEL_SELECT;
-
 	tmp_state.parent_state = 1;
 	tmp_state.next_state = 6;
 	tmp_state.previous_state = 4;
 	tmp_state.child_state = -1;
+	tmp_state.activation_function = []() {
+		std::cout << "moon mission activation was called\n";
+	};
 
 	m_StateManager.m_States.push_back(tmp_state);
 
@@ -366,12 +365,13 @@ void Menu_layer::InitStates()
 	tmp_state.camera_location.orientation = Identity(1.0f);
 	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
 
-	tmp_state.state_type = MenuStateType::LEVEL_SELECT;
-
 	tmp_state.parent_state = 1;
 	tmp_state.next_state = 4;
 	tmp_state.previous_state = 5;
 	tmp_state.child_state = -1;
+	tmp_state.activation_function = []() {
+		std::cout << "mars mission activation was called\n";
+	};
 
 	m_StateManager.m_States.push_back(tmp_state);
 

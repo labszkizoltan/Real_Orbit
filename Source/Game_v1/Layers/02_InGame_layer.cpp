@@ -86,12 +86,8 @@ void InGame_layer::OnAttach()
 	m_ImgProcessor = std::make_unique<ImageProcessor>();
 	m_ImgProcessor->SetMipMapLevel(4);
 
-
-
-
 	// load background music
 	if (!m_Music.openFromFile("assets/audio/Adrift_by_Hayden_Folker.ogg"))
-		//	if (!m_Music.openFromFile("assets/audio/Puritania.wav"))
 		LOG_ERROR("Audio not found: assets/audio/Adrift_by_Hayden_Folker.ogg");
 	m_Music.play();
 
@@ -116,7 +112,6 @@ void InGame_layer::OnUpdate(Timestep ts)
 	if (m_Music.getStatus() == sf::SoundSource::Status::Stopped)
 	{
 		m_Music.openFromFile("assets/audio/Adrift_by_Hayden_Folker.ogg");
-		//		m_Music.openFromFile("assets/audio/Puritania.wav");
 		m_Music.play();
 	}
 
@@ -131,12 +126,9 @@ void InGame_layer::OnUpdate(Timestep ts)
 		float spawn_frequency = 10000.0f;
 		static float asteroid_spawn_timer = spawn_frequency; // in milli seconds
 		asteroid_spawn_timer -= m_SimulationSpeed * ts;
-		//		if (randomLaunchCounter % (int)spawn_frequency == 0)
 		if (asteroid_spawn_timer < 0.0f)
 		{
 			asteroid_spawn_timer = spawn_frequency;
-			//			spawn_frequency *= 0.9f;
-			//			Vec3D center = Vec3D(rand() % 50 - 25, rand() % 50 - 25, 0);
 			Vec3D center = Vec3D(50, 0, 0);
 			Vec3D velocity = -0.01 * center / center.length();
 			for (int i = 0; i < asteroid_count; i++)
@@ -156,25 +148,19 @@ void InGame_layer::OnUpdate(Timestep ts)
 	//	m_FbDisplay.Draw();
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
-	//	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, 0);
-	//	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBrightColAttchSlot);
-	//	m_FbDisplay.DrawCombined(Renderer::GetColorAttachment(), Renderer::GetBrightColorAttachment());
-
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }
 
 void InGame_layer::OnEvent(Event& event)
 {
-	//	LOG_INFO("InGame_layer event received");
-
-	event.Dispatch<sf::Event::EventType::Resized>(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
-	event.Dispatch<sf::Event::EventType::LostFocus>(BIND_EVENT_FN(OnLoosingFocus));
-	event.Dispatch<sf::Event::EventType::GainedFocus>(BIND_EVENT_FN(OnGainingFocus));
-	event.Dispatch<sf::Event::EventType::KeyPressed>(BIND_EVENT_FN(OnKeyPressed));
-	event.Dispatch<sf::Event::EventType::KeyReleased>(BIND_EVENT_FN(OnKeyReleased));
-	event.Dispatch<sf::Event::EventType::MouseWheelScrolled>(BIND_EVENT_FN(MouseWheelScrolled));
-	event.Dispatch<sf::Event::EventType::MouseButtonPressed>(BIND_EVENT_FN(OnMouseButtonPressed));
-	event.Dispatch<sf::Event::EventType::MouseButtonReleased>(BIND_EVENT_FN(OnMouseButtonReleased));
+	event.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize));
+	event.Dispatch<sf::Event::EventType::LostFocus>				(BIND_EVENT_FN(OnLoosingFocus));
+	event.Dispatch<sf::Event::EventType::GainedFocus>			(BIND_EVENT_FN(OnGainingFocus));
+	event.Dispatch<sf::Event::EventType::KeyPressed>			(BIND_EVENT_FN(OnKeyPressed));
+	event.Dispatch<sf::Event::EventType::KeyReleased>			(BIND_EVENT_FN(OnKeyReleased));
+	event.Dispatch<sf::Event::EventType::MouseWheelScrolled>	(BIND_EVENT_FN(MouseWheelScrolled));
+	event.Dispatch<sf::Event::EventType::MouseButtonPressed>	(BIND_EVENT_FN(OnMouseButtonPressed));
+	event.Dispatch<sf::Event::EventType::MouseButtonReleased>	(BIND_EVENT_FN(OnMouseButtonReleased));
 	//	event.Dispatch<sf::Event::EventType::MouseMoved>			(BIND_EVENT_FN(OnMouseMoved));
 }
 
@@ -191,33 +177,6 @@ void InGame_layer::DeActivate()
 	((GameApplication*)(&app))->ActitivateLayer(GameLayers::MENU_LAYER);
 	m_Music.pause();
 	m_IsActive = false;
-}
-
-void InGame_layer::RandomRocketLaunch(int meshIdx, Vec3D origin)
-{
-	// get a random target
-//	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>(entt::exclude<TimerComponent>);
-	auto poolOfTargets = m_Scene->m_Registry.view<TransformComponent>(entt::exclude<TimerComponent>);
-	int size = poolOfTargets.size_hint();
-	int idx = rand() % size;
-
-	entt::entity target = entt::null;
-	while (target == entt::null)
-	{
-		for (auto entity : poolOfTargets)
-		{
-			if (idx == 0)
-			{
-				target = entity;
-				break;
-			}
-			idx--;
-		}
-	}
-
-	TransformComponent trf;
-	trf.location = origin;
-	LaunchMissile(meshIdx, trf, target);
 }
 
 entt::entity InGame_layer::GetTarget()

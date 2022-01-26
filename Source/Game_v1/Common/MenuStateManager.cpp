@@ -45,6 +45,11 @@ int StateManager::GetChildState()
 	return -1;
 }
 
+void StateManager::ActivateState()
+{
+	m_States[m_CurrentState].activation_function();
+}
+
 
 // m_CurrentState should always be a valid index, so eventually these validity checks shouldnt be necessary
 bool StateManager::ValidIndex(int stateIdx)
