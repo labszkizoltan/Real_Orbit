@@ -47,14 +47,6 @@ void Menu_layer::OnAttach()
 
 	m_ImgProcessor = std::make_unique<ImageProcessor>();
 	m_ImgProcessor->SetMipMapLevel(4);
-
-	// load background music
-	/*
-	if (!m_Music.openFromFile("assets/audio/Kevin_MacLeod-Broken_Reality.wav"))
-		LOG_ERROR("Audio not found: assets/audio/Kevin_MacLeod-Broken_Reality.wav");
-	m_Music.play();
-	*/
-
 }
 
 void Menu_layer::OnDetach()
@@ -68,7 +60,6 @@ void Menu_layer::OnUpdate(Timestep ts)
 	if (m_Music.getStatus() == sf::SoundSource::Status::Stopped)
 	{
 		m_Music.openFromFile("assets/audio/Kevin_MacLeod-Broken_Reality.wav");
-		//		m_Music.openFromFile("assets/audio/Puritania.wav");
 		m_Music.play();
 	}
 
@@ -84,17 +75,11 @@ void Menu_layer::OnUpdate(Timestep ts)
 	//	m_FbDisplay.Draw();
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
-	//	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, 0);
-	//	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBrightColAttchSlot);
-	//	m_FbDisplay.DrawCombined(Renderer::GetColorAttachment(), Renderer::GetBrightColorAttachment());
-
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }
 
 void Menu_layer::OnEvent(Event& event)
 {
-	//	LOG_INFO("Menu_layer event received");
-
 	event.Dispatch<sf::Event::EventType::Resized>(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
 	event.Dispatch<sf::Event::EventType::LostFocus>(BIND_EVENT_FN(OnLoosingFocus));
 	event.Dispatch<sf::Event::EventType::GainedFocus>(BIND_EVENT_FN(OnGainingFocus));

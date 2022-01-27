@@ -37,7 +37,6 @@ public:
 	virtual void Activate() override;
 	virtual void DeActivate() override;
 
-	void RandomRocketLaunch(int meshIdx, Vec3D origin);
 	entt::entity GetTarget();
 	void EmitMesh(int meshIdx, TransformComponent transform);
 	void SpawnAsteroid(Vec3D center, Vec3D velocity, float spread);
@@ -62,6 +61,9 @@ private:
 	void ZoomIn();
 	void ZoomOut();
 
+	void UpdateScene(Timestep ts);
+	void SpawnExplosion(TransformComponent trf, DynamicPropertiesComponent dyn);
+
 private:
 	float m_ElapsedTime = 0.0f;
 	float m_SimulationSpeed = 1.0f;
@@ -75,6 +77,7 @@ private:
 	sf::Music m_Music;
 	sf::SoundBuffer m_ShotSoundBuffer;
 	sf::Sound m_ShotSound;
+	sf::SoundBuffer m_ExplosionSoundBuffer;
 	sf::Sound m_ExplosionSound;
 
 	FramebufferDisplay m_FbDisplay;

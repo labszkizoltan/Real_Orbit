@@ -66,7 +66,18 @@ struct ExplosionComponent { char something = 0; };
 
 struct AsteroidComponent { char something = 0; };
 
-struct MarkerComponent { ColourComponent marker_colour = { 0.0f, 0.0f, 1.0f, 1.0f }; };
+struct MarkerComponent
+{ 
+	ColourComponent marker_colour = { 0.0f, 0.0f, 1.0f, 1.0f };
+
+	MarkerComponent(float r, float g, float b, float a)
+	{
+		marker_colour.r = r;
+		marker_colour.g = g;
+		marker_colour.b = b;
+		marker_colour.a = a;
+	}
+};
 
 
 #endif // GAME_COMPONENTS_H

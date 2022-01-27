@@ -49,8 +49,11 @@ the components can be client specific.
 
 
 Missing featuers:
-- Markers (create a new mesh type for them, core feature),
-- mouse picking (core feature)
+- mouse picking (core feature) -> this needs a lot of change on the rendering,
+	the entity id should be added to the instances and rendered into a separate
+	framebuffer (or at least an additional colour attachment), and I dont feel
+	like this feature would be that useful at the moment, so probably I wont implement this
+The rest is definitely game side:
 - Composite meshes (like a ship with a normal mesh plus a bright mesh as the engine, probably core side)
 - AI behaviours (probably game side),
 - collisions (probably game side),
@@ -62,17 +65,29 @@ Mostly done (could take some tweaking):
 - bloom effect,
 
 Features done:
+- Markers (create a new mesh type for them, core feature),
 - moving objects,
 - shooting,
 
 
 Other things to implement:
 - Add mip-map to the textures -> done in the mesh constructors
-- generalize the framebuffer class to be able to hold arbitrary number of colour attachments (so I dont need 3 classes for almost the same things: shadow/doubleFB/single FB)
+- generalize the framebuffer class to be able to hold arbitrary number of colour attachments
+	(so I dont need 3 classes for almost the same things: shadow/doubleFB/single FB) -> this is done
 
-Test lower OpenGL versions!
+Test lower OpenGL versions! -> did it, but none of those versions were running on Niki's laptop.
 
 Blender: proper sphere texturing
+
+
+Game ideas:
+Asteroids coming, the player controls a small mobile ship that spots asteroids, while the slow long range
+missille armed ships launch their missilles on the provided targets.
+
+
+
+
+
 
 
 
