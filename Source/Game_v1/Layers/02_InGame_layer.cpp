@@ -300,9 +300,10 @@ void InGame_layer::LaunchMissile(int meshIdx, TransformComponent transform, entt
 	dynProps.inertial_mass = 0.001f;
 	//	dynProps.velocity = 0.01f * (transform.orientation.f1 + transform.orientation.f3);
 	//	dynProps.velocity = 0.05f * transform.orientation.f3;
-	dynProps.velocity = 0.00000001f * transform.orientation.f3;
+	// dynProps.velocity = 00000001f * transform.orientation.f3; // 0.00000001f
+	dynProps.velocity = 0.01f * transform.orientation.f1; // 0.00000001f
 	dynProps.angular_velocity = Vec3D();
-	transform.scale = 0.01f;
+	transform.scale = 0.05f;
 	transform.location += 0.1 * (transform.orientation.f3 + transform.orientation.f1);
 
 	Entity newEntity = m_Scene->CreateEntity("");
@@ -474,12 +475,22 @@ void InGame_layer::HandleUserInput(Timestep ts)
 	static int skip = 0;
 	if (Input::IsMouseButtonPressed(sf::Mouse::Left))
 	{
-		LaunchMissile(blueIdx, cam_trf, GetTarget());
-		LaunchMissile(blueIdx, cam_trf, GetTarget());
-		LaunchMissile(blueIdx, cam_trf, GetTarget());
-		//LaunchMissile(explosionIdx, cam_trf, GetTarget());
-		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
+		// LaunchMissile(blueIdx, cam_trf, GetTarget());
+		// LaunchMissile(blueIdx, cam_trf, GetTarget());
+		// LaunchMissile(blueIdx, cam_trf, GetTarget());
+		// LaunchMissile(bulletIdx, cam_trf, GetTarget());
+		// if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
 
+		auto armed_ships = m_Scene->m_Registry.view<WeaponComponent, TransformComponent>();
+		for (auto armed_ship : armed_ships)
+		{
+			TransformComponent& shipTrf = armed_ships.get<TransformComponent>(armed_ship);
+			// LaunchMissile(bulletIdx, shipTrf, GetTarget());
+			if(skip % 2 == 0)
+				LaunchMissile(yellowIdx, shipTrf, GetTarget());
+			else
+				LaunchMissile(blueIdx, shipTrf, GetTarget());
+		}
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip % 2 == 0)
 	{
@@ -698,15 +709,14 @@ void InGame_layer::UpdateScene(Timestep ts)
 	/*static*/ std::shared_ptr<Mesh> marker_mesh = m_Scene->m_MeshLibrary.m_Meshes[markerIdx];
 	/*static*/ int markerColBufIdx = marker_mesh->GetColourInstances();
 
-	auto marked_asteroids = m_Scene->m_Registry.view<TransformComponent, AsteroidComponent, MarkerComponent>();
-	for (auto asteroid : marked_asteroids)
+	auto marked_entities= m_Scene->m_Registry.view<TransformComponent, MarkerComponent>();
+	for (auto marked_entity : marked_entities)
 	{
-		TransformComponent& asteroidTrf = marked_asteroids.get<TransformComponent>(asteroid);
-		MarkerComponent& marker = marked_asteroids.get<MarkerComponent>(asteroid);
-		m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(asteroidTrf);
+		TransformComponent& entityTrf = marked_entities.get<TransformComponent>(marked_entity);
+		MarkerComponent& marker = marked_entities.get<MarkerComponent>(marked_entity);
+		m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(entityTrf);
 		m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(marker.marker_colour);
 	}
-
 }
 
 

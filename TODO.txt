@@ -84,7 +84,9 @@ Game ideas:
 Asteroids coming, the player controls a small mobile ship that spots asteroids, while the slow long range
 missille armed ships launch their missilles on the provided targets.
 
-
+A cargo ship heading towards the belt has broken down (engine malfunction or somethin) and is drifting
+towards the asteroid field. We as a light recon wechicle deployed from this ship, need to go ahead
+and mark the dangerous asteroids for destruction, so faraway missille ships can destroy them.
 
 
 

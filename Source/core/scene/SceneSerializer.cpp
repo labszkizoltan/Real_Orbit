@@ -153,6 +153,27 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			deserializedEntity.AddComponent<HitPointComponent>(result);
 		}
 
+		//----- MarkerComponent -----//
+		auto marker_com = entity["MarkerComponent"];
+		if (marker_com)
+		{
+			MarkerComponent result;
+			result.marker_colour = marker_com.as<ColourComponent>();
+			deserializedEntity.AddComponent<MarkerComponent>(result);
+		}
+
+		//----- WeaponComponent -----//
+		auto weapon_com = entity["WeaponComponent"];
+		if (weapon_com)
+		{
+			WeaponComponent result;
+			result.weapon_type = weapon_com.as<WeaponType>();
+			deserializedEntity.AddComponent<WeaponComponent>(result);
+		}
+		/*
+		*/
+
+
 //		std::cout << "entity de-serialized\n";
 	}
 }
@@ -394,9 +415,31 @@ namespace YAML {
 
 	};
 
+	/*
+	*/
+	template<>
+	struct convert<WeaponType>
+	{
+		static Node encode(const WeaponType t)
+		{
+			Node node;
+			node["WeaponComponent"] = WeaponComponent::WeaponType_to_String(t);
+			return node;
+		}
+
+		static bool decode(const Node& node, WeaponType& t)
+		{
+			if (!node.IsScalar())
+				return false;
+
+			std::string mesh_type_string = node.as<std::string>();
+			t = WeaponComponent::String_to_WeaponType(mesh_type_string);
+			return true;
+		}
+
+	};
 
 }
-
 
 
 

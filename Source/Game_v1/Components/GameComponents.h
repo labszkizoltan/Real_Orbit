@@ -70,6 +70,11 @@ struct MarkerComponent
 { 
 	ColourComponent marker_colour = { 0.0f, 0.0f, 1.0f, 1.0f };
 
+	MarkerComponent()
+	{
+		marker_colour = { 0.0f, 0.0f, 1.0f, 1.0f };
+	}
+
 	MarkerComponent(float r, float g, float b, float a)
 	{
 		marker_colour.r = r;
@@ -78,6 +83,37 @@ struct MarkerComponent
 		marker_colour.a = a;
 	}
 };
+
+enum class WeaponType { BULLET, MISSILLE, BEAM };
+
+struct WeaponComponent
+{
+	WeaponType weapon_type = WeaponType::MISSILLE;
+
+	static std::string WeaponType_to_String(const WeaponType& type) {
+		switch (type)
+		{
+		case WeaponType::BULLET:	return std::string("BULLET");
+		case WeaponType::MISSILLE:	return std::string("MISSILLE");
+		case WeaponType::BEAM:		return std::string("BEAM");
+		}
+
+		LOG_CORE_INFO("MeshType not recognized, cannot convert to string");
+		return std::string("MeshType not recognized");
+	}
+
+	static WeaponType String_to_WeaponType(const std::string& s) {
+		if (s.compare("BULLET") == 0) { return WeaponType::BULLET; }
+		if (s.compare("MISSILLE") == 0) { return WeaponType::MISSILLE; }
+		if (s.compare("BEAM") == 0) { return WeaponType::BEAM; }
+
+		LOG_CORE_INFO("String not recognized, cannot convert to MeshType");
+		return WeaponType::BULLET;
+	}
+
+};
+/*
+*/
 
 
 #endif // GAME_COMPONENTS_H
