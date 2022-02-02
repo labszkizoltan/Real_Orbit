@@ -78,7 +78,9 @@ void InGame_layer::OnAttach()
 	serializer.DeSerialize_file("assets/scenes/02_InGameLayer.yaml");
 
 	m_SceneRenderer.SetScene(m_Scene);
-	m_SceneUpdater.SetScene(m_Scene);
+
+	Box3D tmp_box; tmp_box.radius = Vec3D(10000, 10000, 10000);
+	m_AsteroidOctTree = std::make_unique<DualOctTree>(tmp_box);
 
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
@@ -144,11 +146,28 @@ void InGame_layer::OnUpdate(Timestep ts)
 		randomLaunchCounter++;
 	}
 
+	{
+		TransformComponent& camLoc = m_Scene->GetCamera();
+		Box3D camVicinity;
+		camVicinity.center = camLoc.location;
+		camVicinity.radius = Vec3D(10, 10, 10);
+
+		std::vector<entt::entity> close_entities = m_AsteroidOctTree->GetActiveTree()->QueryRange(camVicinity);
+		for (entt::entity entity : close_entities)
+		{
+			TransformComponent& trf = m_Scene->m_Registry.get<TransformComponent>(entity);
+			DynamicPropertiesComponent& dyn = m_Scene->m_Registry.get<DynamicPropertiesComponent>(entity);
+			SpawnExplosion(trf, dyn);
+			m_Scene->m_Registry.destroy(entity);
+		}
+
+	}
+
 	// if the update-render order is swapped, something is un-initialized and the program fails at alpha mesh rendering
 	m_SceneRenderer.RenderScene();
 	// m_SceneUpdater.UpdateScene(m_SimulationSpeed * ts);
 	UpdateScene(m_SimulationSpeed * ts);
-
+	m_AsteroidOctTree->Update(m_Scene.get());
 
 	//	m_ImgProcessor->Blur(g_RendererBlurDepthSlot, Renderer::s_BlurBuffer); // this is not working, as expected
 	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
@@ -187,14 +206,22 @@ void InGame_layer::DeActivate()
 	m_IsActive = false;
 }
 
+
 entt::entity InGame_layer::GetTarget()
+{
+	return GetTarget(m_Scene->GetCamera().location, m_Scene->GetCamera().orientation.f3);
+}
+
+entt::entity InGame_layer::GetTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection)
 {
 	static int counter = 0;
 	int queue_size = 15;
 	std::priority_queue<targeting_data<entt::entity>> targeting_queue;
 
-	Vec3D pos = m_Scene->GetCamera().location;
-	Vec3D dir = m_Scene->GetCamera().orientation.f3;
+//	Vec3D pos = m_Scene->GetCamera().location;
+//	Vec3D dir = m_Scene->GetCamera().orientation.f3;
+	Vec3D pos = acquisitionLocation;
+	Vec3D dir = acquisitionDirection;
 
 	entt::entity result = entt::null;
 
@@ -244,6 +271,42 @@ entt::entity InGame_layer::GetTarget()
 		return targeting_queue.top().user_data;
 
 	//	return result;
+}
+
+
+entt::entity InGame_layer::GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection)
+{
+	static int counter = 0;
+	int queue_size = 15;
+	std::priority_queue<targeting_data<entt::entity>> targeting_queue;
+
+	Vec3D pos = acquisitionLocation;
+	Vec3D dir = acquisitionDirection;
+
+	entt::entity result = entt::null;
+
+	float maxScalarProd = -1.0f;
+
+	// exclude TargetComponent, so missiles wont target other missiles
+	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent, AsteroidComponent>();
+	if (view.begin() == view.end())
+		return entt::null;
+
+	for (auto entity : view)
+	{
+		TransformComponent& entity_trf = view.get<TransformComponent>(entity);
+		Vec3D dx = entity_trf.location - pos;
+
+		float scalarProd = dx * dir / dx.length();
+
+		if (maxScalarProd < scalarProd)
+		{
+			maxScalarProd = scalarProd;
+			result = entity;
+		}
+	}
+
+	return result;
 }
 
 void InGame_layer::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
@@ -632,15 +695,20 @@ void InGame_layer::UpdateScene(Timestep ts)
 				targetHP.HP -= 1.0f;
 			}
 			float dt = sqrt(dx.lengthSquare() / dv.lengthSquare());
-			dx += dt * dv * 0.9f;
+			dx += dt * dv*0.9f;
 			float accel = 0.0001f;
 
 			missileVelocity.velocity += accel * ts * dx / dx.length();
 		}
 		else
 		{
-			// this always returns false according the documentation: registry.valid(entt::tombstone);
-			target.targetEntity = entt::tombstone;
+//			// this always returns false according the documentation: registry.valid(entt::tombstone);
+//			target.targetEntity = entt::tombstone;
+			// acquire new target
+			TransformComponent& missileTrf = missiles.get<TransformComponent>(missile);
+			DynamicPropertiesComponent& missileVelocity = missiles.get<DynamicPropertiesComponent>(missile);
+			//target.targetEntity = GetTarget(missileTrf.location, missileVelocity.velocity);
+			target.targetEntity = GetClosestTarget(missileTrf.location, missileVelocity.velocity);
 		}
 	}
 

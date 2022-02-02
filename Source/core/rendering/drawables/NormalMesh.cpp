@@ -65,6 +65,7 @@ void NormalMesh::Draw()
 //	static const unsigned int attachment = GL_COLOR_ATTACHMENT0;
 //	glDrawBuffers(1, &attachment);
 	GLCall(glDrawElementsInstanced(GL_TRIANGLES, m_IndexBuffer.GetCount(), GL_UNSIGNED_INT, 0, m_InstanceBuffer.GetElementCount()));
+//	glDrawArraysInstanced(GL_LINES, 0, m_IndexBuffer.GetCount(), m_InstanceBuffer.GetElementCount()); // woow cool this works :D
 
 	m_VertexArray.UnBind();
 }

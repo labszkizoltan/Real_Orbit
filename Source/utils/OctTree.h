@@ -1,31 +1,42 @@
 
-// I almost copy-pasted the wikipedia description of this data structure
-// https://en.wikipedia.org/wiki/Quadtree
-
-// this library could be useful:
-// https://pointclouds.org/documentation/classpcl_1_1octree_1_1_octree_base.html
-// quote from https://pcl.readthedocs.io/projects/tutorials/en/master/walkthrough.html#octree:
-// "Furthermore, a memory pool implementation reduces expensive memory allocation and deallocation operations in scenarios where octrees needs to be created at high rate."
+// I intend to create a more cache friendly version of my first OctTree implementation
 
 #ifndef OCTTREE_H
 #define OCTTREE_H
 
-#define OCTREE_NODE_CAPACITY 4 // Arbitrary constant to indicate how many elements can be stored in this quad tree node
+#define OCTREE_NODE_CAPACITY 32 // Arbitrary constant to indicate how many elements can be stored in this quad tree node
 
 #include "Vector_3D.h"
 #include <vector>
+#include <array>
+#include <memory>
 
 //----- Helper Structures -----//
 
 struct Box3D
 {
-	Vec3D center;
-	Vec3D radius;
+	Vec3D center = { 0,0,0 };
+	Vec3D radius = { 1,1,1 };
 
-    Box3D() = default;
+	Box3D() = default;
 	bool ContainsPoint(const Vec3D& point);
 	bool IntersectsBox3D(const Box3D& other);
 
+};
+
+template <class UserDataType>
+struct Node
+{
+	Box3D m_Boundary;
+	Vec3D m_Points[OCTREE_NODE_CAPACITY];
+	UserDataType m_UserData[OCTREE_NODE_CAPACITY];
+	unsigned char m_ElementCount = 0;
+
+	// Index of children Nodes (short int restricts the whole octtree to have no more than 250k
+	// elements, but in my use case that should be way more than enough)
+	// also children should only be created at sub-division, and in that case always 8 of them
+	// so it should be enough if only the first ones index is stored
+	int m_FirstChildIndex = -1;
 };
 
 
@@ -34,138 +45,163 @@ struct Box3D
 //--------------------//
 
 
+// this is a tight container for Nodes
 template <class UserDataType>
 class OctTree
 {
 public:
-
-	// Methods
-	OctTree() = default;
+	OctTree();
 	OctTree(Box3D box);
 
 	bool Insert(Vec3D point, UserDataType user_data);
 	std::vector<UserDataType> QueryRange(Box3D range);
+	void QueryRange(Box3D range, std::vector<UserDataType>& result, int node_idx);
+
+	// clear the vector, but dont deallocate the memory, so we can spare time
+	// on not having to reallocate it
+	void Clear() { m_Nodes.clear(); };
 
 private:
-	void Subdivide(); // create 8 children that fully divide this cube into 8 qubes of equal volume
-	void QueryRange(Box3D range, std::vector<UserDataType>& result);
+	bool InsertIntoNode(const Vec3D& point, const UserDataType& user_data, int node_idx);
+	void SubdivideNode(int node_idx);
 
 private:
-	Box3D m_Boundary;
-	// m_Points and m_UserData are stack allocated I think, which will cause overflow at high element counts
-	Vec3D m_Points[OCTREE_NODE_CAPACITY];
-	UserDataType m_UserData[OCTREE_NODE_CAPACITY];
-	int m_ElementCount = 0;
-
-	// Children
-	std::shared_ptr<OctTree> m_Child_000 = nullptr;
-	std::shared_ptr<OctTree> m_Child_001 = nullptr;
-	std::shared_ptr<OctTree> m_Child_010 = nullptr;
-	std::shared_ptr<OctTree> m_Child_011 = nullptr;
-	std::shared_ptr<OctTree> m_Child_100 = nullptr;
-	std::shared_ptr<OctTree> m_Child_101 = nullptr;
-	std::shared_ptr<OctTree> m_Child_110 = nullptr;
-	std::shared_ptr<OctTree> m_Child_111 = nullptr;
-
+	std::vector<Node<UserDataType>> m_Nodes;
 };
 
+
+//----- OctTree implementation -----//
+
 template<class UserDataType>
-inline OctTree<UserDataType>::OctTree(Box3D box)
-	: m_Boundary(box)
+OctTree<UserDataType>::OctTree()
 {
+	// with some extra code this could be created in-place
+	// (Node constructor + std::vector<Node> constructor with init list)
+	Node<UserDataType> first_node;
+	first_node.m_Boundary = Box3D();
+	m_Nodes.push_back(first_node);
+}
+
+template<class UserDataType>
+OctTree<UserDataType>::OctTree(Box3D box)
+{
+	// with some extra code this could be created in-place
+	// (Node constructor + std::vector<Node> constructor with init list)
+	Node<UserDataType> first_node;
+	first_node.m_Boundary = box;
+	m_Nodes.push_back(first_node);
 }
 
 template<class UserDataType>
 bool OctTree<UserDataType>::Insert(Vec3D point, UserDataType user_data)
 {
-	if (!m_Boundary.ContainsPoint(point))
+	return InsertIntoNode(point, user_data, 0);
+}
+
+template<class UserDataType>
+inline bool OctTree<UserDataType>::InsertIntoNode(const Vec3D& point, const UserDataType& user_data, int node_idx)
+{
+	if (!m_Nodes[node_idx].m_Boundary.ContainsPoint(point))
 		return false;
 
-	if (m_ElementCount < OCTREE_NODE_CAPACITY && m_Child_000 == nullptr)
+	// probably the second condition is not needed, as the first child idx will
+	// always be -1 until the buffers are not full
+	int nodeElementCount = m_Nodes[node_idx].m_ElementCount;
+	if (nodeElementCount < OCTREE_NODE_CAPACITY)// && m_Nodes[node_idx].m_FirstChildIndex == -1)
 	{
-		m_Points[m_ElementCount] = point;
-		m_UserData[m_ElementCount] = user_data;
-		m_ElementCount++;
+		m_Nodes[node_idx].m_Points[nodeElementCount] = point;
+		m_Nodes[node_idx].m_UserData[nodeElementCount] = user_data;
+		m_Nodes[node_idx].m_ElementCount++;
 		return true;
 	}
 
-	if (m_Child_000 == nullptr)
-		Subdivide();
+	if (m_Nodes[node_idx].m_FirstChildIndex == -1)
+		SubdivideNode(node_idx);
 
-
-	if (m_Child_000->Insert(point, user_data)) { return true; }
-	if (m_Child_001->Insert(point, user_data)) { return true; }
-	if (m_Child_010->Insert(point, user_data)) { return true; }
-	if (m_Child_011->Insert(point, user_data)) { return true; }
-	if (m_Child_100->Insert(point, user_data)) { return true; }
-	if (m_Child_101->Insert(point, user_data)) { return true; }
-	if (m_Child_110->Insert(point, user_data)) { return true; }
-	if (m_Child_111->Insert(point, user_data)) { return true; }
+	int child_idx = m_Nodes[node_idx].m_FirstChildIndex;
+	if (InsertIntoNode(point, user_data, child_idx + 0)) { return true; }
+	if (InsertIntoNode(point, user_data, child_idx + 1)) { return true; }
+	if (InsertIntoNode(point, user_data, child_idx + 2)) { return true; }
+	if (InsertIntoNode(point, user_data, child_idx + 3)) { return true; }
+	if (InsertIntoNode(point, user_data, child_idx + 4)) { return true; }
+	if (InsertIntoNode(point, user_data, child_idx + 5)) { return true; }
+	if (InsertIntoNode(point, user_data, child_idx + 6)) { return true; }
+	if (InsertIntoNode(point, user_data, child_idx + 7)) { return true; }
 
 	return false;
 }
 
 template<class UserDataType>
-inline void OctTree<UserDataType>::Subdivide()
+inline void OctTree<UserDataType>::SubdivideNode(int node_idx)
 {
-	Vec3D center = m_Boundary.center;
-	Vec3D radius = m_Boundary.radius;
+	int firstChildIdx = m_Nodes.size();
+	m_Nodes[node_idx].m_FirstChildIndex = firstChildIdx;
+	Vec3D center = m_Nodes[node_idx].m_Boundary.center;
+	Vec3D radius = m_Nodes[node_idx].m_Boundary.radius;
 	Box3D box;
 	box.radius = radius / 2.0f;
 
+	for (int i = 0; i < 8; i++)
+		m_Nodes.push_back(Node<UserDataType>());
+
 	box.center = Vec3D(center.x - radius.x / 2.0f, center.y - radius.y / 2.0f, center.z - radius.z / 2.0f);
-	m_Child_000 = std::make_shared<OctTree>(box);
+	m_Nodes[firstChildIdx + 0].m_Boundary = box;
 	box.center = Vec3D(center.x - radius.x / 2.0f, center.y - radius.y / 2.0f, center.z + radius.z / 2.0f);
-	m_Child_001 = std::make_shared<OctTree>(box);
+	m_Nodes[firstChildIdx + 1].m_Boundary = box;
 	box.center = Vec3D(center.x - radius.x / 2.0f, center.y + radius.y / 2.0f, center.z - radius.z / 2.0f);
-	m_Child_010 = std::make_shared<OctTree>(box);
+	m_Nodes[firstChildIdx + 2].m_Boundary = box;
 	box.center = Vec3D(center.x - radius.x / 2.0f, center.y + radius.y / 2.0f, center.z + radius.z / 2.0f);
-	m_Child_011 = std::make_shared<OctTree>(box);
+	m_Nodes[firstChildIdx + 3].m_Boundary = box;
 	box.center = Vec3D(center.x + radius.x / 2.0f, center.y - radius.y / 2.0f, center.z - radius.z / 2.0f);
-	m_Child_100 = std::make_shared<OctTree>(box);
+	m_Nodes[firstChildIdx + 4].m_Boundary = box;
 	box.center = Vec3D(center.x + radius.x / 2.0f, center.y - radius.y / 2.0f, center.z + radius.z / 2.0f);
-	m_Child_101 = std::make_shared<OctTree>(box);
+	m_Nodes[firstChildIdx + 5].m_Boundary = box;
 	box.center = Vec3D(center.x + radius.x / 2.0f, center.y + radius.y / 2.0f, center.z - radius.z / 2.0f);
-	m_Child_110 = std::make_shared<OctTree>(box);
+	m_Nodes[firstChildIdx + 6].m_Boundary = box;
 	box.center = Vec3D(center.x + radius.x / 2.0f, center.y + radius.y / 2.0f, center.z + radius.z / 2.0f);
-	m_Child_111 = std::make_shared<OctTree>(box);
+	m_Nodes[firstChildIdx + 7].m_Boundary = box;
 }
 
+
 template<class UserDataType>
-inline std::vector<UserDataType> OctTree<UserDataType>::QueryRange(Box3D range)
+std::vector<UserDataType> OctTree<UserDataType>::QueryRange(Box3D range)
 {
 	std::vector<UserDataType> result;
-	QueryRange(range, result);
-
+	QueryRange(range, result, 0); // start the querying at the top node
 	return result;
 }
 
 template<class UserDataType>
-void OctTree<UserDataType>::QueryRange(Box3D range, std::vector<UserDataType>& result)
+void OctTree<UserDataType>::QueryRange(Box3D range, std::vector<UserDataType>& result, int node_idx)
 {
-	if (!m_Boundary.IntersectsBox3D(range))
+	if (!m_Nodes[node_idx].m_Boundary.IntersectsBox3D(range))
 		return;
 
-	for (int i = 0; i < m_ElementCount; i++)
+
+	for (int i = 0; i < m_Nodes[node_idx].m_ElementCount; i++)
 	{
-		if (range.ContainsPoint(m_Points[i]))
-			result.push_back(m_UserData[i]);
+		if (range.ContainsPoint(m_Nodes[node_idx].m_Points[i]))
+			result.push_back(m_Nodes[node_idx].m_UserData[i]);
 	}
 
-	if (m_Child_000 == nullptr)
+	int firstChildIdx = m_Nodes[node_idx].m_FirstChildIndex;
+	if (firstChildIdx == -1)
 		return;
 
-	m_Child_000->QueryRange(range, result);
-	m_Child_001->QueryRange(range, result);
-	m_Child_010->QueryRange(range, result);
-	m_Child_011->QueryRange(range, result);
-	m_Child_100->QueryRange(range, result);
-	m_Child_101->QueryRange(range, result);
-	m_Child_110->QueryRange(range, result);
-	m_Child_111->QueryRange(range, result);
+	QueryRange(range, result, firstChildIdx + 0);
+	QueryRange(range, result, firstChildIdx + 1);
+	QueryRange(range, result, firstChildIdx + 2);
+	QueryRange(range, result, firstChildIdx + 3);
+	QueryRange(range, result, firstChildIdx + 4);
+	QueryRange(range, result, firstChildIdx + 5);
+	QueryRange(range, result, firstChildIdx + 6);
+	QueryRange(range, result, firstChildIdx + 7);
 }
 
 
 
-#endif // OCTTREE_H
 
+
+
+
+#endif // OCTTREE_H

@@ -49,6 +49,8 @@ the components can be client specific.
 
 
 Missing featuers:
+- text rendering: this is importantfor so many reasons, maybe a worthwile page to look for help:
+	https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Text_Rendering_01
 - mouse picking (core feature) -> this needs a lot of change on the rendering,
 	the entity id should be added to the instances and rendered into a separate
 	framebuffer (or at least an additional colour attachment), and I dont feel
@@ -89,6 +91,11 @@ towards the asteroid field. We as a light recon wechicle deployed from this ship
 and mark the dangerous asteroids for destruction, so faraway missille ships can destroy them.
 
 
+Building the octTree: my idea is that there will be two octTrees, one is actively being used and another
+one is being built on another thread. There should be a variable which indicates if this thread is running
+or not. When the tree building starts it is set to true, when finished set to false. From outside the
+building thread this variable can be checked, and if it indicates that the building has completed,
+the two oct trees can be swapped and the building procedure can be started again on the back buffer.
 
 
 

@@ -19,6 +19,8 @@
 #include <core/scene/SceneUpdater.h>
 
 #include <core/GlobalConstants.h>
+#include <Game_v1/Common/DualOctTree.h>
+// #include <utils/OctTree.h>
 
 #include <SFML/Audio.hpp>
 
@@ -38,10 +40,15 @@ public:
 	virtual void DeActivate() override;
 
 	entt::entity GetTarget();
+	entt::entity GetTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection);
+	entt::entity GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection);
+
 	void EmitMesh(int meshIdx, TransformComponent transform);
 	void SpawnAsteroid(Vec3D center, Vec3D velocity, float spread);
 	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
 	void RemoveMesh(int meshIdx);
+
+	void BuildOctTree();
 
 private:
 	bool OnWindowResize(Event& e);
@@ -73,6 +80,10 @@ private:
 	SceneRenderer m_SceneRenderer;
 	SceneUpdater m_SceneUpdater;
 	bool m_InFocus = true;
+
+	std::unique_ptr<DualOctTree> m_AsteroidOctTree = nullptr;
+//	OctTree<entt::entity> m_AsteroidOctTree_active;
+//	OctTree<entt::entity> m_AsteroidOctTree_building;
 
 	sf::Music m_Music;
 	sf::SoundBuffer m_ShotSoundBuffer;

@@ -189,6 +189,7 @@
     <ClCompile Include="Source\core\scene\SceneSerializer.cpp" />
     <ClCompile Include="Source\core\scene\SceneUpdater.cpp" />
     <ClCompile Include="Source\core\Window.cpp" />
+    <ClCompile Include="Source\Game_v1\Common\DualOctTree.cpp" />
     <ClCompile Include="Source\Game_v1\Common\MenuStateManager.cpp" />
     <ClCompile Include="Source\Game_v1\GameApp_v1.cpp" />
     <ClCompile Include="Source\Game_v1\Layers\01_MenuLayer.cpp" />
@@ -251,6 +252,7 @@
     <ClInclude Include="Source\core\scene\SceneUpdater.h" />
     <ClInclude Include="Source\core\Timestep.h" />
     <ClInclude Include="Source\core\Window.h" />
+    <ClInclude Include="Source\Game_v1\Common\DualOctTree.h" />
     <ClInclude Include="Source\Game_v1\Common\MenuStateManager.h" />
     <ClInclude Include="Source\Game_v1\Components\GameComponents.h" />
     <ClInclude Include="Source\Game_v1\GameApp_v1.h" />
