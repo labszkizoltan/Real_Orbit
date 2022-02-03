@@ -16,7 +16,8 @@ DualOctTree::DualOctTree(Box3D box)
 
 DualOctTree::~DualOctTree()
 {
-	m_WorkerThread->join();
+	if(m_WorkerThread != nullptr)
+	 	m_WorkerThread->join();
 }
 
 OctTree<entt::entity>* DualOctTree::GetActiveTree()
@@ -39,8 +40,8 @@ void DualOctTree::Update(Scene* scene)
 void DualOctTree::SwapTrees()
 {
 	OctTree<entt::entity>* temp = m_ActiveTree;
-	OctTree<entt::entity>* m_ActiveTree = m_BuildTree;
-	OctTree<entt::entity>* m_BuildTree = temp;
+	m_ActiveTree = m_BuildTree;
+	m_BuildTree = temp;
 }
 
 void DualOctTree::BuildTree(Scene* scene)

@@ -59,7 +59,7 @@ public:
 
 	// clear the vector, but dont deallocate the memory, so we can spare time
 	// on not having to reallocate it
-	void Clear() { m_Nodes.clear(); };
+	void Clear();// { m_Nodes.clear(); };
 
 private:
 	bool InsertIntoNode(const Vec3D& point, const UserDataType& user_data, int node_idx);
@@ -67,6 +67,7 @@ private:
 
 private:
 	std::vector<Node<UserDataType>> m_Nodes;
+	Box3D m_Box; // box of the top node
 };
 
 
@@ -77,6 +78,7 @@ OctTree<UserDataType>::OctTree()
 {
 	// with some extra code this could be created in-place
 	// (Node constructor + std::vector<Node> constructor with init list)
+	m_Box = Box3D();
 	Node<UserDataType> first_node;
 	first_node.m_Boundary = Box3D();
 	m_Nodes.push_back(first_node);
@@ -87,6 +89,7 @@ OctTree<UserDataType>::OctTree(Box3D box)
 {
 	// with some extra code this could be created in-place
 	// (Node constructor + std::vector<Node> constructor with init list)
+	m_Box = box;
 	Node<UserDataType> first_node;
 	first_node.m_Boundary = box;
 	m_Nodes.push_back(first_node);
@@ -169,6 +172,17 @@ std::vector<UserDataType> OctTree<UserDataType>::QueryRange(Box3D range)
 	std::vector<UserDataType> result;
 	QueryRange(range, result, 0); // start the querying at the top node
 	return result;
+}
+
+
+template<class UserDataType>
+void OctTree<UserDataType>::Clear()
+{
+	m_Nodes.clear();
+
+	Node<UserDataType> top_node;
+	top_node.m_Boundary = m_Box;
+	m_Nodes.push_back(top_node);
 }
 
 template<class UserDataType>

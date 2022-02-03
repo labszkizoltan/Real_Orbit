@@ -155,10 +155,14 @@ void InGame_layer::OnUpdate(Timestep ts)
 		std::vector<entt::entity> close_entities = m_AsteroidOctTree->GetActiveTree()->QueryRange(camVicinity);
 		for (entt::entity entity : close_entities)
 		{
-			TransformComponent& trf = m_Scene->m_Registry.get<TransformComponent>(entity);
-			DynamicPropertiesComponent& dyn = m_Scene->m_Registry.get<DynamicPropertiesComponent>(entity);
-			SpawnExplosion(trf, dyn);
-			m_Scene->m_Registry.destroy(entity);
+			if (m_Scene->m_Registry.valid(entity))
+			{
+				TransformComponent& trf = m_Scene->m_Registry.get<TransformComponent>(entity);
+				DynamicPropertiesComponent& dyn = m_Scene->m_Registry.get<DynamicPropertiesComponent>(entity);
+				SpawnExplosion(trf, dyn);
+				m_ExplosionSound.play();
+				m_Scene->m_Registry.destroy(entity);
+			}
 		}
 
 	}
