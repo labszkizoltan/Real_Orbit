@@ -66,6 +66,8 @@ struct ExplosionComponent { char something = 0; };
 
 struct AsteroidComponent { char something = 0; };
 
+struct BulletComponent { char something = 0; };
+
 struct MarkerComponent
 { 
 	ColourComponent marker_colour = { 0.0f, 0.0f, 1.0f, 1.0f };

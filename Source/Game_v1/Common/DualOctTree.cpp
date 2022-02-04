@@ -63,7 +63,8 @@ void DualOctTree::AddEntities(Scene* scene)
 	for (auto asteroid : asteroids)
 	{
 		TransformComponent& asteroidTrf = asteroids.get<TransformComponent>(asteroid);
-		m_BuildTree->Insert(asteroidTrf.location, asteroid);
+		if (scene->m_Registry.valid(asteroid))
+			m_BuildTree->Insert(asteroidTrf.location, asteroid);
 	}
 
 	m_IsBuilding = false;

@@ -147,10 +147,11 @@ void InGame_layer::OnUpdate(Timestep ts)
 	}
 
 	{
+		/*
 		TransformComponent& camLoc = m_Scene->GetCamera();
 		Box3D camVicinity;
 		camVicinity.center = camLoc.location;
-		camVicinity.radius = Vec3D(10, 10, 10);
+		camVicinity.radius = Vec3D(30, 30, 30);
 
 		std::vector<entt::entity> close_entities = m_AsteroidOctTree->GetActiveTree()->QueryRange(camVicinity);
 		for (entt::entity entity : close_entities)
@@ -164,7 +165,7 @@ void InGame_layer::OnUpdate(Timestep ts)
 				m_Scene->m_Registry.destroy(entity);
 			}
 		}
-
+		*/
 	}
 
 	// if the update-render order is swapped, something is un-initialized and the program fails at alpha mesh rendering
@@ -320,7 +321,7 @@ void InGame_layer::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 	TransformComponent transform;
 	transform.location = center + Vec3D(rand() % 1000 - 500, rand() % 1000 - 500, rand() % 1000 - 500) * spread / 1000.0f;
 	transform.orientation = Rotation((float)(rand() % 31415) / 10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
-	transform.scale = (float)(rand() % 10 + 2) / 20.0f;
+	transform.scale = (float)(rand() % 20 + 2) / 20.0f;
 
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 1.0f;
@@ -328,20 +329,70 @@ void InGame_layer::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 	dynProps.angular_velocity = 0.0001 * Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
 
 	Entity newEntity = m_Scene->CreateEntity("");
-	newEntity.AddComponent<TransformComponent>(transform);
-	newEntity.AddComponent<MeshIndexComponent>(asteroidIdx);
-	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	//	newEntity.AddComponent<HitPointComponent>(1.0f + (float)(rand() % 10));
-	newEntity.AddComponent<HitPointComponent>(1.0f);
-	newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
 
+	// make the Earth hitting asteroids big
 	Vec3D dr = transform.location;
 	Vec3D v = velocity;
 	if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < (2.3f + transform.scale + 0.2)) // 2.3 is the radius of the earth, 0.2 is a safety factor
 	{
+		transform.scale = 5.0f;
 		newEntity.AddComponent<MarkerComponent>(MarkerComponent(1.0f, 0.0f, 0.0f, 1.0f));
 	}
 
+	newEntity.AddComponent<TransformComponent>(transform);
+	newEntity.AddComponent<MeshIndexComponent>(asteroidIdx);
+	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
+	newEntity.AddComponent<HitPointComponent>(transform.scale*20);
+	// newEntity.AddComponent<HitPointComponent>(1.0f + (float)(rand() % 10));
+	// newEntity.AddComponent<HitPointComponent>(1.0f);
+	newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
+
+}
+
+
+void InGame_layer::SpawnDebris(Vec3D center, Vec3D velocity, float spread)
+{
+	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+
+	TransformComponent transform;
+	transform.location = center;
+	transform.orientation = Rotation((float)(rand() % 31415) / 10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
+	transform.scale = (float)(rand() % 10 + 2) / 100.0f;
+
+	DynamicPropertiesComponent dynProps;
+	dynProps.inertial_mass = 1.0f;
+	dynProps.velocity = velocity + Vec3D(rand() % 1000 - 500, rand() % 1000 - 500, rand() % 1000 - 500) * spread / 1000.0f;
+	dynProps.angular_velocity = 0.0001 * Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
+
+	Entity newEntity = m_Scene->CreateEntity("");
+	newEntity.AddComponent<TransformComponent>(transform);
+	newEntity.AddComponent<MeshIndexComponent>(asteroidIdx);
+	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
+	newEntity.AddComponent<TimerComponent>(TimerComponent(1000.0f)); // provide ttl in mili seconds
+}
+
+
+void InGame_layer::ShootBullett(TransformComponent transform, float velocity)
+{
+	static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+
+	/*
+	if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) {
+		m_ShotSound.play();
+	}
+	*/
+	DynamicPropertiesComponent dynProps;
+	dynProps.inertial_mass = 0.001f;
+	dynProps.velocity = transform.orientation.f3 * velocity;
+	transform.scale = 0.1f;
+	transform.location += 0.1 * (transform.orientation.f3 - transform.orientation.f2);
+
+	Entity newEntity = m_Scene->CreateEntity("");
+	newEntity.AddComponent<TransformComponent>(transform);
+	newEntity.AddComponent<MeshIndexComponent>(bulletIdx);
+	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
+	newEntity.AddComponent<TimerComponent>(TimerComponent(10000.0f)); // provide ttl in mili seconds
+	newEntity.AddComponent<BulletComponent>(BulletComponent());
 }
 
 void InGame_layer::EmitMesh(int meshIdx, TransformComponent transform)
@@ -535,12 +586,24 @@ void InGame_layer::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
 
 	static int orangeIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["OrangeSphere"];
-	static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+	// static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
 	static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
 	static int yellowIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
 	static int explosionIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Explosion"];
 	static int skip = 0;
 	if (Input::IsMouseButtonPressed(sf::Mouse::Left))
+	{
+		ShootBullett(cam_trf, 0.05f);
+		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) {
+			m_ShotSound.play();
+		}
+	}
+	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip % 2 == 0)
+	{
+		LaunchMissile(yellowIdx, cam_trf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
+		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
+	}
+	if (Input::IsMouseButtonPressed(sf::Mouse::Middle) && skip % 2 == 1)
 	{
 		// LaunchMissile(blueIdx, cam_trf, GetTarget());
 		// LaunchMissile(blueIdx, cam_trf, GetTarget());
@@ -553,25 +616,13 @@ void InGame_layer::HandleUserInput(Timestep ts)
 		{
 			TransformComponent& shipTrf = armed_ships.get<TransformComponent>(armed_ship);
 			// LaunchMissile(bulletIdx, shipTrf, GetTarget());
-			if(skip % 2 == 0)
+			if (skip % 2 == 0)
 				LaunchMissile(yellowIdx, shipTrf, GetTarget());
+				//LaunchMissile(yellowIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
 			else
 				LaunchMissile(blueIdx, shipTrf, GetTarget());
+				//LaunchMissile(blueIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
 		}
-	}
-	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip % 2 == 0)
-	{
-		//		EmitMesh(orangeIdx, cam_trf);
-		if (skip % 4 == 0)
-			EmitMesh(bulletIdx, cam_trf);
-		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) {
-			m_ShotSound.play();
-		}
-	}
-	if (Input::IsMouseButtonPressed(sf::Mouse::Middle) && skip % 2 == 1)
-	{
-		LaunchMissile(yellowIdx, cam_trf, GetTarget());
-		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
 	}
 	if (!Input::IsMouseButtonPressed(sf::Mouse::Left) && !Input::IsMouseButtonPressed(sf::Mouse::Right) && !Input::IsMouseButtonPressed(sf::Mouse::Middle))
 		m_ShotSound.stop();
@@ -688,7 +739,8 @@ void InGame_layer::UpdateScene(Timestep ts)
 
 			// check collision:
 			float lambda = dv.lengthSquare() < 0.00001f ? 0 : -(dx * dv) / (ts * dv.lengthSquare());
-			float distance = (dx + dv * ts * std::min(1.0f, std::max(lambda, 0.0f))).length();
+			Vec3D hit_location = dx + dv * ts * std::min(1.0f, std::max(lambda, 0.0f));
+			float distance = hit_location.length();
 
 			// delete missille on hit (by setting its timer to 0, so it will be removed automatically)
 			if (distance < (targetLoc.scale + missileTrf.scale))
@@ -696,7 +748,12 @@ void InGame_layer::UpdateScene(Timestep ts)
 				TimerComponent& ttl = timed_entities.get<TimerComponent>(missile);
 				ttl = 0.0f;
 				HitPointComponent& targetHP = m_Scene->m_Registry.get<HitPointComponent>(target.targetEntity);
-				targetHP.HP -= 1.0f;
+				targetHP.HP -= 10.0f;
+
+				for (int k = 0; k < 30; k++)
+				{
+					SpawnDebris(missileTrf.location + hit_location - dx, targetVelocity.velocity, 0.05);
+				}
 			}
 			float dt = sqrt(dx.lengthSquare() / dv.lengthSquare());
 			dx += dt * dv*0.9f;
@@ -706,14 +763,64 @@ void InGame_layer::UpdateScene(Timestep ts)
 		}
 		else
 		{
-//			// this always returns false according the documentation: registry.valid(entt::tombstone);
-//			target.targetEntity = entt::tombstone;
+			// this always returns false according the documentation: registry.valid(entt::tombstone);
+			target.targetEntity = entt::tombstone;
 			// acquire new target
-			TransformComponent& missileTrf = missiles.get<TransformComponent>(missile);
-			DynamicPropertiesComponent& missileVelocity = missiles.get<DynamicPropertiesComponent>(missile);
-			//target.targetEntity = GetTarget(missileTrf.location, missileVelocity.velocity);
-			target.targetEntity = GetClosestTarget(missileTrf.location, missileVelocity.velocity);
+			// TransformComponent& missileTrf = missiles.get<TransformComponent>(missile);
+			// DynamicPropertiesComponent& missileVelocity = missiles.get<DynamicPropertiesComponent>(missile);
+			// //target.targetEntity = GetTarget(missileTrf.location, missileVelocity.velocity);
+			// target.targetEntity = GetClosestTarget(missileTrf.location, missileVelocity.velocity);
 		}
+	}
+
+
+	auto bullets = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, BulletComponent>();
+	for (auto bullet : bullets)
+	{
+		TransformComponent& bulletTrf = bullets.get<TransformComponent>(bullet);
+		DynamicPropertiesComponent& bulletVelocity = bullets.get<DynamicPropertiesComponent>(bullet);
+
+		static std::vector<entt::entity> bullet_vicinity;
+		Box3D box; box.center = bulletTrf.location; box.radius = Vec3D(10, 10, 10);
+		bullet_vicinity.clear();
+		m_AsteroidOctTree->GetActiveTree()->QueryRange(box, bullet_vicinity, 0);
+
+		for (int i = 0; i < bullet_vicinity.size(); i++)
+		{
+			// check validity
+			if (m_Scene->m_Registry.valid(bullet_vicinity[i]))
+			{
+				TransformComponent& targetLoc = m_Scene->m_Registry.get<TransformComponent>(bullet_vicinity[i]);
+				DynamicPropertiesComponent& targetVelocity = m_Scene->m_Registry.get<DynamicPropertiesComponent>(bullet_vicinity[i]);
+
+				Vec3D dx = targetLoc.location - bulletTrf.location;
+				Vec3D dv = targetVelocity.velocity - bulletVelocity.velocity;
+
+				// check collision:
+				float lambda = dv.lengthSquare() < 0.00001f ? 0 : -(dx * dv) / (ts * dv.lengthSquare());
+				Vec3D hit_location = dx + dv * ts * std::min(1.0f, std::max(lambda, 0.0f));
+				float distance = hit_location.length();
+
+				// delete bullet on hit (by setting its timer to 0, so it will be removed automatically)
+				if (distance < (targetLoc.scale + bulletTrf.scale))
+				{
+					TimerComponent& ttl = timed_entities.get<TimerComponent>(bullet);
+					ttl = 0.0f;
+					HitPointComponent& targetHP = m_Scene->m_Registry.get<HitPointComponent>(bullet_vicinity[i]);
+					targetHP.HP -= 1.0f;
+
+					bulletTrf.scale /= 8;
+					// SpawnExplosion(bulletTrf, targetVelocity);
+					for (int k = 0; k < 30; k++)
+					{
+						SpawnDebris(bulletTrf.location+ hit_location-dx, targetVelocity.velocity, 0.05);
+						// SpawnDebris(hit_location, targetVelocity.velocity, 0.1);
+					}
+				}
+			}
+
+		}
+
 	}
 
 	auto asteroids = m_Scene->m_Registry.view<TransformComponent, AsteroidComponent>();
