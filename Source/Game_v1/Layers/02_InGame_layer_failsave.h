@@ -84,6 +84,8 @@ private:
 	bool m_InFocus = true;
 
 	std::unique_ptr<DualOctTree> m_AsteroidOctTree = nullptr;
+//	OctTree<entt::entity> m_AsteroidOctTree_active;
+//	OctTree<entt::entity> m_AsteroidOctTree_building;
 
 	sf::Music m_Music;
 	sf::SoundBuffer m_ShotSoundBuffer;
@@ -94,7 +96,7 @@ private:
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;
 	bool m_CameraContinuousRotation = false;
-	float m_BulletSpawnChance = 0.0f;
+	float m_BulletSpawnChance = 0.3f;
 
 };
 

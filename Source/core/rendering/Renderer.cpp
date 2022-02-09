@@ -220,6 +220,12 @@ int Renderer::InitShaderLibrary()
 		std::string(instanced_marker_shader_fragmentSrc)
 	);
 
+	// MeshType::LETTER_MESH
+	s_ShaderLibrary.AddShader(
+		std::string(instanced_letter_shader_vertexSrc),
+		std::string(instanced_letter_shader_fragmentSrc)
+	);
+
 	// MeshType::SKYBOX
 	s_ShaderLibrary.AddShader(
 		std::string(skybox_shader_vertexSrc),

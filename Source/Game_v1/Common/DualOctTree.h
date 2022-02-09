@@ -6,13 +6,17 @@
 #include <core/scene/Scene.h>
 #include <thread>
 
+// typedef void(*EntityAdderFunction)(Scene* scene);
+using EntityAdderFunction = std::function<void(Scene*)>;
+
 class DualOctTree
 {
 public:
-	DualOctTree() = default;
+	DualOctTree();
 	DualOctTree(Box3D box);
 	~DualOctTree();
 
+	void SetEntityAdderFunction(EntityAdderFunction function);
 	OctTree<entt::entity>* GetActiveTree();
 
 	void Update(Scene* scene);
@@ -31,6 +35,7 @@ private:
 	OctTree<entt::entity>* m_BuildTree = nullptr;
 	bool m_IsBuilding = false;
 	std::unique_ptr<std::thread> m_WorkerThread = nullptr;
+	EntityAdderFunction m_EntityAdder;
 //https://stackoverflow.com/questions/30560949/how-to-call-join-method-of-one-thread-in-another-function-in-c
 
 };

@@ -168,6 +168,7 @@
     <ClCompile Include="Source\core\rendering\drawables\AlphaMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\BrightColouredMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\ColouredMesh.cpp" />
+    <ClCompile Include="Source\core\rendering\drawables\LetterMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\MarkerMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\Mesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\MeshLibrary.cpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="Source\core\rendering\drawables\AlphaMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\BrightColouredMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\ColouredMesh.h" />
+    <ClInclude Include="Source\core\rendering\drawables\LetterMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\MarkerMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Mesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\MeshLibrary.h" />
@@ -235,6 +237,7 @@
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_alpha_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_bright_colour_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_colour_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\instanced_letter_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_marker_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_normal_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\normal_shaders.h" />
