@@ -14,6 +14,7 @@
 #include <Game_v1/Components/GameComponents.h>
 
 
+
 #include <utils/Vector_3D.h>
 #include <glad/glad.h>
 
@@ -76,6 +77,10 @@ void InGame_layer::OnAttach()
 	SceneSerializer serializer(m_Scene);
 	//	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_3.yaml");
 	serializer.DeSerialize_file("assets/scenes/02_InGameLayer.yaml");
+
+	// remove after testing is done
+	// AlphabetDescription alphabetDescription("D:/cpp_codes/37_RealOrbit/AssetFactory/Textures/alphabet/ImageJ_alphabet_description_partial.txt");
+	m_Font = std::make_unique<ROFont>("D:/cpp_codes/37_RealOrbit/AssetFactory/Textures/alphabet/alphabet_by_ImageJ.png", "D:/cpp_codes/37_RealOrbit/AssetFactory/Textures/alphabet/ImageJ_alphabet_description_partial.txt");
 
 	m_SceneRenderer.SetScene(m_Scene);
 
@@ -179,6 +184,8 @@ void InGame_layer::OnUpdate(Timestep ts)
 
 	//	m_FbDisplay.Draw();
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
+
+	m_Font->RODrawText("abcdef012", Vec3D(-1,-1,0), Vec3D(0.1f, 1.0f, 1.0f), 0.2f);
 
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }
@@ -914,6 +921,16 @@ void InGame_layer::UpdateScene(Timestep ts)
 			dyn_prop.velocity += ts * acceleration;
 		}
 	}
+
+
+	auto non_moving_view = m_Scene->m_Registry.view<TransformComponent, MeshIndexComponent>(entt::exclude<DynamicPropertiesComponent>);
+	for (auto entity : non_moving_view)
+	{
+		TransformComponent& entity_trf = non_moving_view.get<TransformComponent>(entity);
+		MeshIndexComponent& idx = non_moving_view.get<MeshIndexComponent>(entity);
+		m_Scene->m_MeshLibrary.m_MeshTransforms[idx.idx].push_back(entity_trf);
+	}
+
 
 	// mark asteroids that are on collision course with the earth
 	/*static*/ int markerIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DefaultMarker"];

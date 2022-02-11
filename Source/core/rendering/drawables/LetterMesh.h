@@ -6,6 +6,7 @@
 #include <core/rendering/Buffer.h>
 #include <core/rendering/InstanceBuffer.h>
 #include <core/rendering/VertexArray.h>
+#include <core/rendering/Texture.h>
 #include <utils/Vector_3D.h>
 
 
@@ -13,8 +14,10 @@ class LetterMesh : public Mesh
 {
 public:
 	LetterMesh();
-	LetterMesh(const std::vector<Vec3D>& vertexAndColorData, const std::vector<uint32_t>& indexData);
-	LetterMesh(const std::vector<float>& vertexAndColorData, const std::vector<uint32_t>& indexData);
+//	LetterMesh(const std::vector<float>& vertexData, const std::vector<uint32_t>& indexData, std::shared_ptr<Texture> texture);
+//	LetterMesh(const std::vector<float>& vertexData, const std::vector<uint32_t>& indexData, const std::string& texturePath);
+	LetterMesh(std::shared_ptr<Texture> texture);
+	LetterMesh(const std::string& texturePath);
 
 	~LetterMesh();
 
@@ -34,6 +37,7 @@ private:
 	VertexBuffer m_VertexBuffer;
 	InstanceBuffer m_InstanceBuffer;
 	IndexBuffer m_IndexBuffer;
+	std::shared_ptr<Texture> m_Texture;
 
 private:
 	static BufferLayout s_VertexLayout;

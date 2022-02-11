@@ -15,6 +15,9 @@
 #include <core/rendering/ImageProcessor.h>
 #include <core/rendering/drawables/Mesh.h>
 
+// font probably should be loaded at the application level, or at the renderer level
+#include <core/rendering/drawables/text_rendering/ROFont.h>
+
 #include <core/rendering/SceneRenderer.h>
 #include <core/scene/SceneUpdater.h>
 
@@ -90,6 +93,8 @@ private:
 	sf::Sound m_ShotSound;
 	sf::SoundBuffer m_ExplosionSoundBuffer;
 	sf::Sound m_ExplosionSound;
+
+	std::unique_ptr<ROFont> m_Font = nullptr;
 
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;

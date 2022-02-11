@@ -10,7 +10,6 @@ const char* instanced_letter_shader_vertexSrc =
 
 // aPos contains the quads vertex coordinates
 "layout(location = 0) in vec3 aPos; \n"
-// "layout(location = 1) in vec3 aColor; \n"
 
 // the transform component instances will contain the letters screen coord (aInstancePos.xy)
 // the letters width and height (aInstancePos.z, aInstanceOrientation_1.z)
@@ -25,6 +24,7 @@ const char* instanced_letter_shader_vertexSrc =
 
 
 "uniform float aspect_ratio; \n"
+"uniform sampler2D u_Textures[32]; \n"
 
 "out vec3 outColor; \n"
 "out vec2 outTexCoord; \n"
@@ -39,17 +39,23 @@ const char* instanced_letter_shader_vertexSrc =
 "	float letter_scale = aInstanceOrientation_2.x; \n"
 "	vec3 letter_colour = aInstanceOrientation_3; \n"
 
-"	vec2 vertex_position = instance_xy + letter_scale * vec2(width*aPos.x, height*aPos.y); \n"
+"	vec2 texture_size = textureSize(u_Textures[0], 0); \n"
+
+//"	vec2 vertex_position = instance_xy + letter_scale * vec2(width*aPos.x, height*aPos.y); \n"
+"	vec2 vertex_position = instance_xy + letter_scale * vec2(aPos.x/aspect_ratio, height*aPos.y/width); \n"
 
 "	gl_Position = vec4(\n"
-"		vertex_position.x/aspect_ratio, \n"
+//"		vertex_position.x/aspect_ratio, \n"
+"		vertex_position.x, \n"
 "		vertex_position.y, \n"
 "		0.0f, \n"
 "		1.0f\n"
 "); \n"
 
+
 "	outColor = letter_colour; \n"
-"	outTexCoord = instance_uv; \n"
+"	outTexCoord = instance_uv/texture_size+2*vec2(width*aPos.x/texture_size.x, height*aPos.y/texture_size.y); \n"
+"	outTexCoord.y += height/texture_size.y; \n"
 "	outWidthHeight = vec2(width, height); \n"
 "}\0";
 
@@ -67,14 +73,10 @@ const char* instanced_letter_shader_fragmentSrc =
 "uniform float alpha; \n"
 "void main()\n"
 "{\n"
-"	vec3 color = texture(u_Textures[0], outTexCoord+outWidthHeight).rgb * outColor; \n"
+"	vec3 color = texture(u_Textures[0], outTexCoord).rgb * outColor; \n"
 "	FragColor = vec4(color, 1.0); \n"
 "	BrightColor = vec4(0,0,0,0); \n"
 "}\0";
-
-
-
-
 
 
 

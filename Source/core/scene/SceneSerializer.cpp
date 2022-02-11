@@ -18,6 +18,7 @@
 #include <core/rendering/drawables/NormalMesh.h>
 #include <core/rendering/drawables/AlphaMesh.h>
 #include <core/rendering/drawables/MarkerMesh.h>
+#include <core/rendering/drawables/LetterMesh.h>
 #include <core/rendering/drawables/Skybox.h>
 
 SceneSerializer::SceneSerializer()
@@ -245,6 +246,15 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
 			std::string texturePath = mesh["texture_file"].as<std::string>();
 			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<NormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
+
+			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
+			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+		}
+		else if (type == MeshType::LETTER_MESH)
+		{
+			std::string texturePath = mesh["texture_file"].as<std::string>();
+			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<LetterMesh>(texturePath);
 
 			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
 			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);

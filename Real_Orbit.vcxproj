@@ -175,6 +175,7 @@
     <ClCompile Include="Source\core\rendering\drawables\NormalMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\Skybox.cpp" />
     <ClCompile Include="Source\core\rendering\DoubleFramebuffer.cpp" />
+    <ClCompile Include="Source\core\rendering\drawables\text_rendering\ROFont.cpp" />
     <ClCompile Include="Source\core\rendering\Framebuffer.cpp" />
     <ClCompile Include="Source\core\rendering\FramebufferDisplay.cpp" />
     <ClCompile Include="Source\core\rendering\ImageProcessor.cpp" />
@@ -226,6 +227,7 @@
     <ClInclude Include="Source\core\rendering\drawables\NormalMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Skybox.h" />
     <ClInclude Include="Source\core\rendering\DoubleFramebuffer.h" />
+    <ClInclude Include="Source\core\rendering\drawables\text_rendering\ROFont.h" />
     <ClInclude Include="Source\core\rendering\Framebuffer.h" />
     <ClInclude Include="Source\core\rendering\FramebufferDisplay.h" />
     <ClInclude Include="Source\core\rendering\ImageProcessor.h" />

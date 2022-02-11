@@ -210,6 +210,9 @@
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_letter_shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\core\rendering\drawables\text_rendering\ROFont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\core\Application.cpp">
@@ -348,6 +351,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\core\rendering\drawables\LetterMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\rendering\drawables\text_rendering\ROFont.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
