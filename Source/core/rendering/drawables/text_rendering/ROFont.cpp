@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 
+#include <core/Application.h>
 #include <core/rendering/Renderer.h>
 
 AlphabetDescription::AlphabetDescription(const std::vector<std::string>& description_lines)
@@ -46,11 +47,14 @@ ROFont::ROFont(const std::string& textureFile, const std::string& description_fi
 	: m_LetterMesh(nullptr), m_AlphabetDescription(description_file)
 {
 	m_LetterMesh = std::make_unique<LetterMesh>(textureFile);
+	SetWidthAndHeightInShader();
 }
 
 void ROFont::RODrawText(const std::string& text, Vec3D screen_coord, Vec3D letter_colour, float scale)
 {
 	m_LetterTransforms.clear();
+
+	// change the units to pixels and make the bottom left corner the 0,0 coordinate
 	TransformComponent current_screen_loc;
 	current_screen_loc.location = screen_coord;
 
@@ -64,9 +68,18 @@ void ROFont::RODrawText(const std::string& text, Vec3D screen_coord, Vec3D lette
 
 		m_LetterTransforms.push_back(current_screen_loc);
 
-		current_screen_loc.location.x += 0.1f;
+		current_screen_loc.location.x += scale * ldata.w;
 	}
 
 	Renderer::BindShader(MeshType::LETTER_MESH);
 	m_LetterMesh->DrawInstances(m_LetterTransforms);
+}
+
+void ROFont::SetWidthAndHeightInShader()
+{
+	m_ScreenW = Application::Get().GetWindow().GetWidth();
+	m_ScreenH = Application::Get().GetWindow().GetHeight();
+	std::shared_ptr<Shader> shader = Renderer::BindShader(MeshType::LETTER_MESH);
+	shader->UploadUniformFloat("screen_w", m_ScreenW);
+	shader->UploadUniformFloat("screen_h", m_ScreenH);
 }

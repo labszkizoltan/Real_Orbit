@@ -44,13 +44,15 @@ public:
 	~ROFont() = default;
 
 	void RODrawText(const std::string& text, Vec3D screen_coord, Vec3D letter_colour, float scale);
-
+	void SetWidthAndHeightInShader();
 
 private:
 	// the texture and the instance buffers are already part of this mesh structure
 	std::unique_ptr<LetterMesh> m_LetterMesh = nullptr;
 	AlphabetDescription m_AlphabetDescription;
 	std::vector<TransformComponent> m_LetterTransforms;
+	float m_ScreenW = 1.0f;
+	float m_ScreenH = 1.0f;
 };
 
 

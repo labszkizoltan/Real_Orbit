@@ -80,7 +80,7 @@ void InGame_layer::OnAttach()
 
 	// remove after testing is done
 	// AlphabetDescription alphabetDescription("D:/cpp_codes/37_RealOrbit/AssetFactory/Textures/alphabet/ImageJ_alphabet_description_partial.txt");
-	m_Font = std::make_unique<ROFont>("D:/cpp_codes/37_RealOrbit/AssetFactory/Textures/alphabet/alphabet_by_ImageJ.png", "D:/cpp_codes/37_RealOrbit/AssetFactory/Textures/alphabet/ImageJ_alphabet_description_partial.txt");
+	m_Font = std::make_unique<ROFont>("D:/cpp_codes/37_RealOrbit/AssetFactory/Textures/alphabet/alphabet_by_ImageJ_modified.png", "D:/cpp_codes/37_RealOrbit/AssetFactory/Textures/alphabet/ImageJ_alphabet_description_partial.txt");
 
 	m_SceneRenderer.SetScene(m_Scene);
 
@@ -185,7 +185,12 @@ void InGame_layer::OnUpdate(Timestep ts)
 	//	m_FbDisplay.Draw();
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
-	m_Font->RODrawText("abcdef012", Vec3D(-1,-1,0), Vec3D(0.1f, 1.0f, 1.0f), 0.2f);
+	
+	m_Font->RODrawText("Elapsed_Game_Time_-_" + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, 1200 -70, 0), Vec3D(0.3f, 0.5f, 0.9f), 0.5f);
+	m_Font->RODrawText("Ammo_-_Infinite", Vec3D(10, 1200 - 140, 0), Vec3D(0.3f, 0.5f, 0.9f), 0.5f);
+//	m_Font->RODrawText("abcdefghijklmnopqrstuvwxyz", Vec3D(10, 10, 0), Vec3D(0.1f, 0.9f, 0.2f), 2.0f);
+//	m_Font->RODrawText("ABCDEFGHIJLMNOPQRSTUVWXYZ", Vec3D(10, 100, 0), Vec3D(0.9f, 0.9f, 0.2f), 2.0f);
+//	m_Font->RODrawText("0123456789._,;!?-+/()<>{}[]", Vec3D(10, 200, 0), Vec3D(0.9f, 0.9f, 0.2f), 2.0f);
 
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }

@@ -23,6 +23,8 @@ const char* instanced_letter_shader_vertexSrc =
 "layout(location = 7) in float aInstanceScale; \n"
 
 
+"uniform float screen_w; \n"
+"uniform float screen_h; \n"
 "uniform float aspect_ratio; \n"
 "uniform sampler2D u_Textures[32]; \n"
 
@@ -41,22 +43,21 @@ const char* instanced_letter_shader_vertexSrc =
 
 "	vec2 texture_size = textureSize(u_Textures[0], 0); \n"
 
-//"	vec2 vertex_position = instance_xy + letter_scale * vec2(width*aPos.x, height*aPos.y); \n"
-"	vec2 vertex_position = instance_xy + letter_scale * vec2(aPos.x/aspect_ratio, height*aPos.y/width); \n"
+"	vec2 corner_position = 2* vec2(instance_xy.x/screen_w, instance_xy.y/screen_h)-1; \n"
+"	vec2 vertex_position = corner_position + 2 * letter_scale * vec2(width*aPos.x/screen_w, height*aPos.y/screen_h); \n"
 
 "	gl_Position = vec4(\n"
-//"		vertex_position.x/aspect_ratio, \n"
 "		vertex_position.x, \n"
 "		vertex_position.y, \n"
 "		0.0f, \n"
 "		1.0f\n"
 "); \n"
 
+"	vec2 texture_corner_position = vec2(instance_uv.x/texture_size.x, 1-instance_uv.y/texture_size.y); \n"
+"	vec2 texture_vertex_position = texture_corner_position + vec2(width*aPos.x/texture_size.x, height*aPos.y/texture_size.y); \n"
 
 "	outColor = letter_colour; \n"
-"	outTexCoord = instance_uv/texture_size+2*vec2(width*aPos.x/texture_size.x, height*aPos.y/texture_size.y); \n"
-"	outTexCoord.y += height/texture_size.y; \n"
-"	outWidthHeight = vec2(width, height); \n"
+"	outTexCoord = texture_vertex_position; \n"
 "}\0";
 
 
@@ -67,7 +68,6 @@ const char* instanced_letter_shader_fragmentSrc =
 "layout(location = 1) out vec4 BrightColor; \n"
 "in vec3 outColor; \n"
 "in vec2 outTexCoord; \n"
-"in vec2 outWidthHeight; \n"
 
 "uniform sampler2D u_Textures[32]; \n"
 "uniform float alpha; \n"
@@ -75,6 +75,7 @@ const char* instanced_letter_shader_fragmentSrc =
 "{\n"
 "	vec3 color = texture(u_Textures[0], outTexCoord).rgb * outColor; \n"
 "	FragColor = vec4(color, 1.0); \n"
+//"	BrightColor = vec4(color, 1.0); \n"
 "	BrightColor = vec4(0,0,0,0); \n"
 "}\0";
 
