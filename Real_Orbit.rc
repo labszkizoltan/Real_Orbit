@@ -28,6 +28,22 @@ LANGUAGE LANG_HUNGARIAN, SUBLANG_DEFAULT
 // remains consistent on all systems.
 IDI_ICON1               ICON                    "D:\\cpp_codes\\37_RealOrbit\\AssetFactory\\Textures\\menu\\Logo.ico"
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDB_PNG1                PNG                     "assets\\fonts\\ImageJ_alphabet_3.png"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// FONT_DESCRIPTION
+//
+
+IDR_FONT_DESCRIPTION1   FONT_DESCRIPTION        "d:\\cpp_codes\\37_realorbit\\assetfactory\\textures\\menu\\font_des.bin"
+
 #endif    // Hungarian (Hungary) resources
 /////////////////////////////////////////////////////////////////////////////
 

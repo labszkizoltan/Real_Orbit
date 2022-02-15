@@ -213,6 +213,15 @@
     <ClInclude Include="Source\core\rendering\drawables\text_rendering\ROFont.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Game_v1\Common\Player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game_v1\Common\EntityManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game_v1\Common\AudioManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\core\Application.cpp">
@@ -356,10 +365,22 @@
     <ClCompile Include="Source\core\rendering\drawables\text_rendering\ROFont.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Game_v1\Common\EntityManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game_v1\Common\AudioManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\core\rendering\shader_source_files\basic_3D_vertex_shd.glsl" />
     <None Include="Source\core\rendering\shader_source_files\basic_3D_fragment_shd.glsl" />
+    <None Include="..\assetfactory\textures\menu\raw_text.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\assetfactory\textures\menu\font_des.bin">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Real_Orbit.rc">
@@ -368,6 +389,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\AssetFactory\Textures\menu\Logo.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\fonts\ImageJ_alphabet_3.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

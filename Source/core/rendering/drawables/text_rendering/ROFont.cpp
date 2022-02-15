@@ -30,15 +30,17 @@ void AlphabetDescription::Init(const std::vector<std::string>& description_lines
 {
 	for (int i = 1; i < description_lines.size(); i++)
 	{
-		char letter;
+		char letter = description_lines[i][0];
 		LetterData data;
 
-		std::stringstream ss(description_lines[i]);
-		ss >> letter;
+		std::stringstream ss(description_lines[i].substr(2));
+		//std::stringstream ss(description_lines[i]);
+		// ss >> letter;
 		ss >> data.u;
 		ss >> data.v;
 		ss >> data.w;
 		ss >> data.h;
+		data.v += data.h;
 		letterDescriptions[letter] = data;
 	}
 }

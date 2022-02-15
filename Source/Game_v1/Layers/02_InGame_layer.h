@@ -23,7 +23,9 @@
 
 #include <core/GlobalConstants.h>
 #include <Game_v1/Common/DualOctTree.h>
-// #include <utils/OctTree.h>
+#include <Game_v1/Common/EntityManager.h>
+#include <Game_v1/Common/AudioManager.h>
+#include <Game_v1/Common/Player.h>
 
 #include <SFML/Audio.hpp>
 
@@ -44,16 +46,9 @@ public:
 
 	entt::entity GetTarget();
 	entt::entity GetTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection);
-	entt::entity GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection);
+	entt::entity GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection); // -> Move to some other class, maybe Player
 
-	void EmitMesh(int meshIdx, TransformComponent transform);
-	void SpawnAsteroid(Vec3D center, Vec3D velocity, float spread);
-	void SpawnDebris(Vec3D center, Vec3D velocity, float spread, float bulletChance);
-	void ShootBullett(TransformComponent transform, float velocity);
-	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
-	void RemoveMesh(int meshIdx);
-
-	void BuildOctTree();
+	void BuildOctTree(); // -> this may need to move to the EntityManager as well, not 100% sure
 
 private:
 	bool OnWindowResize(Event& e);
@@ -74,7 +69,6 @@ private:
 	void ZoomOut();
 
 	void UpdateScene(Timestep ts);
-	void SpawnExplosion(TransformComponent trf, DynamicPropertiesComponent dyn);
 
 private:
 	float m_ElapsedTime = 0.0f;
@@ -86,15 +80,13 @@ private:
 	SceneUpdater m_SceneUpdater;
 	bool m_InFocus = true;
 
+	EntityManager m_EntityManager;
+
 	std::unique_ptr<DualOctTree> m_AsteroidOctTree = nullptr;
 
-	sf::Music m_Music;
-	sf::SoundBuffer m_ShotSoundBuffer;
-	sf::Sound m_ShotSound;
-	sf::SoundBuffer m_ExplosionSoundBuffer;
-	sf::Sound m_ExplosionSound;
+	AudioManager m_AudioManager;
 
-	std::unique_ptr<ROFont> m_Font = nullptr;
+	std::unique_ptr<ROFont> m_Font = nullptr; // probably should go to a higher level, like to the application level
 
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;

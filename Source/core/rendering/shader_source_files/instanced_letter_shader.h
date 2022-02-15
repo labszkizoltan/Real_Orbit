@@ -74,8 +74,9 @@ const char* instanced_letter_shader_fragmentSrc =
 "void main()\n"
 "{\n"
 "	vec3 color = texture(u_Textures[0], outTexCoord).rgb * outColor; \n"
+"   if(color == 0.0)\n"
+"       discard;\n"
 "	FragColor = vec4(color, 1.0); \n"
-//"	BrightColor = vec4(color, 1.0); \n"
 "	BrightColor = vec4(0,0,0,0); \n"
 "}\0";
 

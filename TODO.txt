@@ -49,8 +49,6 @@ the components can be client specific.
 
 
 Missing featuers:
-- text rendering: this is importantfor so many reasons, maybe a worthwile page to look for help:
-	https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Text_Rendering_01
 - mouse picking (core feature) -> this needs a lot of change on the rendering,
 	the entity id should be added to the instances and rendered into a separate
 	framebuffer (or at least an additional colour attachment), and I dont feel
@@ -58,24 +56,35 @@ Missing featuers:
 The rest is definitely game side:
 - Composite meshes (like a ship with a normal mesh plus a bright mesh as the engine, probably core side)
 - AI behaviours (probably game side),
-- collisions (probably game side),
 - Sounds (it might be enough to implement it on the game side),
 - entity bound camera (probably game side),
 
 
 Mostly done (could take some tweaking):
 - bloom effect,
+- collisions: went to the utilities and the game's side. Currently this works by a dual oct tree,
+	it has two oct trees, one is being used for querying object from a spatial interval, meanwhile
+	the other is being built on a separate CPU thread. The building process takes ~500-1000 micro
+	seconds depending on the asteroid count. Unfortunately I have seen the program crash in debug
+	mode, probably because the oct tree building takes longer than 1 game cycle and the state of
+	the asteroid pool changes and the iterator used in the building thread becomes invalid. So this
+	problem doesnt come up when the build is quick, but could potentially cause failures. This
+	will definitely require some attention. Perhaps even the building could be done on the main
+	thread, if it's only half to one milli sec, it might be still okay.
 
 Features done:
 - Markers (create a new mesh type for them, core feature),
 - moving objects,
 - shooting,
+- text rendering: done, but havent used the saved tutorial link. I created a new MeshType - LETTER_MESH
+	and put the drawing parameters into the TransformComponent instance array.
 
 
 Other things to implement:
 - Add mip-map to the textures -> done in the mesh constructors
 - generalize the framebuffer class to be able to hold arbitrary number of colour attachments
 	(so I dont need 3 classes for almost the same things: shadow/doubleFB/single FB) -> this is done
+- Create a ColliderComponent and build the OctTree and check collisions based on that.
 
 Test lower OpenGL versions! -> did it, but none of those versions were running on Niki's laptop.
 
@@ -90,6 +99,7 @@ A cargo ship heading towards the belt has broken down (engine malfunction or som
 towards the asteroid field. We as a light recon wechicle deployed from this ship, need to go ahead
 and mark the dangerous asteroids for destruction, so faraway missille ships can destroy them.
 
+Another game could be a 3D version of Agar.io, we control a sphere and have to eat smaller spheres.
 
 Building the octTree: my idea is that there will be two octTrees, one is actively being used and another
 one is being built on another thread. There should be a variable which indicates if this thread is running
