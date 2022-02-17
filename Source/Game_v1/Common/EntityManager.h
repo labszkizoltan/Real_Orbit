@@ -23,8 +23,9 @@ public:
 
 	void EmitMesh(int meshIdx, TransformComponent transform);
 	void SpawnAsteroid(Vec3D center, Vec3D velocity, float spread);
+	void SpawnAsteroidCloud();
 	void SpawnDebris(Vec3D center, Vec3D velocity, float spread, float bulletChance);
-	void ShootBullett(TransformComponent transform, float velocity);
+	void ShootBullett(TransformComponent transform, Vec3D velocity);
 	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
 	void RemoveMesh(int meshIdx);
 	void SpawnExplosion(TransformComponent trf, DynamicPropertiesComponent dyn);

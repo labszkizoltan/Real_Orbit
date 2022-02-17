@@ -27,6 +27,13 @@ AudioManager::AudioManager()
 	m_ExplosionSound.setVolume(60.0f);
 }
 
+void AudioManager::SetVolume(float volume)
+{
+	m_Music.setVolume(volume);
+	m_ShotSound.setVolume(volume);
+	m_ExplosionSound.setVolume(volume);
+}
+
 void AudioManager::PlayMusic()
 {
 	// if music finished, start again

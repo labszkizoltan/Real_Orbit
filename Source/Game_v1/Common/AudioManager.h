@@ -11,6 +11,8 @@ public:
 	AudioManager();
 	~AudioManager() = default;
 
+	void SetVolume(float volume);
+
 	void PlayMusic();
 	void PauseMusic();
 	void ContinueMusic();
@@ -20,6 +22,7 @@ public:
 	void StopShotSound();
 
 	void PlayExplosionSound();
+
 
 
 

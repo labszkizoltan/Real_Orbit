@@ -24,8 +24,6 @@
 
 #include <Game_v1/Common/MenuStateManager.h>
 
-//class StateManager;
-
 class Menu_layer : public Layer
 {
 public:
@@ -76,10 +74,7 @@ private:
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;
 	StateManager m_StateManager;
 
-
 	friend class StateManager;
 };
-
-
 
 #endif // MENU_LAYER_H

@@ -195,6 +195,7 @@
     <ClCompile Include="Source\Game_v1\Common\DualOctTree.cpp" />
     <ClCompile Include="Source\Game_v1\Common\EntityManager.cpp" />
     <ClCompile Include="Source\Game_v1\Common\MenuStateManager.cpp" />
+    <ClCompile Include="Source\Game_v1\Common\Player.cpp" />
     <ClCompile Include="Source\Game_v1\GameApp_v1.cpp" />
     <ClCompile Include="Source\Game_v1\Layers\01_MenuLayer.cpp" />
     <ClCompile Include="Source\Game_v1\Layers\02_InGame_layer.cpp" />

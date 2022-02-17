@@ -371,6 +371,9 @@
     <ClCompile Include="Source\Game_v1\Common\AudioManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Game_v1\Common\Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\core\rendering\shader_source_files\basic_3D_vertex_shd.glsl" />

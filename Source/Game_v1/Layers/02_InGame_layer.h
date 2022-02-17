@@ -15,9 +15,6 @@
 #include <core/rendering/ImageProcessor.h>
 #include <core/rendering/drawables/Mesh.h>
 
-// font probably should be loaded at the application level, or at the renderer level
-#include <core/rendering/drawables/text_rendering/ROFont.h>
-
 #include <core/rendering/SceneRenderer.h>
 #include <core/scene/SceneUpdater.h>
 
@@ -80,18 +77,20 @@ private:
 	SceneUpdater m_SceneUpdater;
 	bool m_InFocus = true;
 
+	Player m_Player;
 	EntityManager m_EntityManager;
+	AudioManager m_AudioManager;
 
 	std::unique_ptr<DualOctTree> m_AsteroidOctTree = nullptr;
 
-	AudioManager m_AudioManager;
-
-	std::unique_ptr<ROFont> m_Font = nullptr; // probably should go to a higher level, like to the application level
 
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;
 	bool m_CameraContinuousRotation = false;
 	float m_BulletSpawnChance = 0.0f;
+
+	int m_EarthHitCount = 0;
+	int m_MaxEarthHitCount = 5;
 
 };
 

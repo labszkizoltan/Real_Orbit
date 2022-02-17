@@ -61,6 +61,10 @@ void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 
 }
 
+void EntityManager::SpawnAsteroidCloud()
+{
+}
+
 void EntityManager::SpawnDebris(Vec3D center, Vec3D velocity, float spread, float bulletChance)
 {
 	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
@@ -87,13 +91,13 @@ void EntityManager::SpawnDebris(Vec3D center, Vec3D velocity, float spread, floa
 	}
 }
 
-void EntityManager::ShootBullett(TransformComponent transform, float velocity)
+void EntityManager::ShootBullett(TransformComponent transform, Vec3D velocity)
 {
 	static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
 
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 0.001f;
-	dynProps.velocity = transform.orientation.f3 * velocity;
+	dynProps.velocity = velocity;
 	transform.scale = 0.1f;
 	transform.location += 0.1 * (transform.orientation.f3 - transform.orientation.f2);
 
