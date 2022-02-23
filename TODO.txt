@@ -84,7 +84,12 @@ Other things to implement:
 - Add mip-map to the textures -> done in the mesh constructors
 - generalize the framebuffer class to be able to hold arbitrary number of colour attachments
 	(so I dont need 3 classes for almost the same things: shadow/doubleFB/single FB) -> this is done
-- Create a ColliderComponent and build the OctTree and check collisions based on that.
+- Create a ColliderComponent and build the OctTree and check collisions based on that. -> mostly done
+	a few issues came up with this, namely that the ships firing torpedoes are being hit by their own
+	torpedoes.
+- Create a secondary mesh library for static meshes, which are not being updated every frame, only at
+		rare occasions.
+
 
 Test lower OpenGL versions! -> did it, but none of those versions were running on Niki's laptop.
 

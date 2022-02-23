@@ -79,6 +79,7 @@ void InGame_layer::OnAttach()
 	serializer.DeSerialize_file("assets/scenes/02_InGameLayer.yaml");
 
 	m_EntityManager.SetScene(m_Scene.get());
+	m_EntityManager.CreateStars();
 
 	// m_Font = std::make_unique<ROFont>("assets/fonts/ImageJ_alphabet_3.png", "assets/fonts/ImageJ_alphabet_3_description.txt");
 	m_SceneRenderer.SetScene(m_Scene);
@@ -91,6 +92,7 @@ void InGame_layer::OnAttach()
 
 	m_ImgProcessor = std::make_unique<ImageProcessor>();
 	m_ImgProcessor->SetMipMapLevel(4);
+
 }
 
 void InGame_layer::OnDetach()
@@ -108,10 +110,27 @@ void InGame_layer::OnUpdate(Timestep ts)
 	
 	if (m_EarthHitCount >= m_MaxEarthHitCount)
 	{
+		m_SceneRenderer.RenderScene();
+		m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
+		m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
+
 		GameApplication::Game_DrawText("Game Over",
-			Vec3D(700, 600, 0),
+			Vec3D(700, 600, 0), // parameterize the screen coordinates
 			Vec3D(0.9f, 0.3f, 0.3f),
 			2.0f);
+		GameApplication::Game_DrawText("press Esc to return to menu",
+			Vec3D(650, 550, 0),
+			Vec3D(0.9f, 0.3f, 0.3f),
+			1.0f);
+
+
+		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, 1200 - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+		GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_EarthHitCount) + " / " + std::to_string(m_MaxEarthHitCount),
+			Vec3D(700, 1200 - 70, 0),
+			Vec3D(0.3f, 0.9f, 0.5f),
+			1.0f);
+		m_Player.DrawStatsOnScreen();
+
 		return;
 	}
 
@@ -247,6 +266,31 @@ entt::entity InGame_layer::GetTarget(const Vec3D& acquisitionLocation, const Vec
 		return targeting_queue.top().user_data;
 }
 
+void InGame_layer::ResetLayer()
+{
+	LOG_INFO("InGame_layer reset");
+
+	m_Scene = std::make_shared<Scene>();
+
+	SceneSerializer serializer(m_Scene);
+	serializer.DeSerialize_file("assets/scenes/02_InGameLayer.yaml");
+
+	m_EntityManager.SetScene(m_Scene.get());
+	m_SceneRenderer.SetScene(m_Scene);
+
+	m_ElapsedTime = 0.0f;
+	m_SimulationSpeed = 1.0f;
+	m_ZoomLevel = g_InitialZoomLevel;
+
+	m_Player = Player();
+
+	m_CameraContinuousRotation = false;
+	
+	m_EarthHitCount = 0;
+
+	m_EntityManager.CreateStars();
+}
+
 
 entt::entity InGame_layer::GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection)
 {
@@ -316,6 +360,8 @@ bool InGame_layer::OnKeyPressed(Event& e)
 	if (event.key.code == sf::Keyboard::Key::Escape)
 	{
 		DeActivate(); // this automatically activates the menu layer
+		if (m_EarthHitCount >= m_MaxEarthHitCount)
+			ResetLayer();
 	}
 	else if (event.key.code == sf::Keyboard::Key::Space)
 		m_SimulationSpeed = 0.0f;
@@ -462,22 +508,23 @@ void InGame_layer::HandleUserInput(Timestep ts)
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip % 2 == 0 && m_Player.m_MissilleCount > 0)
 	{
-		m_EntityManager.LaunchMissile(yellowIdx, m_Player.m_Transform, GetClosestTarget(m_Player.m_Transform.location, m_Player.m_Transform.orientation.f3));
+		m_EntityManager.LaunchMissile(yellowIdx, m_Player.m_Transform, DynamicPropertiesComponent(), GetClosestTarget(m_Player.m_Transform.location, m_Player.m_Transform.orientation.f3));
 		m_Player.m_MissilleCount--;
 		m_AudioManager.PlayShotSound();
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Middle) && skip % 2 == 1)
 	{
-		auto armed_ships = m_Scene->m_Registry.view<WeaponComponent, TransformComponent>();
+		auto armed_ships = m_Scene->m_Registry.view<WeaponComponent, TransformComponent, DynamicPropertiesComponent>();
 		for (auto armed_ship : armed_ships)
 		{
 			TransformComponent& shipTrf = armed_ships.get<TransformComponent>(armed_ship);
+			DynamicPropertiesComponent& shipVelocity = armed_ships.get<DynamicPropertiesComponent>(armed_ship);
 			// LaunchMissile(bulletIdx, shipTrf, GetTarget());
 			if ((skip/2) % 2 == 0)
-				m_EntityManager.LaunchMissile(yellowIdx, shipTrf, GetTarget());
+				m_EntityManager.LaunchMissile(yellowIdx, shipTrf, shipVelocity, GetTarget());
 				//m_EntityManager.LaunchMissile(yellowIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
 			else
-				m_EntityManager.LaunchMissile(blueIdx, shipTrf, GetTarget());
+				m_EntityManager.LaunchMissile(blueIdx, shipTrf, shipVelocity, GetTarget());
 				//m_EntityManager.LaunchMissile(blueIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
 		}
 	}
@@ -723,7 +770,6 @@ void InGame_layer::UpdateScene(Timestep ts)
 			m_EntityManager.SpawnExplosion(asteroidTrf, DynamicPropertiesComponent());
 			m_Scene->m_Registry.destroy(asteroid);
 			m_AudioManager.PlayExplosionSound();
-			//m_ExplosionSound.play();
 
 			m_EarthHitCount++;
 		}

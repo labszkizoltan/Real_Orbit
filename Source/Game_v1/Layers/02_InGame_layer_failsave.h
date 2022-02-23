@@ -20,7 +20,9 @@
 
 #include <core/GlobalConstants.h>
 #include <Game_v1/Common/DualOctTree.h>
-// #include <utils/OctTree.h>
+#include <Game_v1/Common/EntityManager.h>
+#include <Game_v1/Common/AudioManager.h>
+#include <Game_v1/Common/Player.h>
 
 #include <SFML/Audio.hpp>
 
@@ -39,18 +41,13 @@ public:
 	virtual void Activate() override;
 	virtual void DeActivate() override;
 
+	void ResetLayer();
+
 	entt::entity GetTarget();
 	entt::entity GetTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection);
-	entt::entity GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection);
+	entt::entity GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection); // -> Move to some other class, maybe Player
 
-	void EmitMesh(int meshIdx, TransformComponent transform);
-	void SpawnAsteroid(Vec3D center, Vec3D velocity, float spread);
-	void SpawnDebris(Vec3D center, Vec3D velocity, float spread, float bulletChance);
-	void ShootBullett(TransformComponent transform, float velocity);
-	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
-	void RemoveMesh(int meshIdx);
-
-	void BuildOctTree();
+	void BuildOctTree(); // -> this may need to move to the EntityManager as well, not 100% sure
 
 private:
 	bool OnWindowResize(Event& e);
@@ -71,7 +68,6 @@ private:
 	void ZoomOut();
 
 	void UpdateScene(Timestep ts);
-	void SpawnExplosion(TransformComponent trf, DynamicPropertiesComponent dyn);
 
 private:
 	float m_ElapsedTime = 0.0f;
@@ -80,23 +76,23 @@ private:
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
-	SceneUpdater m_SceneUpdater;
+//	SceneUpdater m_SceneUpdater;
 	bool m_InFocus = true;
 
-	std::unique_ptr<DualOctTree> m_AsteroidOctTree = nullptr;
-//	OctTree<entt::entity> m_AsteroidOctTree_active;
-//	OctTree<entt::entity> m_AsteroidOctTree_building;
+	Player m_Player;
+	EntityManager m_EntityManager;
+	AudioManager m_AudioManager;
 
-	sf::Music m_Music;
-	sf::SoundBuffer m_ShotSoundBuffer;
-	sf::Sound m_ShotSound;
-	sf::SoundBuffer m_ExplosionSoundBuffer;
-	sf::Sound m_ExplosionSound;
+	std::unique_ptr<DualOctTree> m_AsteroidOctTree = nullptr;
+
 
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;
 	bool m_CameraContinuousRotation = false;
-	float m_BulletSpawnChance = 0.3f;
+	float m_BulletSpawnChance = 0.0f;
+
+	int m_EarthHitCount = 0;
+	int m_MaxEarthHitCount = 5;
 
 };
 

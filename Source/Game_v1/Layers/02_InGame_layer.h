@@ -41,11 +41,12 @@ public:
 	virtual void Activate() override;
 	virtual void DeActivate() override;
 
+	void ResetLayer();
+
 	entt::entity GetTarget();
 	entt::entity GetTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection);
 	entt::entity GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection); // -> Move to some other class, maybe Player
 
-	void BuildOctTree(); // -> this may need to move to the EntityManager as well, not 100% sure
 
 private:
 	bool OnWindowResize(Event& e);
@@ -74,7 +75,7 @@ private:
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
-	SceneUpdater m_SceneUpdater;
+//	SceneUpdater m_SceneUpdater;
 	bool m_InFocus = true;
 
 	Player m_Player;

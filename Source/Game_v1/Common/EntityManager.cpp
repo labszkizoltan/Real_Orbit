@@ -58,6 +58,8 @@ void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 	// newEntity.AddComponent<HitPointComponent>(1.0f + (float)(rand() % 10));
 	// newEntity.AddComponent<HitPointComponent>(1.0f);
 	newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
+	newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+	
 
 }
 
@@ -98,7 +100,7 @@ void EntityManager::ShootBullett(TransformComponent transform, Vec3D velocity)
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 0.001f;
 	dynProps.velocity = velocity;
-	transform.scale = 0.1f;
+	transform.scale = 0.05f;
 	transform.location += 0.1 * (transform.orientation.f3 - transform.orientation.f2);
 
 	Entity newEntity = m_Scene->CreateEntity("");
@@ -109,17 +111,17 @@ void EntityManager::ShootBullett(TransformComponent transform, Vec3D velocity)
 	newEntity.AddComponent<BulletComponent>(BulletComponent());
 }
 
-void EntityManager::LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target)
+void EntityManager::LaunchMissile(int meshIdx, TransformComponent hostTransform, DynamicPropertiesComponent hostVelocity, entt::entity target)
 {
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 0.001f;
-	dynProps.velocity = 0.01f * transform.orientation.f1; // 0.00000001f
+	dynProps.velocity = hostVelocity.velocity + 0.02f * hostTransform.orientation.f1; // 0.00000001f
 	dynProps.angular_velocity = Vec3D();
-	transform.scale = 0.05f;
-	transform.location += 0.1 * (transform.orientation.f3 + transform.orientation.f1);
+	hostTransform.location += hostTransform.scale * (hostTransform.orientation.f3 + hostTransform.orientation.f1);
+	hostTransform.scale = 0.05f;
 
 	Entity newEntity = m_Scene->CreateEntity("");
-	newEntity.AddComponent<TransformComponent>(transform);
+	newEntity.AddComponent<TransformComponent>(hostTransform);
 	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
 	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
 	newEntity.AddComponent<TimerComponent>(TimerComponent(20000.0f)); // provide ttl in mili seconds
@@ -143,6 +145,27 @@ void EntityManager::SpawnExplosion(TransformComponent trf, DynamicPropertiesComp
 	newEntity.AddComponent<DynamicPropertiesComponent>(dyn);
 	newEntity.AddComponent<TimerComponent>(TimerComponent(2000.0f));
 	newEntity.AddComponent<ExplosionComponent>(ExplosionComponent());
+}
+
+void EntityManager::CreateStars()
+{
+	/*
+	int starCount = 10000;
+	// int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"]; // -> this is a bright mesh and it slows down the program much more
+	int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
+
+	std::vector<TransformComponent> star_transforms;
+	for (int i = 0; i < starCount; i++)
+	{
+		TransformComponent tmpTransform;
+		tmpTransform.location = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 200 - 100);
+		tmpTransform.orientation = Rotation((float)(rand() % 31415) / 10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
+		tmpTransform.scale = (float)(rand() % 20 + 2) / 20.0f;
+		star_transforms.push_back(tmpTransform);
+	}
+
+	m_Scene->m_StaticMeshLibrary.m_Meshes[asteroidIdx]->SetInstances(star_transforms);
+	*/
 }
 
 

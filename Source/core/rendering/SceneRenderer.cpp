@@ -56,25 +56,12 @@ void SceneRenderer::RenderScene()
 		MeshType mesh_type = m_Scene->m_MeshLibrary.m_Meshes[i]->GetMeshType();
 		if (m_Scene->m_MeshLibrary.m_Meshes[i]->GetColourInstances() != -1)
 		{
-//			int mesh_count = m_Scene->m_MeshLibrary.m_MeshTransforms[i].size();
-//			m_Scene->m_MeshLibrary.m_Meshes[i]->SetColourInstances(std::vector<ColourComponent>(mesh_count));
 			int colBufIdx = m_Scene->m_MeshLibrary.m_Meshes[i]->GetColourInstances();
 			m_Scene->m_MeshLibrary.m_Meshes[i]->SetColourInstances(m_Scene->m_MeshLibrary.m_ColourBuffers[colBufIdx]);
 		}
 		Renderer::BindShader(mesh_type);
 		m_Scene->m_MeshLibrary.m_Meshes[i]->Draw(); // no need to set transform data again, it was already uploaded at shadow mapping
-	}
-
-	// this is required indeed
-	// go for another round, maybe the text is being drawn over
-	for (int i = 0; i < m_Scene->m_MeshLibrary.size(); i++)
-	{
-		MeshType mesh_type = m_Scene->m_MeshLibrary.m_Meshes[i]->GetMeshType();
-		if (mesh_type == MeshType::LETTER_MESH)
-		{
-			Renderer::BindShader(mesh_type);
-			m_Scene->m_MeshLibrary.m_Meshes[i]->Draw(); // no need to set transform data again, it was already uploaded at shadow mapping
-		}
+//		m_Scene->m_StaticMeshLibrary.m_Meshes[i]->Draw();
 	}
 
 	Renderer::s_FrameBuffer->Unbind();

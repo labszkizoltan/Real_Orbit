@@ -14,6 +14,7 @@
 #include <Game_v1/Components/GameComponents.h>
 
 
+
 #include <utils/Vector_3D.h>
 #include <glad/glad.h>
 
@@ -77,6 +78,9 @@ void InGame_layer::OnAttach()
 	//	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_3.yaml");
 	serializer.DeSerialize_file("assets/scenes/02_InGameLayer.yaml");
 
+	m_EntityManager.SetScene(m_Scene.get());
+
+	// m_Font = std::make_unique<ROFont>("assets/fonts/ImageJ_alphabet_3.png", "assets/fonts/ImageJ_alphabet_3_description.txt");
 	m_SceneRenderer.SetScene(m_Scene);
 
 	Box3D tmp_box; tmp_box.radius = Vec3D(10000, 10000, 10000);
@@ -87,26 +91,6 @@ void InGame_layer::OnAttach()
 
 	m_ImgProcessor = std::make_unique<ImageProcessor>();
 	m_ImgProcessor->SetMipMapLevel(4);
-
-	// load background music
-	if (!m_Music.openFromFile("assets/audio/Adrift_by_Hayden_Folker.ogg"))
-		LOG_ERROR("Audio not found: assets/audio/Adrift_by_Hayden_Folker.ogg");
-	m_Music.play();
-
-	// Load a sound to play
-	if (!m_ShotSoundBuffer.loadFromFile("assets/audio/SciFi_weapon_MultiShot_1.wav"))
-		LOG_ERROR("Audio not found: assets/audio/SciFi_weapon_MultiShot_1.wav");
-	m_ShotSound.setBuffer(m_ShotSoundBuffer);
-	m_ShotSound.setVolume(60.0f);
-
-	// Load a sound to play
-	if (!m_ExplosionSoundBuffer.loadFromFile("assets/audio/Explosion_big.wav"))
-		LOG_ERROR("SceneUpdater() - Audio not found: assets/audio/Explosion_big.wav");
-	m_ExplosionSound.setBuffer(m_ExplosionSoundBuffer);
-	m_ExplosionSound.setVolume(60.0f);
-
-
-
 }
 
 void InGame_layer::OnDetach()
@@ -116,20 +100,39 @@ void InGame_layer::OnDetach()
 
 void InGame_layer::OnUpdate(Timestep ts)
 {
-	// if music finished, start again
-	if (m_Music.getStatus() == sf::SoundSource::Status::Stopped)
-	{
-		m_Music.openFromFile("assets/audio/Adrift_by_Hayden_Folker.ogg");
-		m_Music.play();
-	}
+	m_AudioManager.PlayMusic();
 
 	HandleUserInput(ts);
+	if (m_Player.m_Transform.location.length() < 5.0f)
+		m_Player.FillReserves();
+	
+	if (m_EarthHitCount >= m_MaxEarthHitCount)
 	{
-		static int randomLaunchCounter = 0;
-		static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
-		static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
-		static int yellowIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
+		m_SceneRenderer.RenderScene();
+		m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
+		m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
+		GameApplication::Game_DrawText("Game Over",
+			Vec3D(700, 600, 0),
+			Vec3D(0.9f, 0.3f, 0.3f),
+			2.0f);
+		GameApplication::Game_DrawText("press Esc to return to menu",
+			Vec3D(650, 550, 0),
+			Vec3D(0.9f, 0.3f, 0.3f),
+			1.0f);
+
+
+		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, 1200 - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+		GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_EarthHitCount) + " / " + std::to_string(m_MaxEarthHitCount),
+			Vec3D(700, 1200 - 70, 0),
+			Vec3D(0.3f, 0.9f, 0.5f),
+			1.0f);
+		m_Player.DrawStatsOnScreen();
+
+		return;
+	}
+
+	{
 		int asteroid_count = 128;
 		float spawn_frequency = 10000.0f;
 		static float asteroid_spawn_timer = spawn_frequency; // in milli seconds
@@ -140,32 +143,8 @@ void InGame_layer::OnUpdate(Timestep ts)
 			Vec3D center = Vec3D(50, 0, 0);
 			Vec3D velocity = -0.01 * center / center.length();
 			for (int i = 0; i < asteroid_count; i++)
-				SpawnAsteroid(500.0f * center / center.length(), velocity, 80.0f);
+				m_EntityManager.SpawnAsteroid(500.0f * center / center.length(), velocity, 80.0f);
 		}
-
-		randomLaunchCounter++;
-	}
-
-	{
-		/*
-		TransformComponent& camLoc = m_Scene->GetCamera();
-		Box3D camVicinity;
-		camVicinity.center = camLoc.location;
-		camVicinity.radius = Vec3D(30, 30, 30);
-
-		std::vector<entt::entity> close_entities = m_AsteroidOctTree->GetActiveTree()->QueryRange(camVicinity);
-		for (entt::entity entity : close_entities)
-		{
-			if (m_Scene->m_Registry.valid(entity))
-			{
-				TransformComponent& trf = m_Scene->m_Registry.get<TransformComponent>(entity);
-				DynamicPropertiesComponent& dyn = m_Scene->m_Registry.get<DynamicPropertiesComponent>(entity);
-				SpawnExplosion(trf, dyn);
-				m_ExplosionSound.play();
-				m_Scene->m_Registry.destroy(entity);
-			}
-		}
-		*/
 	}
 
 	// if the update-render order is swapped, something is un-initialized and the program fails at alpha mesh rendering
@@ -179,6 +158,17 @@ void InGame_layer::OnUpdate(Timestep ts)
 
 	//	m_FbDisplay.Draw();
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
+
+	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, 1200 - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+	GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_EarthHitCount) + " / " + std::to_string(m_MaxEarthHitCount),
+		Vec3D(700, 1200 - 70, 0),
+		Vec3D(0.3f, 0.9f, 0.5f),
+		1.0f);
+	m_Player.DrawStatsOnScreen();
+
+//	m_Font->RODrawText("abcdefghijklmnopqrstuvwxyz", Vec3D(10, 10, 0), Vec3D(0.1f, 0.9f, 0.2f), 1.0f);
+//	m_Font->RODrawText("ABCDEFGHIJLMNOPQRSTUVWXYZ", Vec3D(10, 100, 0), Vec3D(0.9f, 0.9f, 0.2f), 1.0f);
+//	m_Font->RODrawText("0123456789._,;!?-+/()<>{}[]", Vec3D(10, 200, 0), Vec3D(0.9f, 0.9f, 0.2f), 1.0f);
 
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }
@@ -199,7 +189,8 @@ void InGame_layer::OnEvent(Event& event)
 void InGame_layer::Activate()
 {
 	m_IsActive = true;
-	m_Music.play();
+	m_AudioManager.ContinueMusic();
+	//m_Music.play();
 	Renderer::SetZoomLevel(m_ZoomLevel);
 }
 
@@ -207,7 +198,8 @@ void InGame_layer::DeActivate()
 {
 	Application& app = Application::Get();
 	((GameApplication*)(&app))->ActitivateLayer(GameLayers::MENU_LAYER);
-	m_Music.pause();
+	m_AudioManager.PauseMusic();
+	// m_Music.pause();
 	m_IsActive = false;
 }
 
@@ -223,8 +215,6 @@ entt::entity InGame_layer::GetTarget(const Vec3D& acquisitionLocation, const Vec
 	int queue_size = 15;
 	std::priority_queue<targeting_data<entt::entity>> targeting_queue;
 
-//	Vec3D pos = m_Scene->GetCamera().location;
-//	Vec3D dir = m_Scene->GetCamera().orientation.f3;
 	Vec3D pos = acquisitionLocation;
 	Vec3D dir = acquisitionDirection;
 
@@ -232,8 +222,6 @@ entt::entity InGame_layer::GetTarget(const Vec3D& acquisitionLocation, const Vec
 
 	float maxScalarProd = -1.0f;
 
-	// exclude TargetComponent, so missiles wont target other missiles
-//	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent, HitPointComponent>(entt::exclude<TargetComponent>);
 	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent, AsteroidComponent>();
 	if (view.begin() == view.end())
 		return entt::null;
@@ -274,8 +262,32 @@ entt::entity InGame_layer::GetTarget(const Vec3D& acquisitionLocation, const Vec
 		return entt::null;
 	else
 		return targeting_queue.top().user_data;
+}
 
-	//	return result;
+void InGame_layer::ResetLayer()
+{
+	LOG_INFO("InGame_layer reset");
+
+	m_Scene = std::make_shared<Scene>();
+
+	SceneSerializer serializer(m_Scene);
+	serializer.DeSerialize_file("assets/scenes/02_InGameLayer.yaml");
+
+	m_EntityManager.SetScene(m_Scene.get());
+	m_SceneRenderer.SetScene(m_Scene);
+
+	m_ElapsedTime = 0.0f;
+	m_SimulationSpeed = 1.0f;
+	m_ZoomLevel = g_InitialZoomLevel;
+
+	m_Player = Player();
+
+	m_CameraContinuousRotation = false;
+	
+	m_EarthHitCount = 0;
+	
+//	Box3D tmp_box; tmp_box.radius = Vec3D(10000, 10000, 10000);
+//	m_AsteroidOctTree = std::make_unique<DualOctTree>(tmp_box);
 }
 
 
@@ -314,135 +326,6 @@ entt::entity InGame_layer::GetClosestTarget(const Vec3D& acquisitionLocation, co
 	return result;
 }
 
-void InGame_layer::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
-{
-	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
-
-	TransformComponent transform;
-	transform.location = center + Vec3D(rand() % 1000 - 500, rand() % 1000 - 500, rand() % 1000 - 500) * spread / 1000.0f;
-	transform.orientation = Rotation((float)(rand() % 31415) / 10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
-	transform.scale = (float)(rand() % 20 + 2) / 20.0f;
-
-	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 1.0f;
-	dynProps.velocity = velocity;
-	dynProps.angular_velocity = 0.0001 * Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
-
-	Entity newEntity = m_Scene->CreateEntity("");
-
-	// make the Earth hitting asteroids big
-	Vec3D dr = transform.location;
-	Vec3D v = velocity;
-	if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < (2.3f + transform.scale + 0.2)) // 2.3 is the radius of the earth, 0.2 is a safety factor
-	{
-		transform.scale = 5.0f;
-		newEntity.AddComponent<MarkerComponent>(MarkerComponent(1.0f, 0.0f, 0.0f, 1.0f));
-	}
-
-	newEntity.AddComponent<TransformComponent>(transform);
-	newEntity.AddComponent<MeshIndexComponent>(asteroidIdx);
-	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	newEntity.AddComponent<HitPointComponent>(transform.scale*20);
-	// newEntity.AddComponent<HitPointComponent>(1.0f + (float)(rand() % 10));
-	// newEntity.AddComponent<HitPointComponent>(1.0f);
-	newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
-
-}
-
-
-void InGame_layer::SpawnDebris(Vec3D center, Vec3D velocity, float spread, float bulletChance)
-{
-	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
-
-	TransformComponent transform;
-	transform.location = center;
-	transform.orientation = Rotation((float)(rand() % 31415) / 10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
-	transform.scale = (float)(rand() % 10 + 2) / 100.0f;
-
-	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 1.0f;
-	dynProps.velocity = velocity + Vec3D(rand() % 1000 - 500, rand() % 1000 - 500, rand() % 1000 - 500) * spread / 1000.0f;
-	dynProps.angular_velocity = 0.0001 * Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
-
-	Entity newEntity = m_Scene->CreateEntity("");
-	newEntity.AddComponent<TransformComponent>(transform);
-	newEntity.AddComponent<MeshIndexComponent>(asteroidIdx);
-	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	newEntity.AddComponent<TimerComponent>(TimerComponent(1000.0f)); // provide ttl in mili seconds
-
-	if ((float)(rand() % 1000) / 1000 < bulletChance)
-	{
-		newEntity.AddComponent<BulletComponent>(BulletComponent());
-	}
-}
-
-
-void InGame_layer::ShootBullett(TransformComponent transform, float velocity)
-{
-	static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
-
-	/*
-	if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) {
-		m_ShotSound.play();
-	}
-	*/
-	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 0.001f;
-	dynProps.velocity = transform.orientation.f3 * velocity;
-	transform.scale = 0.1f;
-	transform.location += 0.1 * (transform.orientation.f3 - transform.orientation.f2);
-
-	Entity newEntity = m_Scene->CreateEntity("");
-	newEntity.AddComponent<TransformComponent>(transform);
-	newEntity.AddComponent<MeshIndexComponent>(bulletIdx);
-	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	newEntity.AddComponent<TimerComponent>(TimerComponent(10000.0f)); // provide ttl in mili seconds
-	newEntity.AddComponent<BulletComponent>(BulletComponent());
-}
-
-void InGame_layer::EmitMesh(int meshIdx, TransformComponent transform)
-{
-	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 0.001f;
-	dynProps.velocity = 0.05f * transform.orientation.f3;
-	dynProps.angular_velocity = Vec3D();
-	transform.scale = 0.1f; // 0.02f;
-	transform.location += 0.1 * (transform.orientation.f3 - transform.orientation.f2);
-
-	Entity newEntity = m_Scene->CreateEntity("");
-	newEntity.AddComponent<TransformComponent>(transform);
-	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
-	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	newEntity.AddComponent<TimerComponent>(TimerComponent(10000.0f)); // provide ttl in mili seconds
-	newEntity.AddComponent<HitPointComponent>(1.0f);
-}
-
-void InGame_layer::LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target)
-{
-	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 0.001f;
-	//	dynProps.velocity = 0.01f * (transform.orientation.f1 + transform.orientation.f3);
-	//	dynProps.velocity = 0.05f * transform.orientation.f3;
-	// dynProps.velocity = 00000001f * transform.orientation.f3; // 0.00000001f
-	dynProps.velocity = 0.01f * transform.orientation.f1; // 0.00000001f
-	dynProps.angular_velocity = Vec3D();
-	transform.scale = 0.05f;
-	transform.location += 0.1 * (transform.orientation.f3 + transform.orientation.f1);
-
-	Entity newEntity = m_Scene->CreateEntity("");
-	newEntity.AddComponent<TransformComponent>(transform);
-	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
-	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	newEntity.AddComponent<TimerComponent>(TimerComponent(20000.0f)); // provide ttl in mili seconds
-	newEntity.AddComponent<TargetComponent>(target);
-}
-
-void InGame_layer::RemoveMesh(int meshIdx)
-{
-	if (m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].size() > 0)
-		m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].pop_back();
-}
-
 
 /***********************************
 ***** Private member functions *****
@@ -476,6 +359,8 @@ bool InGame_layer::OnKeyPressed(Event& e)
 	if (event.key.code == sf::Keyboard::Key::Escape)
 	{
 		DeActivate(); // this automatically activates the menu layer
+		if (m_EarthHitCount >= m_MaxEarthHitCount)
+			ResetLayer();
 	}
 	else if (event.key.code == sf::Keyboard::Key::Space)
 		m_SimulationSpeed = 0.0f;
@@ -571,42 +456,60 @@ void InGame_layer::HandleUserInput(Timestep ts)
 	//	static TransformComponent cam_trf = TransformComponent();
 	//	TransformComponent& cam_trf = m_Camera;
 
-	static float cam_velocity = 0.001f;
+	// m_Player.m_Transform = cam_trf;
+	cam_trf = m_Player.m_Transform;
+
+	static float player_acceleration = 0.000001f;
 	// moves
-	if (Input::IsKeyPressed(sf::Keyboard::Key::W)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f3; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::S)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f3; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::A)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f1; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::D)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f1; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::R)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f2; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::F)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f2; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::W) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel--;}
+	if (Input::IsKeyPressed(sf::Keyboard::Key::S) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel--;}
+	if (Input::IsKeyPressed(sf::Keyboard::Key::A) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel--;}
+	if (Input::IsKeyPressed(sf::Keyboard::Key::D) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel--;}
+	if (Input::IsKeyPressed(sf::Keyboard::Key::R) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel--;}
+	if (Input::IsKeyPressed(sf::Keyboard::Key::F) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel--;}
 	// rotations
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Up)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f1) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Down)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f1) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Left)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Right)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f2) * cam_trf.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { m_Player.m_Transform.orientation = Rotation(0.001f * ts, m_Player.m_Transform.orientation.f3) * m_Player.m_Transform.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { m_Player.m_Transform.orientation = Rotation(-0.001f * ts, m_Player.m_Transform.orientation.f3) * m_Player.m_Transform.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Up)) { m_Player.m_Transform.orientation = Rotation(0.001f * ts, m_Player.m_Transform.orientation.f1) * m_Player.m_Transform.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Down)) { m_Player.m_Transform.orientation = Rotation(-0.001f * ts, m_Player.m_Transform.orientation.f1) * m_Player.m_Transform.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Left)) { m_Player.m_Transform.orientation = Rotation(-0.001f * ts, m_Player.m_Transform.orientation.f2) * m_Player.m_Transform.orientation; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Right)) { m_Player.m_Transform.orientation = Rotation(0.001f * ts, m_Player.m_Transform.orientation.f2) * m_Player.m_Transform.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::P)) { ZoomIn(); }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::O)) { ZoomOut(); }
 
+	// if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { player_acceleration *= 1.1f; }
+	// if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { player_acceleration /= 1.1f; }
+
+	if (Input::IsKeyPressed(sf::Keyboard::Key::B)) { m_Player.m_DynamicProps.velocity = Vec3D(0,0,0); }
+
+	static float cam_velocity = 0.001f;
+	// moves, for debugging
+	if (Input::IsKeyPressed(sf::Keyboard::Key::I)) { m_Player.m_Transform.location += cam_velocity * m_Player.m_Transform.orientation.f3; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::K)) { m_Player.m_Transform.location -= cam_velocity * m_Player.m_Transform.orientation.f3; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::J)) { m_Player.m_Transform.location -= cam_velocity * m_Player.m_Transform.orientation.f1; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::L)) { m_Player.m_Transform.location += cam_velocity * m_Player.m_Transform.orientation.f1; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Z)) { m_Player.m_Transform.location += cam_velocity * m_Player.m_Transform.orientation.f2; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::H)) { m_Player.m_Transform.location -= cam_velocity * m_Player.m_Transform.orientation.f2; }
+
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { cam_velocity *= 1.1f; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
+
 
 	static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
 	static int yellowIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
 	static int explosionIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Explosion"];
 	static int skip = 0;
-	if (Input::IsMouseButtonPressed(sf::Mouse::Left))
+	if (Input::IsMouseButtonPressed(sf::Mouse::Left) && m_Player.m_BulletCount > 0)
 	{
-		ShootBullett(cam_trf, 0.05f);
-		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) {
-			m_ShotSound.play();
-		}
+		m_EntityManager.ShootBullett(m_Player.m_Transform, m_Player.m_DynamicProps.velocity + m_Player.m_Transform.orientation.f3* m_Player.m_BulletSpeed);
+		m_Player.m_BulletCount--;
+		m_AudioManager.PlayShotSound();
 	}
-	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip % 2 == 0)
+	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip % 2 == 0 && m_Player.m_MissilleCount > 0)
 	{
-		LaunchMissile(yellowIdx, cam_trf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
-		if (m_ShotSound.getStatus() != sf::SoundSource::Status::Playing) { m_ShotSound.play(); }
+		m_EntityManager.LaunchMissile(yellowIdx, m_Player.m_Transform, GetClosestTarget(m_Player.m_Transform.location, m_Player.m_Transform.orientation.f3));
+		m_Player.m_MissilleCount--;
+		m_AudioManager.PlayShotSound();
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Middle) && skip % 2 == 1)
 	{
@@ -616,15 +519,15 @@ void InGame_layer::HandleUserInput(Timestep ts)
 			TransformComponent& shipTrf = armed_ships.get<TransformComponent>(armed_ship);
 			// LaunchMissile(bulletIdx, shipTrf, GetTarget());
 			if ((skip/2) % 2 == 0)
-				LaunchMissile(yellowIdx, shipTrf, GetTarget());
-				//LaunchMissile(yellowIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
+				m_EntityManager.LaunchMissile(yellowIdx, shipTrf, GetTarget());
+				//m_EntityManager.LaunchMissile(yellowIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
 			else
-				LaunchMissile(blueIdx, shipTrf, GetTarget());
-				//LaunchMissile(blueIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
+				m_EntityManager.LaunchMissile(blueIdx, shipTrf, GetTarget());
+				//m_EntityManager.LaunchMissile(blueIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
 		}
 	}
 	if (!Input::IsMouseButtonPressed(sf::Mouse::Left) && !Input::IsMouseButtonPressed(sf::Mouse::Right) && !Input::IsMouseButtonPressed(sf::Mouse::Middle))
-		m_ShotSound.stop();
+		m_AudioManager.StopShotSound();
 
 	skip++;
 
@@ -632,7 +535,7 @@ void InGame_layer::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Space))
 	{
 		TransformComponent& light_trf = m_Scene->GetLight();
-		light_trf.location = cam_trf.location;
+		light_trf.location = m_Player.m_Transform.location;
 	}
 
 	// move with as the mouse changes position
@@ -649,10 +552,10 @@ void InGame_layer::HandleUserInput(Timestep ts)
 
 			float radiusFromCenter = sqrt(dx * dx + dy * dy);
 			float radiusFromCenterSqr = dx * dx + dy * dy;
-			Vec3D rotationAxis = dy * cam_trf.orientation.f1 + dx * cam_trf.orientation.f2;
+			Vec3D rotationAxis = dy * m_Player.m_Transform.orientation.f1 + dx * m_Player.m_Transform.orientation.f2;
 			Mat_3D rotationMatrix = Rotation(ts * (0.00025f * radiusFromCenter + 0.0000001f * radiusFromCenterSqr) / m_ZoomLevel, rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
 
-			cam_trf.orientation = rotationMatrix * cam_trf.orientation;
+			m_Player.m_Transform.orientation = rotationMatrix * m_Player.m_Transform.orientation;
 			sf::Mouse::setPosition(sf::Vector2i(center_x, center_y), Application::Get().GetWindow().GetNativeWindow());
 		}
 		else
@@ -662,10 +565,10 @@ void InGame_layer::HandleUserInput(Timestep ts)
 			mousePos.x -= Application::Get().GetWindow().GetWidth() / 2;
 			mousePos.y -= Application::Get().GetWindow().GetHeight() / 2;
 			float radiusFromCenter_square = (mousePos.x * mousePos.x + mousePos.y * mousePos.y);
-			Vec3D rotationAxis = mousePos.y * cam_trf.orientation.f1 + mousePos.x * cam_trf.orientation.f2;
+			Vec3D rotationAxis = mousePos.y * m_Player.m_Transform.orientation.f1 + mousePos.x * m_Player.m_Transform.orientation.f2;
 			Mat_3D rotationMatrix = Rotation(0.00000001f * ts * std::max(0.0f, radiusFromCenter_square - r_min_square) / m_ZoomLevel, rotationAxis); // angle could be divided by zoom level to slow down turning when really zoomed into something
 
-			cam_trf.orientation = rotationMatrix * cam_trf.orientation;
+			m_Player.m_Transform.orientation = rotationMatrix * m_Player.m_Transform.orientation;
 		}
 	}
 
@@ -707,9 +610,10 @@ void InGame_layer::UpdateScene(Timestep ts)
 			TransformComponent& trf = m_Scene->m_Registry.get<TransformComponent>(entity);
 			DynamicPropertiesComponent& dyn = m_Scene->m_Registry.get<DynamicPropertiesComponent>(entity);
 			dyn.velocity *= 0.5f;
-			SpawnExplosion(trf, dyn);
+			m_EntityManager.SpawnExplosion(trf, dyn);
 			m_Scene->m_Registry.destroy(entity);
-			m_ExplosionSound.play();
+			m_AudioManager.PlayExplosionSound();
+			//m_ExplosionSound.play();
 		}
 	}
 
@@ -765,9 +669,9 @@ void InGame_layer::UpdateScene(Timestep ts)
 
 						for (int k = 0; k < 15; k++)
 						{
-							SpawnDebris(missileTrf.location + hit_location - dx, targetVelocity.velocity, 0.05, m_BulletSpawnChance);
-							SpawnDebris(missileTrf.location + hit_location - dx, missileVelocity.velocity / 4, 0.1, m_BulletSpawnChance);
-							SpawnDebris(missileTrf.location + hit_location - dx, missileVelocity.velocity / 4, 0.1, m_BulletSpawnChance);
+							m_EntityManager.SpawnDebris(missileTrf.location + hit_location - dx, targetVelocity.velocity, 0.05, m_BulletSpawnChance);
+							m_EntityManager.SpawnDebris(missileTrf.location + hit_location - dx, missileVelocity.velocity / 4, 0.1, m_BulletSpawnChance);
+							m_EntityManager.SpawnDebris(missileTrf.location + hit_location - dx, missileVelocity.velocity / 4, 0.1, m_BulletSpawnChance);
 						}
 					}
 				}
@@ -837,11 +741,11 @@ void InGame_layer::UpdateScene(Timestep ts)
 					targetHP.HP -= 1.0f;
 
 					bulletTrf.scale /= 8;
-					// SpawnExplosion(bulletTrf, targetVelocity);
+					// m_EntityManager.SpawnExplosion(bulletTrf, targetVelocity);
 					for (int k = 0; k < 30; k++)
 					{
-						SpawnDebris(bulletTrf.location+ hit_location-dx, targetVelocity.velocity, 0.05, m_BulletSpawnChance);
-						// SpawnDebris(hit_location, targetVelocity.velocity, 0.1);
+						m_EntityManager.SpawnDebris(bulletTrf.location+ hit_location-dx, targetVelocity.velocity, 0.05, m_BulletSpawnChance);
+						// m_EntityManager.SpawnDebris(hit_location, targetVelocity.velocity, 0.1);
 					}
 				}
 			}
@@ -861,14 +765,29 @@ void InGame_layer::UpdateScene(Timestep ts)
 		TransformComponent& asteroidTrf = asteroids.get<TransformComponent>(asteroid);
 		if (asteroidTrf.location.length() < 2.3f + asteroidTrf.scale) // 2.3 is the radius of the earth
 		{
-			SpawnExplosion(asteroidTrf, DynamicPropertiesComponent());
+			m_EntityManager.SpawnExplosion(asteroidTrf, DynamicPropertiesComponent());
 			m_Scene->m_Registry.destroy(asteroid);
-			m_ExplosionSound.play();
+			m_AudioManager.PlayExplosionSound();
+			//m_ExplosionSound.play();
+
+			m_EarthHitCount++;
 		}
 	}
 
 	// update wo collision
 	auto grav_masses = m_Scene->m_Registry.view<TransformComponent, GravitationalMassComponent>();
+	// first the player:
+	Vec3D playerAcceleration = { 0,0,0 };
+	for (auto grav_entity : grav_masses)
+	{
+		GravitationalMassComponent& grav_mass = grav_masses.get<GravitationalMassComponent>(grav_entity);
+		TransformComponent& grav_trf = grav_masses.get<TransformComponent>(grav_entity);
+		Vec3D dr = grav_trf.location - m_Player.m_Transform.location;
+		playerAcceleration += grav_mass.gravitational_mass * dr / pow(dr.length(), 3);
+	}
+	m_Player.Update(ts, playerAcceleration);
+
+	// then the rest of the objects
 	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>();
 	for (auto entity : view)
 	{
@@ -915,6 +834,14 @@ void InGame_layer::UpdateScene(Timestep ts)
 		}
 	}
 
+	auto non_moving_view = m_Scene->m_Registry.view<TransformComponent, MeshIndexComponent>(entt::exclude<DynamicPropertiesComponent>);
+	for (auto entity : non_moving_view)
+	{
+		TransformComponent& entity_trf = non_moving_view.get<TransformComponent>(entity);
+		MeshIndexComponent& idx = non_moving_view.get<MeshIndexComponent>(entity);
+		m_Scene->m_MeshLibrary.m_MeshTransforms[idx.idx].push_back(entity_trf);
+	}
+
 	// mark asteroids that are on collision course with the earth
 	/*static*/ int markerIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DefaultMarker"];
 	/*static*/ std::shared_ptr<Mesh> marker_mesh = m_Scene->m_MeshLibrary.m_Meshes[markerIdx];
@@ -929,21 +856,5 @@ void InGame_layer::UpdateScene(Timestep ts)
 		m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(marker.marker_colour);
 	}
 }
-
-
-void InGame_layer::SpawnExplosion(TransformComponent trf, DynamicPropertiesComponent dyn)
-{
-	static int explosionIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Explosion"];
-
-	Entity newEntity = m_Scene->CreateEntity("");
-	newEntity.AddComponent<TransformComponent>(trf);
-	newEntity.AddComponent<MeshIndexComponent>(explosionIdx);
-	newEntity.AddComponent<ColourComponent>(ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
-	newEntity.AddComponent<DynamicPropertiesComponent>(dyn);
-	newEntity.AddComponent<TimerComponent>(TimerComponent(2000.0f));
-	newEntity.AddComponent<ExplosionComponent>(ExplosionComponent());
-}
-
-
 
 

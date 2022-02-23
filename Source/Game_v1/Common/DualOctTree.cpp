@@ -15,7 +15,8 @@ DualOctTree::DualOctTree()
 	m_WorkerThread = nullptr;
 	m_EntityAdder = [this](Scene* scene) {
 		// add only the asteroids
-		auto asteroids = scene->m_Registry.view<TransformComponent, AsteroidComponent>();
+		// auto asteroids = scene->m_Registry.view<TransformComponent, AsteroidComponent>();
+		auto asteroids = scene->m_Registry.view<TransformComponent, ColliderComponent>();
 		for (auto asteroid : asteroids)
 		{
 			TransformComponent& asteroidTrf = asteroids.get<TransformComponent>(asteroid);
@@ -35,7 +36,8 @@ DualOctTree::DualOctTree(Box3D box)
 	m_WorkerThread = nullptr;
 	m_EntityAdder = [this](Scene* scene) {
 		// add only the asteroids
-		auto asteroids = scene->m_Registry.view<TransformComponent, AsteroidComponent>();
+		// auto asteroids = scene->m_Registry.view<TransformComponent, AsteroidComponent>();
+		auto asteroids = scene->m_Registry.view<TransformComponent, ColliderComponent>();
 		for (auto asteroid : asteroids)
 		{
 			TransformComponent& asteroidTrf = asteroids.get<TransformComponent>(asteroid);

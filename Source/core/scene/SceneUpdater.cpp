@@ -155,7 +155,7 @@ void SceneUpdater::UpdateScene(Timestep ts)
 					GravitationalMassComponent& grav_mass = grav_masses.get<GravitationalMassComponent>(grav_entity);
 					TransformComponent& grav_trf = grav_masses.get<TransformComponent>(grav_entity);
 					Vec3D dr = grav_trf.location - entity_trf.location;
-					acceleration += grav_mass.gravitational_mass * dr / pow(dr.length(), 3); // a gravitatonal constant scalar could be added here
+					acceleration += grav_mass.gravitational_mass * dr / pow(dr.length(), 3.0f); // a gravitatonal constant scalar could be added here
 				}
 			}
 			dyn_prop.velocity += ts * acceleration;
@@ -274,7 +274,7 @@ void SceneUpdater::SpawnExplosion(TransformComponent trf, DynamicPropertiesCompo
 //	newEntity.AddComponent<ColourComponent>(ColourComponent(0.7f, 0.3f, 0.3f, 0.8f)); // usual orange explosion
 //	newEntity.AddComponent<ColourComponent>(ColourComponent(0.3f, 0.8f, 0.5f, 0.8f));
 //	newEntity.AddComponent<ColourComponent>(ColourComponent(float(rand() % 1000) / 1000.0f, float(rand() % 1000) / 1000.0f, float(rand() % 1000) / 1000.0f, 0.8f));
-	newEntity.AddComponent<ColourComponent>(ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
+	newEntity.AddComponent<ColourComponent>(ColourComponent(0.8f, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
 //	newEntity.AddComponent<ColourComponent>(ColourComponent());
 	newEntity.AddComponent<DynamicPropertiesComponent>(dyn);
 	newEntity.AddComponent<TimerComponent>(TimerComponent(2000.0f));

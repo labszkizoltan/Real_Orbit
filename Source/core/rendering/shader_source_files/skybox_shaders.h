@@ -62,6 +62,7 @@ const char* skybox_shader_fragmentSrc =
 "	void main() \n"
 "	{ \n"
 "		color = texture(u_Textures[int(vTexID+2)], vTexCoord); \n"
+//"		BrightColor = color; \n"
 "		BrightColor = vec4(0,0,0,0); \n"
 //"		color = vec4(vTexID/6); \n"
 "	}\0";

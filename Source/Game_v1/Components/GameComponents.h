@@ -30,6 +30,7 @@ struct GravitationalMassComponent
 	float gravitational_mass;
 };
 
+struct ColliderComponent { char something = 0; };
 
 //----- Entity lifetime -----//
 
@@ -51,22 +52,36 @@ struct TargetComponent
 	TargetComponent(entt::entity tgt) : targetEntity(tgt) {};
 };
 
-struct TeamComponent_0 { ColourComponent team_colour = { 0.3f, 0.9f, 0.3f, 1.0f }; };
-struct TeamComponent_1 { ColourComponent team_colour = { 0.9f, 0.3f, 0.3f, 1.0f }; };
-struct TeamComponent_2 { ColourComponent team_colour = { 0.3f, 0.3f, 0.9f, 1.0f }; };
-struct TeamComponent_3 { ColourComponent team_colour = { 0.9f, 0.9f, 0.3f, 1.0f }; };
-struct TeamComponent_4 { ColourComponent team_colour = { 0.9f, 0.5f, 0.1f, 1.0f }; };
-struct TeamComponent_5 { ColourComponent team_colour = { 0.3f, 0.9f, 0.9f, 1.0f }; };
-struct TeamComponent_6 { ColourComponent team_colour = { 0.5f, 0.1f, 0.9f, 1.0f }; };
-struct TeamComponent_7 { ColourComponent team_colour = { 0.5f, 0.3f, 0.1f, 1.0f }; };
-struct TeamComponent_default { ColourComponent team_colour = { 0.7f, 0.7f, 0.7f, 1.0f }; };
+// struct TeamComponent_0 { ColourComponent team_colour = { 0.3f, 0.9f, 0.3f, 1.0f }; };
+// struct TeamComponent_1 { ColourComponent team_colour = { 0.9f, 0.3f, 0.3f, 1.0f }; };
+// struct TeamComponent_2 { ColourComponent team_colour = { 0.3f, 0.3f, 0.9f, 1.0f }; };
+// struct TeamComponent_3 { ColourComponent team_colour = { 0.9f, 0.9f, 0.3f, 1.0f }; };
+// struct TeamComponent_4 { ColourComponent team_colour = { 0.9f, 0.5f, 0.1f, 1.0f }; };
+// struct TeamComponent_5 { ColourComponent team_colour = { 0.3f, 0.9f, 0.9f, 1.0f }; };
+// struct TeamComponent_6 { ColourComponent team_colour = { 0.5f, 0.1f, 0.9f, 1.0f }; };
+// struct TeamComponent_7 { ColourComponent team_colour = { 0.5f, 0.3f, 0.1f, 1.0f }; };
+// struct TeamComponent_default { ColourComponent team_colour = { 0.7f, 0.7f, 0.7f, 1.0f }; };
 
+struct TeamComponent_0 { char something = 0; };
+struct TeamComponent_1 { char something = 0; };
+struct TeamComponent_2 { char something = 0; };
+struct TeamComponent_3 { char something = 0; };
+struct TeamComponent_4 { char something = 0; };
+struct TeamComponent_5 { char something = 0; };
+struct TeamComponent_6 { char something = 0; };
+struct TeamComponent_7 { char something = 0; };
+struct TeamComponent_default { char something = 0; };
+
+struct PlayerComponent { char something = 0; };
 
 struct ExplosionComponent { char something = 0; };
 
 struct AsteroidComponent { char something = 0; };
 
 struct BulletComponent { char something = 0; };
+
+struct MarkedForDestructionComponent { char something = 0; };
+
 
 struct MarkerComponent
 { 

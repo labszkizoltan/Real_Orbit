@@ -41,7 +41,8 @@ void SceneSerializer::Serialize(const std::string& output_file)
 void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 {
 	YAML::Node data = YAML::Load(scene_description);
-	InitMeshLibrary(data);
+	InitMeshLibrary(data, m_Scene->m_MeshLibrary);
+//	InitMeshLibrary(data, m_Scene->m_StaticMeshLibrary);
 
 	int camera_counter = 0, light_counter = 0;
 	auto entities = data["Entities"];
@@ -76,7 +77,6 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			result.scale = light_com["scale"].as<float>();
 		}
 
-
 		//----- TransformComponent -----//
 		TransformComponent transformResult;
 		auto trf_com = entity["TransformComponent"];
@@ -87,7 +87,6 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			transformResult.scale = trf_com["scale"].as<float>();
 			deserializedEntity.AddComponent<TransformComponent>(transformResult);
 		}
-
 
 		//----- ColourComponent -----//
 		ColourComponent colResult;
@@ -136,6 +135,14 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			deserializedEntity.AddComponent<DynamicPropertiesComponent>(result);
 		}
 
+		//----- ColliderComponent -----//
+		auto collider_com = entity["ColliderComponent"];
+		if (collider_com)
+		{
+			ColliderComponent coll_com;
+			deserializedEntity.AddComponent<ColliderComponent>(coll_com);
+		}
+
 		//----- GravitationalMassComponent -----//
 		auto gravmass_com = entity["GravitationalMassComponent"];
 		if (gravmass_com)
@@ -163,6 +170,22 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			deserializedEntity.AddComponent<MarkerComponent>(result);
 		}
 
+		//----- TeamComponent -----//
+		auto team_com = entity["TeamComponent"];
+		if (team_com)
+		{
+			int team_id = team_com.as<int>();
+			if (team_id == 0) deserializedEntity.AddComponent<TeamComponent_0>();
+			else if (team_id == 1) deserializedEntity.AddComponent<TeamComponent_1>();
+			else if (team_id == 2) deserializedEntity.AddComponent<TeamComponent_2>();
+			else if (team_id == 3) deserializedEntity.AddComponent<TeamComponent_3>();
+			else if (team_id == 4) deserializedEntity.AddComponent<TeamComponent_4>();
+			else if (team_id == 5) deserializedEntity.AddComponent<TeamComponent_5>();
+			else if (team_id == 6) deserializedEntity.AddComponent<TeamComponent_6>();
+			else if (team_id == 7) deserializedEntity.AddComponent<TeamComponent_7>();
+			else deserializedEntity.AddComponent<TeamComponent_default>();
+		}
+
 		//----- WeaponComponent -----//
 		auto weapon_com = entity["WeaponComponent"];
 		if (weapon_com)
@@ -171,9 +194,15 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			result.weapon_type = weapon_com.as<WeaponType>();
 			deserializedEntity.AddComponent<WeaponComponent>(result);
 		}
-		/*
-		*/
 
+
+		//----- PlayerComponent -----//
+		auto player_com = entity["PlayerComponent"];
+		if (player_com)
+		{
+			PlayerComponent player_com;
+			deserializedEntity.AddComponent<PlayerComponent>(player_com);
+		}
 
 //		std::cout << "entity de-serialized\n";
 	}
@@ -208,7 +237,7 @@ static bool contains_key(std::unordered_map<std::string, int> map, std::string k
 	return "Present";
 }
 
-void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
+void SceneSerializer::InitMeshLibrary(const YAML::Node& data, MeshLibrary& mesh_library)
 {
 	YAML::Node meshes = data["Meshes"];
 	std::cout << "number of meshes defined in config: " << meshes.size() << "\n";
@@ -226,9 +255,10 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
 			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<ColouredMesh>(buffer_data.vertex_data, buffer_data.index_data);
 
-			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
-			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
-			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+			mesh_library.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+			mesh_library.m_Meshes.push_back(mesh_ptr);
+			mesh_library.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+			// mesh_library.m_StaticMeshTransforms.push_back(std::vector<TransformComponent>());
 		}
 		else if (type == MeshType::BRIGHT_COLOURED_MESH)
 		{
@@ -236,9 +266,10 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
 			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<BrightColouredMesh>(buffer_data.vertex_data, buffer_data.index_data);
 
-			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
-			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
-			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+			mesh_library.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+			mesh_library.m_Meshes.push_back(mesh_ptr);
+			mesh_library.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+			// mesh_library.m_StaticMeshTransforms.push_back(std::vector<TransformComponent>());
 		}
 		else if (type == MeshType::NORMAL_MESH)
 		{
@@ -247,18 +278,19 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 			std::string texturePath = mesh["texture_file"].as<std::string>();
 			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<NormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
 
-			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
-			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
-			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+			mesh_library.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+			mesh_library.m_Meshes.push_back(mesh_ptr);
+			mesh_library.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+			// mesh_library.m_StaticMeshTransforms.push_back(std::vector<TransformComponent>());
 		}
 		else if (type == MeshType::LETTER_MESH)
 		{
 			std::string texturePath = mesh["texture_file"].as<std::string>();
 			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<LetterMesh>(texturePath);
 
-			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
-			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
-			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+			mesh_library.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+			mesh_library.m_Meshes.push_back(mesh_ptr);
+			mesh_library.m_MeshTransforms.push_back(std::vector<TransformComponent>());
 		}
 		// leave out the transparent mesh types, so they end up at the end of the mesh library and will be rendered last
 //		else if (type == MeshType::ALPHA_MESH) {}
@@ -291,26 +323,30 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data)
 			std::string vertex_file = mesh["vertex_file"].as<std::string>();
 			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
 			std::shared_ptr<AlphaMesh> temp_mesh_ptr = std::make_shared<AlphaMesh>(buffer_data.vertex_data, buffer_data.index_data);
-			temp_mesh_ptr->SetColourBufferIndex(m_Scene->m_MeshLibrary.m_ColourBuffers.size());
+			temp_mesh_ptr->SetColourBufferIndex(mesh_library.m_ColourBuffers.size());
 			std::shared_ptr<Mesh> mesh_ptr = temp_mesh_ptr;
 
-			m_Scene->m_MeshLibrary.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
-			m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
-			m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
-			m_Scene->m_MeshLibrary.m_ColourBuffers.push_back(std::vector<ColourComponent>());
+			mesh_library.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+			mesh_library.m_Meshes.push_back(mesh_ptr);
+			mesh_library.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+			mesh_library.m_ColourBuffers.push_back(std::vector<ColourComponent>());
+			// mesh_library.m_StaticMeshTransforms.push_back(std::vector<TransformComponent>());
+			// mesh_library.m_StaticColourBuffers.push_back(std::vector<ColourComponent>());
 		}
 	}
 
 	// regardless of being defined in the scene file, add the default marker mesh:
 	{
 		std::shared_ptr<MarkerMesh> temp_mesh_ptr = std::make_shared<MarkerMesh>();
-		temp_mesh_ptr->SetColourBufferIndex(m_Scene->m_MeshLibrary.m_ColourBuffers.size());
+		temp_mesh_ptr->SetColourBufferIndex(mesh_library.m_ColourBuffers.size());
 		std::shared_ptr<Mesh> mesh_ptr = temp_mesh_ptr;
 
-		m_Scene->m_MeshLibrary.m_NameIndexLookup["DefaultMarker"] = mesh_idx; mesh_idx++;
-		m_Scene->m_MeshLibrary.m_Meshes.push_back(mesh_ptr);
-		m_Scene->m_MeshLibrary.m_MeshTransforms.push_back(std::vector<TransformComponent>());
-		m_Scene->m_MeshLibrary.m_ColourBuffers.push_back(std::vector<ColourComponent>());
+		mesh_library.m_NameIndexLookup["DefaultMarker"] = mesh_idx; mesh_idx++;
+		mesh_library.m_Meshes.push_back(mesh_ptr);
+		mesh_library.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+		mesh_library.m_ColourBuffers.push_back(std::vector<ColourComponent>());
+		// mesh_library.m_StaticMeshTransforms.push_back(std::vector<TransformComponent>());
+		// mesh_library.m_StaticColourBuffers.push_back(std::vector<ColourComponent>());
 	}
 
 }

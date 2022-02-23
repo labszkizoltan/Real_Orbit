@@ -45,6 +45,13 @@ MeshLibrary& Scene::GetMeshLibrary()
 	return m_MeshLibrary;
 }
 
+/*
+MeshLibrary& Scene::GetStaticMeshLibrary()
+{
+	return m_StaticMeshLibrary;
+}
+*/
+
 
 
 

@@ -26,9 +26,10 @@ public:
 	void SpawnAsteroidCloud();
 	void SpawnDebris(Vec3D center, Vec3D velocity, float spread, float bulletChance);
 	void ShootBullett(TransformComponent transform, Vec3D velocity);
-	void LaunchMissile(int meshIdx, TransformComponent transform, entt::entity target);
+	void LaunchMissile(int meshIdx, TransformComponent transform, DynamicPropertiesComponent hostVelocity, entt::entity target);
 	void RemoveMesh(int meshIdx);
 	void SpawnExplosion(TransformComponent trf, DynamicPropertiesComponent dyn);
+	void CreateStars();
 
 	//void BuildOctTree(); // -> this may need to move to the EntityManager as well, not 100% sure
 

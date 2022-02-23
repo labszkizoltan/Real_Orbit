@@ -23,6 +23,7 @@ public:
 	TransformComponent& GetCamera();
 	TransformComponent& GetLight();
 	MeshLibrary& GetMeshLibrary();
+//	MeshLibrary& GetStaticMeshLibrary();
 
 public:
 	entt::registry m_Registry;
@@ -31,6 +32,7 @@ public:
 	std::shared_ptr<Mesh> m_Skybox = nullptr;
 
 	MeshLibrary m_MeshLibrary;
+//	MeshLibrary m_StaticMeshLibrary;
 
 	friend class Entity;
 	friend class SceneSerializer;
