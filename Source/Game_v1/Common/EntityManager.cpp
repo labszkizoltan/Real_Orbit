@@ -29,11 +29,16 @@ void EntityManager::EmitMesh(int meshIdx, TransformComponent transform)
 void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 {
 	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
+	static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
+
+	int meshIdx = asteroidIdx;
 
 	TransformComponent transform;
 	transform.location = center + Vec3D(rand() % 1000 - 500, rand() % 1000 - 500, rand() % 1000 - 500) * spread / 1000.0f;
 	transform.orientation = Rotation((float)(rand() % 31415) / 10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
 	transform.scale = (float)(rand() % 20 + 2) / 20.0f;
+
+	float hitPoints = transform.scale * 20;
 
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 1.0f;
@@ -47,14 +52,30 @@ void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 	Vec3D v = velocity;
 	if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < (2.3f + transform.scale + 0.2)) // 2.3 is the radius of the earth, 0.2 is a safety factor
 	{
-		transform.scale = 5.0f;
+		/*
+		Vec3D dr = transform.location;
+		Vec3D z = transform.orientation.f3;
+		// turn towards the target:
+		Vec3D n = CrossProduct(z, dr); // no need to normalize the vector, since the Rotation matrix generator function does that
+		float phi = acos(z * dr / (z.length() * dr.length()));
+		phi = !std::isfinite(phi) ? 0.0f : (phi);
+		transform.orientation = Rotation(phi, n) * transform.orientation;
+		*/
+		transform.orientation.f1 = Vec3D(0, -1, 0);
+		transform.orientation.f2 = Vec3D(0, 0, -1);
+		transform.orientation.f3 = Vec3D(1, 0, 0);
+
+		transform.scale = 1.0f;
+		hitPoints = 100;
+		dynProps.angular_velocity = Vec3D(0,0,0);
 		newEntity.AddComponent<MarkerComponent>(MarkerComponent(1.0f, 0.0f, 0.0f, 1.0f));
+		meshIdx = battleshipIdx;
 	}
 
 	newEntity.AddComponent<TransformComponent>(transform);
-	newEntity.AddComponent<MeshIndexComponent>(asteroidIdx);
+	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
 	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	newEntity.AddComponent<HitPointComponent>(transform.scale * 20);
+	newEntity.AddComponent<HitPointComponent>(hitPoints);
 	// newEntity.AddComponent<HitPointComponent>(1.0f + (float)(rand() % 10));
 	// newEntity.AddComponent<HitPointComponent>(1.0f);
 	newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
@@ -93,7 +114,7 @@ void EntityManager::SpawnDebris(Vec3D center, Vec3D velocity, float spread, floa
 	}
 }
 
-void EntityManager::ShootBullett(TransformComponent transform, Vec3D velocity)
+void EntityManager::ShootBullett(TransformComponent transform, Vec3D velocity, bool anti_missille)
 {
 	static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
 
@@ -109,6 +130,13 @@ void EntityManager::ShootBullett(TransformComponent transform, Vec3D velocity)
 	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
 	newEntity.AddComponent<TimerComponent>(TimerComponent(10000.0f)); // provide ttl in mili seconds
 	newEntity.AddComponent<BulletComponent>(BulletComponent());
+	if (anti_missille)
+	{
+		
+		newEntity.AddComponent<AntiMissilleComponent>(AntiMissilleComponent());
+		//newEntity.AddComponent<HitPointComponent>(0.01f);
+		//newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+	}
 }
 
 void EntityManager::LaunchMissile(int meshIdx, TransformComponent hostTransform, DynamicPropertiesComponent hostVelocity, entt::entity target)

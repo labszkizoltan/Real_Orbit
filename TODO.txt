@@ -113,7 +113,7 @@ building thread this variable can be checked, and if it indicates that the build
 the two oct trees can be swapped and the building procedure can be started again on the back buffer.
 
 
-
+- Redesign DualOctTree update procedure and make the private members private again
 
 
 

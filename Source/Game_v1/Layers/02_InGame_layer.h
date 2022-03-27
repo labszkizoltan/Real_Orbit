@@ -82,8 +82,9 @@ private:
 	EntityManager m_EntityManager;
 	AudioManager m_AudioManager;
 
-	std::unique_ptr<DualOctTree> m_AsteroidOctTree = nullptr;
-
+	std::shared_ptr<DualOctTree> m_CollidersOctTree = nullptr;
+	std::shared_ptr<DualOctTree> m_MissillesOctTree = nullptr;
+	std::shared_ptr<DualOctTree> m_AntiMissilleOctTree = nullptr;
 
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;

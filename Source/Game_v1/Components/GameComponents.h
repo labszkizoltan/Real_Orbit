@@ -80,6 +80,8 @@ struct AsteroidComponent { char something = 0; };
 
 struct BulletComponent { char something = 0; };
 
+struct AntiMissilleComponent { char something = 0; };
+
 struct MarkedForDestructionComponent { char something = 0; };
 
 

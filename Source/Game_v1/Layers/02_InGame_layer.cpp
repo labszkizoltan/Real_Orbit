@@ -16,6 +16,7 @@
 
 
 #include <utils/Vector_3D.h>
+#include <utils/RandomGeneration.h>
 #include <glad/glad.h>
 
 //#include "scene_descriptions.h"
@@ -85,13 +86,16 @@ void InGame_layer::OnAttach()
 	m_SceneRenderer.SetScene(m_Scene);
 
 	Box3D tmp_box; tmp_box.radius = Vec3D(10000, 10000, 10000);
-	m_AsteroidOctTree = std::make_unique<DualOctTree>(tmp_box);
+	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
+	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
 
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
 
 	m_ImgProcessor = std::make_unique<ImageProcessor>();
 	m_ImgProcessor->SetMipMapLevel(4);
+
+	m_AudioManager.SetVolume(10.0f);
 
 }
 
@@ -153,7 +157,11 @@ void InGame_layer::OnUpdate(Timestep ts)
 	m_SceneRenderer.RenderScene();
 	// m_SceneUpdater.UpdateScene(m_SimulationSpeed * ts);
 	UpdateScene(m_SimulationSpeed * ts);
-	m_AsteroidOctTree->Update(m_Scene.get());
+//	m_CollidersOctTree->Update(m_Scene.get());
+//	m_MissillesOctTree->Update(m_Scene.get());
+	m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
+	m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
+	//m_AntiMissilleOctTree->Update<AntiMissilleComponent>(m_Scene.get());
 
 	//	m_ImgProcessor->Blur(g_RendererBlurDepthSlot, Renderer::s_BlurBuffer); // this is not working, as expected
 	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
@@ -640,8 +648,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 			static std::vector<entt::entity> missille_vicinity;
 			Box3D box; box.center = missileTrf.location; box.radius = Vec3D(10, 10, 10);
 			missille_vicinity.clear();
-			m_AsteroidOctTree->GetActiveTree()->QueryRange(box, missille_vicinity, 0);
-
+			m_CollidersOctTree->GetActiveTree()->QueryRange(box, missille_vicinity, 0);
 
 			for (int i = 0; i < missille_vicinity.size(); i++)
 			{
@@ -689,6 +696,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 			dx += dt * dv*0.9f;
 			float accel = 0.0001f;
 
+			// This is the place where I can add repulsive forces, so the missilles avoid nearby objects and focus on reaching the target!!!
 			missileVelocity.velocity += accel * ts * dx / dx.length();
 		}
 		else
@@ -715,7 +723,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 		static std::vector<entt::entity> bullet_vicinity;
 		Box3D box; box.center = bulletTrf.location; box.radius = Vec3D(10, 10, 10);
 		bullet_vicinity.clear();
-		m_AsteroidOctTree->GetActiveTree()->QueryRange(box, bullet_vicinity, 0);
+		m_CollidersOctTree->GetActiveTree()->QueryRange(box, bullet_vicinity, 0);
 
 
 		for (int i = 0; i < bullet_vicinity.size(); i++)
@@ -773,6 +781,99 @@ void InGame_layer::UpdateScene(Timestep ts)
 
 			m_EarthHitCount++;
 		}
+	}
+
+
+	auto colliding_asteroids = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, AsteroidComponent, MarkerComponent>();
+	for (auto asteroid : colliding_asteroids)
+	{
+		TransformComponent& asteroidTrf = colliding_asteroids.get<TransformComponent>(asteroid);
+		DynamicPropertiesComponent& asteroidVel = colliding_asteroids.get<DynamicPropertiesComponent>(asteroid);
+
+		static std::vector<entt::entity> asteroid_vicinity;
+		Box3D box; box.center = asteroidTrf.location; box.radius = Vec3D(50, 50, 50);
+		asteroid_vicinity.clear();
+		m_MissillesOctTree->GetActiveTree()->QueryRange(box, asteroid_vicinity, 0);
+
+		int counter = 0;
+
+		const int target_limit = 2;
+		for (int i = 0; (i < asteroid_vicinity.size()) && (counter < target_limit); i++)
+		{
+			// i think it can happen that the missille hits an ateroid and gets destroyed by the time we get here
+			// and if i want to get the location of a destroyed entity it will cause memory access violation
+			if (!m_Scene->m_Registry.valid(asteroid_vicinity[i]))
+				continue;
+
+			TransformComponent& missilleTrf = m_Scene->m_Registry.get<TransformComponent>(asteroid_vicinity[i]);
+			DynamicPropertiesComponent& missilleVel = m_Scene->m_Registry.get<DynamicPropertiesComponent>(asteroid_vicinity[i]);
+
+			// this is the anti missille targeting part
+			/*
+			TransformComponent bulletStartLoc = asteroidTrf;
+			float v = 0.2f;
+			Vec3D dx = missilleTrf.location - asteroidTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
+			float dt = dx.length() / v;
+			Vec3D futureLoc = missilleTrf.location + dt * missilleVel.velocity;
+			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
+			Vec3D bulletVel = futureLoc - asteroidTrf.location + dv*v*0.1f;
+			bulletStartLoc.location += dx * (1.5f * asteroidTrf.scale / dx.length());
+			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * v);
+			*/
+
+			TransformComponent bulletStartLoc = asteroidTrf;
+			Vec3D v = missilleVel.velocity -asteroidVel.velocity;
+			float u = 0.2f;
+			float a = 0.0001f;
+			Vec3D r0 = missilleTrf.location - asteroidTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
+			float t0 = r0.length() / u;
+			Vec3D ri = r0;
+			for (int l = 0; l < 3; l++)
+			{
+				ri = r0 + v * t0 * (1 + t0 * a / v.length());
+				t0 = ri.length() / u; // v.length();
+			}
+			Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000)/5000.0f) * t0 * missilleVel.velocity * (1.0f + t0*a/ v.length());
+			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
+			Vec3D bulletVel = asteroidVel.velocity + futureLoc - asteroidTrf.location + dv * u * 0.1f;
+			bulletStartLoc.location += ri * (1.5f * asteroidTrf.scale / ri.length());
+			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
+			counter++;
+
+
+			/*
+			// m_Scene->m_Registry.destroy(asteroid_vicinity[i]); // dont destroy like this
+			if (m_Scene->m_Registry.all_of<TimerComponent>(asteroid_vicinity[i]))
+			{
+				TimerComponent& missilleTimer = m_Scene->m_Registry.get<TimerComponent>(asteroid_vicinity[i]);
+				missilleTimer = 0.0f;
+			}
+			*/
+		}
+
+	}
+
+	auto anti_missilles = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, AntiMissilleComponent>();
+	for (auto antiMissille : anti_missilles)
+	{
+		TransformComponent& antiMTrf = anti_missilles.get<TransformComponent>(antiMissille);
+
+		static std::vector<entt::entity> antiM_vicinity;
+		Box3D box; box.center = antiMTrf.location; box.radius = 2.0f * Vec3D(antiMTrf.scale, antiMTrf.scale, antiMTrf.scale);
+		antiM_vicinity.clear();
+		m_MissillesOctTree->GetActiveTree()->QueryRange(box, antiM_vicinity, 0);
+		if (antiM_vicinity.size() > 0)
+		{
+			TimerComponent& missilleTimer = m_Scene->m_Registry.get<TimerComponent>(antiM_vicinity[0]);
+			TransformComponent& missilleLoc = m_Scene->m_Registry.get<TransformComponent>(antiM_vicinity[0]);
+			DynamicPropertiesComponent& missilleVel = m_Scene->m_Registry.get<DynamicPropertiesComponent>(antiM_vicinity[0]);
+			TimerComponent& antiMTimer = m_Scene->m_Registry.get<TimerComponent>(antiMissille);
+			m_EntityManager.SpawnExplosion(missilleLoc, missilleVel);
+
+			missilleTimer = 0.0f;
+			antiMTimer = 0.0f;
+		}
+
 	}
 
 	// update wo collision

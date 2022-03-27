@@ -222,6 +222,12 @@
     <ClInclude Include="Source\Game_v1\Common\AudioManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Game_v1\Common\UnitControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\utils\RandomGeneration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\core\Application.cpp">
@@ -372,6 +378,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Game_v1\Common\Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game_v1\Common\UnitControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\utils\RandomGeneration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
