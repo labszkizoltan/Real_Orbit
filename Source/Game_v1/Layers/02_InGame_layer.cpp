@@ -112,7 +112,7 @@ void InGame_layer::OnUpdate(Timestep ts)
 	if (m_Player.m_Transform.location.length() < 5.0f)
 		m_Player.FillReserves();
 	
-	if (m_EarthHitCount >= m_MaxEarthHitCount)
+	if (m_EarthHitCount >= m_MaxEarthHitCount || m_Player.m_Health <= 0.0f)
 	{
 		m_SceneRenderer.RenderScene();
 		m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
@@ -149,7 +149,7 @@ void InGame_layer::OnUpdate(Timestep ts)
 			Vec3D center = Vec3D(50, 0, 0);
 			Vec3D velocity = -0.01 * center / center.length();
 			for (int i = 0; i < asteroid_count; i++)
-				m_EntityManager.SpawnAsteroid(500.0f * center / center.length(), velocity, 80.0f);
+				m_EntityManager.SpawnAsteroid(500.0f * center / center.length(), velocity, 80.0f, 2.5f);
 		}
 	}
 
@@ -620,7 +620,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 			TransformComponent& trf = m_Scene->m_Registry.get<TransformComponent>(entity);
 			DynamicPropertiesComponent& dyn = m_Scene->m_Registry.get<DynamicPropertiesComponent>(entity);
 			dyn.velocity *= 0.5f;
-			m_EntityManager.SpawnExplosion(trf, dyn);
+			m_EntityManager.SpawnExplosion(trf, dyn, ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
 			m_Scene->m_Registry.destroy(entity);
 			m_AudioManager.PlayExplosionSound();
 			//m_ExplosionSound.play();
@@ -650,6 +650,8 @@ void InGame_layer::UpdateScene(Timestep ts)
 			missille_vicinity.clear();
 			m_CollidersOctTree->GetActiveTree()->QueryRange(box, missille_vicinity, 0);
 
+			Vec3D avoidanceVector = Vec3D();
+
 			for (int i = 0; i < missille_vicinity.size(); i++)
 			{
 				// check validity
@@ -660,6 +662,9 @@ void InGame_layer::UpdateScene(Timestep ts)
 
 					Vec3D dx = targetLoc.location - missileTrf.location;
 					Vec3D dv = targetVelocity.velocity - missileVelocity.velocity;
+
+					// avoidanceVector += dx / dx.lengthSquare();
+					avoidanceVector += dx / dx.length() / (dx.length()- targetLoc.scale);
 
 					// check collision:
 					float lambda = dv.lengthSquare() < 0.00001f ? 0 : -(dx * dv) / (ts * dv.lengthSquare());
@@ -697,7 +702,8 @@ void InGame_layer::UpdateScene(Timestep ts)
 			float accel = 0.0001f;
 
 			// This is the place where I can add repulsive forces, so the missilles avoid nearby objects and focus on reaching the target!!!
-			missileVelocity.velocity += accel * ts * dx / dx.length();
+			// missileVelocity.velocity += accel * ts * dx / dx.length();
+			missileVelocity.velocity += accel * ts * (dx + 2 * avoidanceVector) / (dx + 2 * avoidanceVector).length();
 		}
 		else
 		{
@@ -775,7 +781,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 		TransformComponent& asteroidTrf = asteroids.get<TransformComponent>(asteroid);
 		if (asteroidTrf.location.length() < 2.3f + asteroidTrf.scale) // 2.3 is the radius of the earth
 		{
-			m_EntityManager.SpawnExplosion(asteroidTrf, DynamicPropertiesComponent());
+			m_EntityManager.SpawnExplosion(asteroidTrf, DynamicPropertiesComponent(), ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
 			m_Scene->m_Registry.destroy(asteroid);
 			m_AudioManager.PlayExplosionSound();
 
@@ -797,7 +803,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 
 		int counter = 0;
 
-		const int target_limit = 2;
+		const int target_limit = 4;
 		for (int i = 0; (i < asteroid_vicinity.size()) && (counter < target_limit); i++)
 		{
 			// i think it can happen that the missille hits an ateroid and gets destroyed by the time we get here
@@ -824,7 +830,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 			TransformComponent bulletStartLoc = asteroidTrf;
 			Vec3D v = missilleVel.velocity -asteroidVel.velocity;
 			float u = 0.2f;
-			float a = 0.0001f;
+			float a = 0.0001f*(2*RORNG::runif());
 			Vec3D r0 = missilleTrf.location - asteroidTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
 			float t0 = r0.length() / u;
 			Vec3D ri = r0;
@@ -862,13 +868,14 @@ void InGame_layer::UpdateScene(Timestep ts)
 		Box3D box; box.center = antiMTrf.location; box.radius = 2.0f * Vec3D(antiMTrf.scale, antiMTrf.scale, antiMTrf.scale);
 		antiM_vicinity.clear();
 		m_MissillesOctTree->GetActiveTree()->QueryRange(box, antiM_vicinity, 0);
-		if (antiM_vicinity.size() > 0)
+		const float hit_chance = 0.1f;
+		if (antiM_vicinity.size() > 0 && m_Scene->m_Registry.valid(antiM_vicinity[0]) && RORNG::runif() < hit_chance)
 		{
 			TimerComponent& missilleTimer = m_Scene->m_Registry.get<TimerComponent>(antiM_vicinity[0]);
 			TransformComponent& missilleLoc = m_Scene->m_Registry.get<TransformComponent>(antiM_vicinity[0]);
 			DynamicPropertiesComponent& missilleVel = m_Scene->m_Registry.get<DynamicPropertiesComponent>(antiM_vicinity[0]);
 			TimerComponent& antiMTimer = m_Scene->m_Registry.get<TimerComponent>(antiMissille);
-			m_EntityManager.SpawnExplosion(missilleLoc, missilleVel);
+			m_EntityManager.SpawnExplosion(missilleLoc, missilleVel, ColourComponent(0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f, 0.8f));
 
 			missilleTimer = 0.0f;
 			antiMTimer = 0.0f;
@@ -888,6 +895,28 @@ void InGame_layer::UpdateScene(Timestep ts)
 		playerAcceleration += grav_mass.gravitational_mass * dr / pow(dr.length(), 3);
 	}
 	m_Player.Update(ts, playerAcceleration);
+
+	/*
+	*/
+	// check collisions of the player:
+	static std::vector<entt::entity> player_vicinity;
+	Box3D box; box.center = m_Player.m_Transform.location; box.radius = Vec3D(2,2,2);
+	player_vicinity.clear();
+	m_CollidersOctTree->GetActiveTree()->QueryRange(box, player_vicinity, 0);
+	for (int i = 0; i < player_vicinity.size(); i++)
+	{
+		if (m_Scene->m_Registry.valid(player_vicinity[i]) && m_Scene->m_Registry.all_of<HitPointComponent>(player_vicinity[i]))
+		{
+			TransformComponent& transform = m_Scene->m_Registry.get<TransformComponent>(player_vicinity[0]);
+			HitPointComponent& hitpoint = m_Scene->m_Registry.get<HitPointComponent>(player_vicinity[0]);
+			if ((m_Player.m_Transform.location - transform.location).length() < m_Player.m_Transform.scale + transform.scale)
+			{
+				m_Player.m_Health -= hitpoint.HP;
+				hitpoint.HP = -1;
+			}
+		}
+	}
+
 
 	// then the rest of the objects
 	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>();

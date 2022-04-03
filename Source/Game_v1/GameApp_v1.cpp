@@ -2,6 +2,7 @@
 #include "GameApp_v1.h"
 #include <Game_v1/Layers/01_MenuLayer.h>
 #include <Game_v1/Layers/02_InGame_layer.h>
+#include <Game_v1/Layers/03_InGame_layer.h>
 
 std::unique_ptr<ROFont> GameApplication::s_Font = nullptr;
 
@@ -11,12 +12,15 @@ GameApplication::GameApplication()
 
 	Menu_layer* menuLayer = new Menu_layer();
 	InGame_layer* ingameLayer = new InGame_layer();
+	InGame_layer2* ingameLayer2 = new InGame_layer2();
 
 	PushLayer(menuLayer);
-	PushLayer(ingameLayer); // test rebuilding
+	PushLayer(ingameLayer);
+	PushLayer(ingameLayer2);
 
 	menuLayer->Activate();
 	ingameLayer->DeActivate();
+	ingameLayer2->DeActivate();
 }
 
 GameApplication::~GameApplication()

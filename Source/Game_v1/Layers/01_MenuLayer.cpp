@@ -102,8 +102,8 @@ void Menu_layer::Activate()
 
 void Menu_layer::DeActivate()
 {
-	Application& app = Application::Get();
-	((GameApplication*)(&app))->ActitivateLayer(GameLayers::INGAME_LAYER);
+	// Application& app = Application::Get();
+	// ((GameApplication*)(&app))->ActitivateLayer(GameLayers::INGAME_LAYER);
 	m_Music.pause();
 	m_IsActive = false;
 }
@@ -327,6 +327,8 @@ void Menu_layer::InitStates()
 	tmp_state.activation_function = [this]() {
 		std::cout << "earth mission activation was called\n";
 		DeActivate();
+		Application& app = Application::Get();
+		((GameApplication*)(&app))->ActitivateLayer(GameLayers::INGAME_LAYER);
 	};
 
 	m_StateManager.m_States.push_back(tmp_state);
@@ -340,8 +342,11 @@ void Menu_layer::InitStates()
 	tmp_state.next_state = 6;
 	tmp_state.previous_state = 4;
 	tmp_state.child_state = -1;
-	tmp_state.activation_function = []() {
+	tmp_state.activation_function = [this]() {
 		std::cout << "moon mission activation was called\n";
+		DeActivate();
+		Application& app = Application::Get();
+		((GameApplication*)(&app))->ActitivateLayer(GameLayers::INGAME_LAYER2);
 	};
 
 	m_StateManager.m_States.push_back(tmp_state);

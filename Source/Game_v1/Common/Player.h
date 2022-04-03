@@ -24,7 +24,7 @@ public:
 	TransformComponent m_Transform;
 	DynamicPropertiesComponent m_DynamicProps;
 	// some of these should be float, like fuel, because sim speed should affect burn rate
-	int m_Health, m_MaxHealth;
+	float m_Health, m_MaxHealth;
 	int m_Fuel, m_MaxFuel;
 	int m_BulletCount, m_MaxBulletCount;
 	float m_BulletSpeed;

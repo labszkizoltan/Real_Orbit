@@ -1,5 +1,6 @@
 
 #include "EntityManager.h"
+#include <utils/RandomGeneration.h>
 
 EntityManager::EntityManager(Scene* scene)
 	: m_Scene(scene) {}
@@ -26,7 +27,8 @@ void EntityManager::EmitMesh(int meshIdx, TransformComponent transform)
 	newEntity.AddComponent<HitPointComponent>(1.0f);
 }
 
-void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
+
+void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread, float markerRadius)
 {
 	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
 	static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
@@ -50,7 +52,8 @@ void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread)
 	// make the Earth hitting asteroids big
 	Vec3D dr = transform.location;
 	Vec3D v = velocity;
-	if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < (2.3f + transform.scale + 0.2)) // 2.3 is the radius of the earth, 0.2 is a safety factor
+	// if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < (2.3f + transform.scale + 0.2)) // 2.3 is the radius of the earth, 0.2 is a safety factor
+	if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < markerRadius) // 2.3 is the radius of the earth, 0.2 is a safety factor
 	{
 		/*
 		Vec3D dr = transform.location;
@@ -162,14 +165,15 @@ void EntityManager::RemoveMesh(int meshIdx)
 		m_Scene->GetMeshLibrary().m_MeshTransforms[meshIdx].pop_back();
 }
 
-void EntityManager::SpawnExplosion(TransformComponent trf, DynamicPropertiesComponent dyn)
+void EntityManager::SpawnExplosion(TransformComponent trf, DynamicPropertiesComponent dyn, ColourComponent col)
 {
 	static int explosionIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Explosion"];
 
 	Entity newEntity = m_Scene->CreateEntity("");
 	newEntity.AddComponent<TransformComponent>(trf);
 	newEntity.AddComponent<MeshIndexComponent>(explosionIdx);
-	newEntity.AddComponent<ColourComponent>(ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
+//	newEntity.AddComponent<ColourComponent>(ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
+	newEntity.AddComponent<ColourComponent>(col);
 	newEntity.AddComponent<DynamicPropertiesComponent>(dyn);
 	newEntity.AddComponent<TimerComponent>(TimerComponent(2000.0f));
 	newEntity.AddComponent<ExplosionComponent>(ExplosionComponent());
@@ -196,7 +200,40 @@ void EntityManager::CreateStars()
 	*/
 }
 
+void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, int asteroidCount)
+{
+	for (int i = 0; i < asteroidCount; i++)
+	{
+		static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
+		int meshIdx = asteroidIdx;
 
+		TransformComponent transform;
+		transform.location = Vec3D(RORNG::runif(), RORNG::runif(), RORNG::runif()) * 2 * radius - Vec3D(radius, radius, radius);
+		transform.orientation = Rotation(RORNG::runif()*3.141592f, Vec3D(RORNG::runif(), RORNG::runif(), RORNG::runif()) - Vec3D(0.5f, 0.5f, 0.5f));
+		transform.scale = 10 * RORNG::runif() + 5;
+
+		//if (transform.location.length() > radius / 10)
+		{
+			// i--;
+			float hitPoints = transform.scale * 100;
+
+			DynamicPropertiesComponent dynProps;
+
+			Entity newEntity = m_Scene->CreateEntity("");
+
+			newEntity.AddComponent<TransformComponent>(transform);
+			newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
+			newEntity.AddComponent<MeshIndexComponent>(meshIdx);
+			newEntity.AddComponent<HitPointComponent>(hitPoints);
+			newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
+			newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+
+
+		}
+	}
+
+	tree->Update<AsteroidComponent>(m_Scene);
+}
 
 
 

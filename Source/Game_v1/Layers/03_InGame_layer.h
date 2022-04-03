@@ -1,6 +1,6 @@
 
-#ifndef INGAME_LAYER_H
-#define INGAME_LAYER_H
+#ifndef InGame_layer2_H
+#define InGame_layer2_H
 
 
 #include <core/Core.h>
@@ -27,11 +27,11 @@
 #include <SFML/Audio.hpp>
 
 
-class InGame_layer : public Layer
+class InGame_layer2 : public Layer
 {
 public:
-	InGame_layer();
-	virtual ~InGame_layer() = default;
+	InGame_layer2();
+	virtual ~InGame_layer2() = default;
 
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
@@ -47,7 +47,6 @@ public:
 	entt::entity GetTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection);
 	entt::entity GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection); // -> Move to some other class, maybe Player
 
-	void BuildOctTree(); // -> this may need to move to the EntityManager as well, not 100% sure
 
 private:
 	bool OnWindowResize(Event& e);
@@ -76,50 +75,30 @@ private:
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
-//	SceneUpdater m_SceneUpdater;
+	//	SceneUpdater m_SceneUpdater;
 	bool m_InFocus = true;
 
 	Player m_Player;
 	EntityManager m_EntityManager;
 	AudioManager m_AudioManager;
 
-	std::unique_ptr<DualOctTree> m_AsteroidOctTree = nullptr;
-
+	std::shared_ptr<DualOctTree> m_CollidersOctTree = nullptr;
+	// std::shared_ptr<DualOctTree> m_AsteroidsOctTree = nullptr;
+	std::shared_ptr<DualOctTree> m_MissillesOctTree = nullptr;
+	std::shared_ptr<DualOctTree> m_AntiMissilleOctTree = nullptr;
 
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;
 	bool m_CameraContinuousRotation = false;
 	float m_BulletSpawnChance = 0.0f;
 
-	int m_EarthHitCount = 0;
+	int m_MoonHitCount = 0;
 	int m_MaxEarthHitCount = 5;
 
 };
 
 
 
-template <typename UserDataType>
-struct targeting_data
-{
-	float dot_product;
-	UserDataType user_data;
-
-	bool operator<(const targeting_data<UserDataType>& other) const
-	{
-		return dot_product < other.dot_product; // this is the original
-//		return dot_product > other.dot_product;
-	}
-};
-
-template <typename UserDataType>
-std::ostream& operator<<(std::ostream& stream, const targeting_data<UserDataType>& td)
-{
-	stream << td.dot_product << "\t" << td.user_data << "\n";
-	return stream;
-}
 
 
-
-
-
-#endif // INGAME_LAYER_H
+#endif // InGame_layer2_H
