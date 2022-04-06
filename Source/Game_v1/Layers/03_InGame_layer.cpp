@@ -57,7 +57,7 @@ void InGame_layer2::OnAttach()
 	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
 
 	m_EntityManager.BuildStaticAsteroidField(m_CollidersOctTree.get(), 2000, 5000);
-
+	// m_EntityManager.BuildStaticAsteroidField(m_CollidersOctTree.get(), 500, 100); // for debug mode, make things easier
 
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
@@ -243,10 +243,16 @@ void InGame_layer2::ResetLayer()
 	m_Scene = std::make_shared<Scene>();
 
 	SceneSerializer serializer(m_Scene);
-	serializer.DeSerialize_file("assets/scenes/02_InGameLayer.yaml");
+	serializer.DeSerialize_file("assets/scenes/03_InGameLayer2.yaml");
 
 	m_EntityManager.SetScene(m_Scene.get());
 	m_SceneRenderer.SetScene(m_Scene);
+
+	Box3D tmp_box; tmp_box.radius = Vec3D(10000, 10000, 10000);
+	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
+	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
+
+	m_EntityManager.BuildStaticAsteroidField(m_CollidersOctTree.get(), 2000, 5000);
 
 	m_ElapsedTime = 0.0f;
 	m_SimulationSpeed = 1.0f;
@@ -262,6 +268,9 @@ void InGame_layer2::ResetLayer()
 	m_CameraContinuousRotation = false;
 
 	m_MoonHitCount = 0;
+
+
+
 }
 
 
@@ -333,7 +342,7 @@ bool InGame_layer2::OnKeyPressed(Event& e)
 	if (event.key.code == sf::Keyboard::Key::Escape)
 	{
 		DeActivate(); // this automatically activates the menu layer
-		if (m_MoonHitCount >= m_MaxEarthHitCount)
+		if (m_MoonHitCount >= m_MaxEarthHitCount || m_Player.m_Health <= 0.0f)
 			ResetLayer();
 	}
 	else if (event.key.code == sf::Keyboard::Key::Space)
@@ -835,15 +844,15 @@ void InGame_layer2::UpdateScene(Timestep ts)
 
 	// check collisions of the player:
 	static std::vector<entt::entity> player_vicinity;
-	Box3D box; box.center = m_Player.m_Transform.location; box.radius = Vec3D(2, 2, 2);
+	Box3D box; box.center = m_Player.m_Transform.location; box.radius = Vec3D(50, 50, 50);
 	player_vicinity.clear();
 	m_CollidersOctTree->GetActiveTree()->QueryRange(box, player_vicinity, 0);
 	for (int i = 0; i < player_vicinity.size(); i++)
 	{
 		if (m_Scene->m_Registry.valid(player_vicinity[i]) && m_Scene->m_Registry.all_of<HitPointComponent>(player_vicinity[i]))
 		{
-			TransformComponent& transform = m_Scene->m_Registry.get<TransformComponent>(player_vicinity[0]);
-			HitPointComponent& hitpoint = m_Scene->m_Registry.get<HitPointComponent>(player_vicinity[0]);
+			TransformComponent& transform = m_Scene->m_Registry.get<TransformComponent>(player_vicinity[i]);
+			HitPointComponent& hitpoint = m_Scene->m_Registry.get<HitPointComponent>(player_vicinity[i]);
 			if ((m_Player.m_Transform.location - transform.location).length() < m_Player.m_Transform.scale + transform.scale)
 			{
 				m_Player.m_Health -= hitpoint.HP;
@@ -918,9 +927,32 @@ void InGame_layer2::UpdateScene(Timestep ts)
 	{
 		TransformComponent& entityTrf = marked_entities.get<TransformComponent>(marked_entity);
 		MarkerComponent& marker = marked_entities.get<MarkerComponent>(marked_entity);
-		m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(entityTrf);
-		m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(marker.marker_colour);
+		// draw marker only within a certain range
+		const float detectionRange = 500.0f;
+		if (marker.marker_colour.r < 0.8f || (entityTrf.location - m_Player.m_Transform.location).lengthSquare() < detectionRange * detectionRange)
+		{
+			m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(entityTrf);
+			m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(marker.marker_colour);
+		}
 	}
+
+	// add velocity markers:
+	TransformComponent velocityMarkerLoc;
+	// yellow -> forward velocity marker
+	velocityMarkerLoc.location = m_Player.m_Transform.location + 0.5f * m_Player.m_DynamicProps.velocity / m_Player.m_DynamicProps.velocity.length();
+	m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(velocityMarkerLoc);
+	m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(1,1,0,1));
+
+	// orange -> backward velocity marker
+	velocityMarkerLoc.location = m_Player.m_Transform.location - 0.5f * m_Player.m_DynamicProps.velocity / m_Player.m_DynamicProps.velocity.length();
+	m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(velocityMarkerLoc);
+	m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(1, 0.6f, 0, 1));
+
+	// blue -> center marker for easier navigation
+	velocityMarkerLoc.location = m_Player.m_Transform.location - 0.5f* m_Player.m_Transform.location / m_Player.m_Transform.location.length();
+	m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(velocityMarkerLoc);
+	m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(0, 0, 1, 1));
+
 }
 
 

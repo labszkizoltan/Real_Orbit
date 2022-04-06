@@ -205,6 +205,7 @@ void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, in
 	for (int i = 0; i < asteroidCount; i++)
 	{
 		static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
+		static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
 		int meshIdx = asteroidIdx;
 
 		TransformComponent transform;
@@ -212,12 +213,13 @@ void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, in
 		transform.orientation = Rotation(RORNG::runif()*3.141592f, Vec3D(RORNG::runif(), RORNG::runif(), RORNG::runif()) - Vec3D(0.5f, 0.5f, 0.5f));
 		transform.scale = 10 * RORNG::runif() + 5;
 
+		DynamicPropertiesComponent dynProps;
+
 		//if (transform.location.length() > radius / 10)
 		{
 			// i--;
 			float hitPoints = transform.scale * 100;
 
-			DynamicPropertiesComponent dynProps;
 
 			Entity newEntity = m_Scene->CreateEntity("");
 
@@ -227,12 +229,28 @@ void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, in
 			newEntity.AddComponent<HitPointComponent>(hitPoints);
 			newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
 			newEntity.AddComponent<ColliderComponent>(ColliderComponent());
-
-
 		}
+
+		if (i % 50 == 0)
+		{
+			Entity newEntity = m_Scene->CreateEntity("");
+
+			TransformComponent trf2 = transform;
+			trf2.location = trf2.location * (trf2.location.length() + trf2.scale + 5) / trf2.location.length();
+			trf2.scale = 1;
+
+			newEntity.AddComponent<TransformComponent>(trf2);
+			newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
+			newEntity.AddComponent<MeshIndexComponent>(battleshipIdx);
+			newEntity.AddComponent<HitPointComponent>(100.0f);
+			newEntity.AddComponent<AsteroidComponent>(AsteroidComponent()); // this component needed so the enemy ships are defending against missilles
+			newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+			newEntity.AddComponent<MarkerComponent>(MarkerComponent(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+
 	}
 
-	tree->Update<AsteroidComponent>(m_Scene);
+	tree->Update<ColliderComponent>(m_Scene);
 }
 
 
