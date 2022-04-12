@@ -62,11 +62,16 @@ private:
 	bool OnMouseEntered(Event& e);
 	bool OnMouseLeft(Event& e);
 
+	void PartialUpdate();
+
 	void HandleUserInput(Timestep ts);
 	void ZoomIn();
 	void ZoomOut();
 
 	void UpdateScene(Timestep ts);
+
+	void OnEnemyShipDestroyed();
+	int CountMarkers();
 
 private:
 	float m_ElapsedTime = 0.0f;
@@ -92,8 +97,8 @@ private:
 	bool m_CameraContinuousRotation = false;
 	float m_BulletSpawnChance = 0.0f;
 
-	int m_MoonHitCount = 0;
-	int m_MaxEarthHitCount = 5;
+	int m_KillCount = 0;
+	int m_MaxKillCount = 10;
 
 };
 

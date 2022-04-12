@@ -59,6 +59,8 @@ void InGame_layer2::OnAttach()
 	m_EntityManager.BuildStaticAsteroidField(m_CollidersOctTree.get(), 2000, 5000);
 	// m_EntityManager.BuildStaticAsteroidField(m_CollidersOctTree.get(), 500, 100); // for debug mode, make things easier
 
+	auto connection = m_Scene->m_Registry.on_destroy<MarkerComponent>().connect<&InGame_layer2::OnEnemyShipDestroyed>(this);
+
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
 
@@ -88,24 +90,39 @@ void InGame_layer2::OnUpdate(Timestep ts)
 	if (m_Player.m_Transform.location.length() < 15.0f)
 		m_Player.FillReserves();
 
-	if (m_MoonHitCount >= m_MaxEarthHitCount || m_Player.m_Health <= 0.0f)
+
+	if (m_KillCount >= m_MaxKillCount || m_Player.m_Health <= 0.0f)
 	{
 		m_SceneRenderer.RenderScene();
 		m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
 		m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
-		GameApplication::Game_DrawText("Game Over",
-			Vec3D(700, 600, 0), // parameterize the screen coordinates
-			Vec3D(0.9f, 0.3f, 0.3f),
-			2.0f);
-		GameApplication::Game_DrawText("press Esc to return to menu",
-			Vec3D(650, 550, 0),
-			Vec3D(0.9f, 0.3f, 0.3f),
-			1.0f);
+		if (m_KillCount >= m_MaxKillCount)
+		{
+			GameApplication::Game_DrawText("Victory",
+				Vec3D(800, 600, 0), // parameterize the screen coordinates
+				Vec3D(0.3f, 0.9f, 0.3f),
+				2.0f);
+			GameApplication::Game_DrawText("press Esc to return to menu",
+				Vec3D(650, 550, 0),
+				Vec3D(0.3f, 0.9f, 0.3f),
+				1.0f);
+		}
 
+		if (m_Player.m_Health <= 0.0f)
+		{
+			GameApplication::Game_DrawText("Game Over",
+				Vec3D(700, 600, 0), // parameterize the screen coordinates
+				Vec3D(0.9f, 0.3f, 0.3f),
+				2.0f);
+			GameApplication::Game_DrawText("press Esc to return to menu",
+				Vec3D(650, 550, 0),
+				Vec3D(0.9f, 0.3f, 0.3f),
+				1.0f);
+		}
 
 		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, 1200 - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
-		GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_MoonHitCount) + " / " + std::to_string(m_MaxEarthHitCount),
+		GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_KillCount) + " / " + std::to_string(m_MaxKillCount),
 			Vec3D(700, 1200 - 70, 0),
 			Vec3D(0.3f, 0.9f, 0.5f),
 			1.0f);
@@ -116,31 +133,37 @@ void InGame_layer2::OnUpdate(Timestep ts)
 
 
 	// if the update-render order is swapped, something is un-initialized and the program fails at alpha mesh rendering
+	PartialUpdate();
 	m_SceneRenderer.RenderScene();
-	// m_SceneUpdater.UpdateScene(m_SimulationSpeed * ts);
 	UpdateScene(m_SimulationSpeed * ts);
-	//	m_CollidersOctTree->Update(m_Scene.get());
-	//	m_MissillesOctTree->Update(m_Scene.get());
 	m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
 	m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
-	//m_AntiMissilleOctTree->Update<AntiMissilleComponent>(m_Scene.get());
 
-	//	m_ImgProcessor->Blur(g_RendererBlurDepthSlot, Renderer::s_BlurBuffer); // this is not working, as expected
 	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
 
 	//	m_FbDisplay.Draw();
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
 	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, 1200 - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
-	GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_MoonHitCount) + " / " + std::to_string(m_MaxEarthHitCount),
+	GameApplication::Game_DrawText("Enemy Ships Destroyed - " + std::to_string(m_KillCount) + " / " + std::to_string(m_MaxKillCount),
 		Vec3D(700, 1200 - 70, 0),
 		Vec3D(0.3f, 0.9f, 0.5f),
 		1.0f);
 	m_Player.DrawStatsOnScreen();
 
-	//	m_Font->RODrawText("abcdefghijklmnopqrstuvwxyz", Vec3D(10, 10, 0), Vec3D(0.1f, 0.9f, 0.2f), 1.0f);
-	//	m_Font->RODrawText("ABCDEFGHIJLMNOPQRSTUVWXYZ", Vec3D(10, 100, 0), Vec3D(0.9f, 0.9f, 0.2f), 1.0f);
-	//	m_Font->RODrawText("0123456789._,;!?-+/()<>{}[]", Vec3D(10, 200, 0), Vec3D(0.9f, 0.9f, 0.2f), 1.0f);
+
+	// auto sink = m_Scene->m_Registry.on_destroy<MarkerComponent>().connect<&InGame_layer2::OnEnemyShipDestroyed>(this);
+
+	// https://skypjack.github.io/entt/md_docs_md_signal.html
+	// entt::delegate<void(void)> delegate{};
+	// bind a member function to the delegate
+	// delegate.connect<&InGame_layer2::OnEnemyShipDestroyed>(this);
+
+	// this doesnt even build:
+	// m_Scene->m_Registry.on_destroy<MarkerComponent>().connect<entt::invoke<&InGame_layer2::OnEnemyShipDestroyed>>();
+	// registry.on_construct<clazz>().connect<entt::invoke<&clazz::func>>();
+
+
 
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }
@@ -238,8 +261,10 @@ entt::entity InGame_layer2::GetTarget(const Vec3D& acquisitionLocation, const Ve
 
 void InGame_layer2::ResetLayer()
 {
-	LOG_INFO("InGame_layer2 reset");
+	LOG_INFO("InGame_layer3 reset");
 
+	// New scne is created here, so the asteroid field has to be regenerated
+	// and the on_destroy... listener should be set again
 	m_Scene = std::make_shared<Scene>();
 
 	SceneSerializer serializer(m_Scene);
@@ -253,6 +278,7 @@ void InGame_layer2::ResetLayer()
 	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
 
 	m_EntityManager.BuildStaticAsteroidField(m_CollidersOctTree.get(), 2000, 5000);
+	m_Scene->m_Registry.on_destroy<MarkerComponent>().connect<&InGame_layer2::OnEnemyShipDestroyed>(this);
 
 	m_ElapsedTime = 0.0f;
 	m_SimulationSpeed = 1.0f;
@@ -267,10 +293,7 @@ void InGame_layer2::ResetLayer()
 
 	m_CameraContinuousRotation = false;
 
-	m_MoonHitCount = 0;
-
-
-
+	m_KillCount = 0;
 }
 
 
@@ -342,7 +365,10 @@ bool InGame_layer2::OnKeyPressed(Event& e)
 	if (event.key.code == sf::Keyboard::Key::Escape)
 	{
 		DeActivate(); // this automatically activates the menu layer
-		if (m_MoonHitCount >= m_MaxEarthHitCount || m_Player.m_Health <= 0.0f)
+		if (m_Player.m_Health <= 0.0f)
+			ResetLayer();
+
+		if (m_KillCount >= m_MaxKillCount)
 			ResetLayer();
 	}
 	else if (event.key.code == sf::Keyboard::Key::Space)
@@ -431,6 +457,44 @@ bool InGame_layer2::OnMouseEntered(Event& e)
 bool InGame_layer2::OnMouseLeft(Event& e)
 {
 	return false;
+}
+
+void InGame_layer2::PartialUpdate()
+{
+	static int phaseCounter = 0;
+
+	if (phaseCounter == 0)
+	{
+	}
+	else if (phaseCounter == 1)
+	{
+	}
+	else if (phaseCounter == 2)
+	{
+	}
+	else if (phaseCounter == 3)
+	{
+	}
+	else if (phaseCounter == 4)
+	{
+	}
+	else if (phaseCounter == 5)
+	{
+	}
+	else if (phaseCounter == 6)
+	{
+	}
+	else if (phaseCounter == 7)
+	{
+	}
+	else if (phaseCounter == 8)
+	{
+	}
+	else if (phaseCounter == 9)
+	{
+	}
+
+	phaseCounter = (phaseCounter + 1) % 10;
 }
 
 void InGame_layer2::HandleUserInput(Timestep ts)
@@ -753,7 +817,7 @@ void InGame_layer2::UpdateScene(Timestep ts)
 			m_Scene->m_Registry.destroy(asteroid);
 			m_AudioManager.PlayExplosionSound();
 
-			m_MoonHitCount++;
+			m_KillCount++;
 		}
 	}
 
@@ -953,6 +1017,23 @@ void InGame_layer2::UpdateScene(Timestep ts)
 	m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(velocityMarkerLoc);
 	m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(0, 0, 1, 1));
 
+}
+
+void InGame_layer2::OnEnemyShipDestroyed()
+{
+	//std::cout << "OnEnemyShipDestroyed() called\n";
+	if(m_ElapsedTime > 1000)
+		m_KillCount++;
+}
+
+int InGame_layer2::CountMarkers()
+{
+	int result = 0;
+	auto markers = m_Scene->m_Registry.view<MarkerComponent>();
+	for (auto e : markers)
+		result++;
+
+	return result;
 }
 
 

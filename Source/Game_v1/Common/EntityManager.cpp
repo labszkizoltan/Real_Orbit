@@ -135,7 +135,6 @@ void EntityManager::ShootBullett(TransformComponent transform, Vec3D velocity, b
 	newEntity.AddComponent<BulletComponent>(BulletComponent());
 	if (anti_missille)
 	{
-		
 		newEntity.AddComponent<AntiMissilleComponent>(AntiMissilleComponent());
 		//newEntity.AddComponent<HitPointComponent>(0.01f);
 		//newEntity.AddComponent<ColliderComponent>(ColliderComponent());
@@ -231,7 +230,7 @@ void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, in
 			newEntity.AddComponent<ColliderComponent>(ColliderComponent());
 		}
 
-		if (i % 50 == 0)
+		if (i % 40 == 0)
 		{
 			Entity newEntity = m_Scene->CreateEntity("");
 

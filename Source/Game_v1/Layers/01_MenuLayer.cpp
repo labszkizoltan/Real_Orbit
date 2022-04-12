@@ -74,7 +74,7 @@ void Menu_layer::OnUpdate(Timestep ts)
 
 	//	m_FbDisplay.Draw();
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
-	GameApplication::Game_DrawText("Hello Real Orbit!", Vec3D(10, 10, 0), Vec3D(0.3f, 0.9f, 0.5f), 2.0f);
+	// GameApplication::Game_DrawText("Hello Real Orbit!", Vec3D(10, 10, 0), Vec3D(0.3f, 0.9f, 0.5f), 2.0f);
 
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }
