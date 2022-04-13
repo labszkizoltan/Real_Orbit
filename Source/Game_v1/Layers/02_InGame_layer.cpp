@@ -842,7 +842,8 @@ void InGame_layer::UpdateScene(Timestep ts)
 			Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000)/5000.0f) * t0 * missilleVel.velocity * (1.0f + t0*a/ v.length());
 			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
 			Vec3D bulletVel = asteroidVel.velocity + futureLoc - asteroidTrf.location + dv * u * 0.1f;
-			bulletStartLoc.location += ri * (1.5f * asteroidTrf.scale / ri.length());
+			// bulletStartLoc.location += ri * (1.5f * asteroidTrf.scale / ri.length());
+			bulletStartLoc.location += bulletVel * (1.5f * asteroidTrf.scale / bulletVel.length());
 			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
 			counter++;
 

@@ -230,7 +230,7 @@ void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, in
 			newEntity.AddComponent<ColliderComponent>(ColliderComponent());
 		}
 
-		if (i % 40 == 0)
+		if (i % 10 == 0)
 		{
 			Entity newEntity = m_Scene->CreateEntity("");
 

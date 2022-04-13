@@ -98,7 +98,7 @@ private:
 	float m_BulletSpawnChance = 0.0f;
 
 	int m_KillCount = 0;
-	int m_MaxKillCount = 10;
+	int m_MaxKillCount = 20;
 
 };
 

@@ -61,6 +61,7 @@ void Menu_layer::OnUpdate(Timestep ts)
 	{
 		m_Music.openFromFile("assets/audio/Kevin_MacLeod-Broken_Reality.wav");
 		m_Music.play();
+		m_Music.setVolume(10.0f);
 	}
 
 	HandleUserInput(ts);
@@ -160,29 +161,29 @@ bool Menu_layer::OnKeyReleased(Event& e)
 
 bool Menu_layer::MouseWheelScrolled(Event& e)
 {
-	sf::Event& event = e.GetEvent();
-
-	m_ZoomLevel *= event.mouseWheelScroll.delta > 0 ? 1.25f : 0.8f;
-	m_ZoomLevel = m_ZoomLevel < g_InitialZoomLevel ? g_InitialZoomLevel : m_ZoomLevel;
-	m_ZoomLevel = m_ZoomLevel > g_MaxZoomLevel ? g_MaxZoomLevel : m_ZoomLevel;
-
-	Renderer::SetZoomLevel(m_ZoomLevel);
+//	sf::Event& event = e.GetEvent();
+//
+//	m_ZoomLevel *= event.mouseWheelScroll.delta > 0 ? 1.25f : 0.8f;
+//	m_ZoomLevel = m_ZoomLevel < g_InitialZoomLevel ? g_InitialZoomLevel : m_ZoomLevel;
+//	m_ZoomLevel = m_ZoomLevel > g_MaxZoomLevel ? g_MaxZoomLevel : m_ZoomLevel;
+//
+//	Renderer::SetZoomLevel(m_ZoomLevel);
 
 	return false;
 }
 
 bool Menu_layer::OnMouseButtonPressed(Event& e)
 {
-	sf::Event& event = e.GetEvent();
-	if (event.mouseButton.button == sf::Mouse::Right)
-	{
-		TransformComponent& trf = m_Scene->GetCamera();
-		std::cout << trf.location << "\n";
-		std::cout << trf.orientation << "\n";
-		std::cout << m_ZoomLevel << "\n";
-		std::cout << "camera stop\n";
-	}
-
+//	sf::Event& event = e.GetEvent();
+//	if (event.mouseButton.button == sf::Mouse::Right)
+//	{
+//		TransformComponent& trf = m_Scene->GetCamera();
+//		std::cout << trf.location << "\n";
+//		std::cout << trf.orientation << "\n";
+//		std::cout << m_ZoomLevel << "\n";
+//		std::cout << "camera stop\n";
+//	}
+//
 
 	return false;
 }
@@ -209,24 +210,24 @@ bool Menu_layer::OnMouseLeft(Event& e)
 
 void Menu_layer::HandleUserInput(Timestep ts)
 {
-	TransformComponent& cam_trf = m_Scene->GetCamera();
+//	TransformComponent& cam_trf = m_Scene->GetCamera();
 
-	static float cam_velocity = 0.0005f;
+//	static float cam_velocity = 0.0005f;
 	// moves
-	if (Input::IsKeyPressed(sf::Keyboard::Key::W)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f3; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::S)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f3; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::A)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f1; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::D)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f1; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::R)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f2; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::F)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f2; }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::W)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f3; }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::S)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f3; }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::A)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f1; }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::D)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f1; }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::R)) { cam_trf.location += ts * cam_velocity * cam_trf.orientation.f2; }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::F)) { cam_trf.location -= ts * cam_velocity * cam_trf.orientation.f2; }
 	// rotations
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::P)) { ZoomIn(); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::O)) { ZoomOut(); }
-
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { cam_velocity *= 1.1f; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { cam_trf.orientation = Rotation(0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { cam_trf.orientation = Rotation(-0.001f * ts, cam_trf.orientation.f3) * cam_trf.orientation; }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::P)) { ZoomIn(); }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::O)) { ZoomOut(); }
+//
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { cam_velocity *= 1.1f; }
+//	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
 
 }
 

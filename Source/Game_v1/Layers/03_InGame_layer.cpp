@@ -506,14 +506,18 @@ void InGame_layer2::HandleUserInput(Timestep ts)
 	// m_Player.m_Transform = cam_trf;
 	cam_trf = m_Player.m_Transform;
 
-	static float player_acceleration = 0.000001f;
+	// static float player_acceleration = 0.000003f;
+	float player_acceleration = 0.000003f;
+	float fuel_consumption_multiplier = 1.0f;
+	if (Input::IsKeyPressed(sf::Keyboard::Key::LShift)) { player_acceleration *= 3; fuel_consumption_multiplier = 6.0f;}
+
 	// moves
-	if (Input::IsKeyPressed(sf::Keyboard::Key::W) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel--; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::S) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel--; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::A) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel--; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::D) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel--; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::R) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel--; }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::F) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel--; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::W) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::S) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::A) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::D) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::R) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::F) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
 	// rotations
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { m_Player.m_Transform.orientation = Rotation(0.001f * ts, m_Player.m_Transform.orientation.f3) * m_Player.m_Transform.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { m_Player.m_Transform.orientation = Rotation(-0.001f * ts, m_Player.m_Transform.orientation.f3) * m_Player.m_Transform.orientation; }
@@ -821,7 +825,8 @@ void InGame_layer2::UpdateScene(Timestep ts)
 		}
 	}
 
-
+	// these were the asteroids on collision course with the Earth in the earth mission, but these objects were replaced by battleships
+	// and the capability to shoot down rockets has been added
 	auto colliding_asteroids = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, AsteroidComponent, MarkerComponent>();
 	for (auto asteroid : colliding_asteroids)
 	{
@@ -829,13 +834,13 @@ void InGame_layer2::UpdateScene(Timestep ts)
 		DynamicPropertiesComponent& asteroidVel = colliding_asteroids.get<DynamicPropertiesComponent>(asteroid);
 
 		static std::vector<entt::entity> asteroid_vicinity;
-		Box3D box; box.center = asteroidTrf.location; box.radius = Vec3D(50, 50, 50);
+		Box3D box; box.center = asteroidTrf.location; box.radius = Vec3D(250, 250, 250);
 		asteroid_vicinity.clear();
 		m_MissillesOctTree->GetActiveTree()->QueryRange(box, asteroid_vicinity, 0);
 
 		int counter = 0;
 
-		const int target_limit = 4;
+		const int target_limit = 2;
 		for (int i = 0; (i < asteroid_vicinity.size()) && (counter < target_limit); i++)
 		{
 			// i think it can happen that the missille hits an ateroid and gets destroyed by the time we get here
@@ -853,7 +858,7 @@ void InGame_layer2::UpdateScene(Timestep ts)
 			Vec3D r0 = missilleTrf.location - asteroidTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
 			float t0 = r0.length() / u;
 			Vec3D ri = r0;
-			for (int l = 0; l < 3; l++)
+			for (int l = 0; l < 2; l++)
 			{
 				ri = r0 + v * t0 * (1 + t0 * a / v.length());
 				t0 = ri.length() / u; // v.length();
@@ -861,12 +866,11 @@ void InGame_layer2::UpdateScene(Timestep ts)
 			Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000) / 5000.0f) * t0 * missilleVel.velocity * (1.0f + t0 * a / v.length());
 			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
 			Vec3D bulletVel = asteroidVel.velocity + futureLoc - asteroidTrf.location + dv * u * 0.1f;
-			bulletStartLoc.location += ri * (1.5f * asteroidTrf.scale / ri.length());
+			// bulletStartLoc.location += ri * (1.5f * asteroidTrf.scale / ri.length());
+			bulletStartLoc.location += bulletVel * (1.5f * asteroidTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
 			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
 			counter++;
-
 		}
-
 	}
 
 	auto anti_missilles = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, AntiMissilleComponent>();

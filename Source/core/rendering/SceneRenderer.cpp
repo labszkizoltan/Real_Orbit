@@ -35,7 +35,7 @@ void SceneRenderer::RenderScene()
 	for (int i = 0; i < m_Scene->m_MeshLibrary.size(); i++)
 	{
 		m_Scene->m_MeshLibrary.m_Meshes[i]->SetInstances(m_Scene->m_MeshLibrary.m_MeshTransforms[i]);
-		m_Scene->m_MeshLibrary.m_Meshes[i]->Draw();
+		m_Scene->m_MeshLibrary.m_Meshes[i]->Draw(); // comment this line out to turn off shadows
 	}
 
 	Renderer::s_DepthBuffer->Unbind();
