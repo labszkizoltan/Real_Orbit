@@ -23,6 +23,7 @@ public:
 
 	void EmitMesh(int meshIdx, TransformComponent transform);
 	void SpawnAsteroid(Vec3D center, Vec3D velocity, float spread, float markerRadius);
+	void SpawnPickupAsteroid(Vec3D center, Vec3D velocity, float spread, float markerRadius, PickupType pickup_type);
 	void SpawnAsteroidCloud();
 	void SpawnDebris(Vec3D center, Vec3D velocity, float spread, float bulletChance);
 	void ShootBullett(TransformComponent transform, Vec3D velocity, bool anti_missille = false);

@@ -87,6 +87,46 @@ void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread, fl
 
 }
 
+void EntityManager::SpawnPickupAsteroid(Vec3D center, Vec3D velocity, float spread, float markerRadius, PickupType pickup_type)
+{
+	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
+	static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
+
+	int meshIdx = asteroidIdx;
+
+	TransformComponent transform;
+	transform.location = center + Vec3D(rand() % 1000 - 500, rand() % 1000 - 500, rand() % 1000 - 500) * spread / 1000.0f;
+	transform.orientation = Rotation((float)(rand() % 31415) / 10000.0f, Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
+	transform.scale = (float)(rand() % 20 + 2) / 20.0f;
+
+	float hitPoints = transform.scale * 20;
+
+	DynamicPropertiesComponent dynProps;
+	dynProps.inertial_mass = 1.0f;
+	dynProps.velocity = velocity;
+	dynProps.angular_velocity = 0.0001 * Vec3D(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
+
+	Entity newEntity = m_Scene->CreateEntity("");
+
+	// make the Earth hitting asteroids big
+	Vec3D dr = transform.location;
+	Vec3D v = velocity;
+	while (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < markerRadius) // 2.3 is the radius of the earth, 0.2 is a safety factor
+	{
+		transform.location = center + Vec3D(rand() % 1000 - 500, rand() % 1000 - 500, rand() % 1000 - 500) * spread / 1000.0f;
+		dr = transform.location;
+	}
+
+	newEntity.AddComponent<PickupComponent>(pickup_type);
+	newEntity.AddComponent<TransformComponent>(transform);
+	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
+	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
+	newEntity.AddComponent<HitPointComponent>(hitPoints);
+	newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
+	newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+	newEntity.AddComponent<MarkerComponent>(MarkerComponent(0.0f, 1.0f, 1.0f, 1.0f));
+}
+
 void EntityManager::SpawnAsteroidCloud()
 {
 }

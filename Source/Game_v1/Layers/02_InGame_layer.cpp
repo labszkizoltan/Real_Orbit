@@ -89,6 +89,8 @@ void InGame_layer::OnAttach()
 	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
 
+	auto connection = m_Scene->m_Registry.on_destroy<PickupComponent>().connect<&InGame_layer::OnPickupDestroyed>(this);
+
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
 
@@ -106,6 +108,7 @@ void InGame_layer::OnDetach()
 
 void InGame_layer::OnUpdate(Timestep ts)
 {
+	static int windowHeight = GameApplication::Get().GetWindow().GetHeight();
 	m_AudioManager.PlayMusic();
 
 	HandleUserInput(ts);
@@ -128,9 +131,9 @@ void InGame_layer::OnUpdate(Timestep ts)
 			1.0f);
 
 
-		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, 1200 - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 		GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_EarthHitCount) + " / " + std::to_string(m_MaxEarthHitCount),
-			Vec3D(700, 1200 - 70, 0),
+			Vec3D(700, windowHeight - 70, 0),
 			Vec3D(0.3f, 0.9f, 0.5f),
 			1.0f);
 		m_Player.DrawStatsOnScreen();
@@ -150,6 +153,8 @@ void InGame_layer::OnUpdate(Timestep ts)
 			Vec3D velocity = -0.01 * center / center.length();
 			for (int i = 0; i < asteroid_count; i++)
 				m_EntityManager.SpawnAsteroid(500.0f * center / center.length(), velocity, 80.0f, 2.5f);
+
+			m_EntityManager.SpawnPickupAsteroid(500.0f * center / center.length(), velocity, 80.0f, 2.5f, PickupType::HEALTH);
 		}
 	}
 
@@ -286,6 +291,8 @@ void InGame_layer::ResetLayer()
 	m_EntityManager.SetScene(m_Scene.get());
 	m_SceneRenderer.SetScene(m_Scene);
 
+	m_Scene->m_Registry.on_destroy<PickupComponent>().connect<&InGame_layer::OnPickupDestroyed>(this);
+	
 	m_ElapsedTime = 0.0f;
 	m_SimulationSpeed = 1.0f;
 	m_ZoomLevel = g_InitialZoomLevel;
@@ -1002,5 +1009,28 @@ void InGame_layer::UpdateScene(Timestep ts)
 	m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(velocityMarkerLoc);
 	m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(0, 0, 1, 1));
 }
+
+void InGame_layer::OnPickupDestroyed(entt::registry& registry, entt::entity entity)
+{
+
+	if (registry.all_of<TransformComponent>(entity))
+	{
+		TransformComponent& trf = registry.get<TransformComponent>(entity);
+		Vec3D center = trf.location;
+		// Vec3D center = Vec3D(0, 50, 0);
+		Vec3D velocity = -0.01 * center / center.length();
+		m_EntityManager.SpawnAsteroid(500.0f * center / center.length(), velocity, 0.0f, 50.0f);
+	}
+	else
+	{
+		TransformComponent& trf = registry.get<TransformComponent>(entity);
+		Vec3D center = Vec3D(0, 50, 0);
+		Vec3D velocity = -0.01 * center / center.length();
+		m_EntityManager.SpawnAsteroid(500.0f * center / center.length(), velocity, 50.0f, 2.3f);
+	}
+
+}
+
+
 
 

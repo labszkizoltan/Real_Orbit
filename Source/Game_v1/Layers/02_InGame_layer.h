@@ -68,6 +68,9 @@ private:
 
 	void UpdateScene(Timestep ts);
 
+	void OnPickupDestroyed(entt::registry& registry, entt::entity entity);
+
+
 private:
 	float m_ElapsedTime = 0.0f;
 	float m_SimulationSpeed = 1.0f;

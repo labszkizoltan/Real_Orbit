@@ -131,8 +131,14 @@ struct WeaponComponent
 	}
 
 };
-/*
-*/
+
+
+enum class PickupType { HEALTH, FUEL, AMMO };
+
+struct PickupComponent
+{
+	PickupType type;
+};
 
 
 #endif // GAME_COMPONENTS_H

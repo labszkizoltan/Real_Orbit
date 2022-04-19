@@ -84,12 +84,12 @@ void InGame_layer2::OnDetach()
 
 void InGame_layer2::OnUpdate(Timestep ts)
 {
+	static int windowHeight = GameApplication::Get().GetWindow().GetHeight();
 	m_AudioManager.PlayMusic();
 
 	HandleUserInput(ts);
 	if (m_Player.m_Transform.location.length() < 15.0f)
 		m_Player.FillReserves();
-
 
 	if (m_KillCount >= m_MaxKillCount || m_Player.m_Health <= 0.0f)
 	{
@@ -121,9 +121,9 @@ void InGame_layer2::OnUpdate(Timestep ts)
 				1.0f);
 		}
 
-		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, 1200 - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 		GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_KillCount) + " / " + std::to_string(m_MaxKillCount),
-			Vec3D(700, 1200 - 70, 0),
+			Vec3D(700, windowHeight - 70, 0),
 			Vec3D(0.3f, 0.9f, 0.5f),
 			1.0f);
 		m_Player.DrawStatsOnScreen();
