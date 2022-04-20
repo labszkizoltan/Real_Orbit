@@ -69,6 +69,7 @@ private:
 	void UpdateScene(Timestep ts);
 
 	void OnPickupDestroyed(entt::registry& registry, entt::entity entity);
+	void OnPickupDestroyed();
 
 
 private:

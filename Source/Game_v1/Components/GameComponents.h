@@ -135,10 +135,14 @@ struct WeaponComponent
 
 enum class PickupType { HEALTH, FUEL, AMMO };
 
-struct PickupComponent
+struct HiddenPickupComponent
 {
 	PickupType type;
 };
 
+struct PickupComponent
+{
+	PickupType type;
+};
 
 #endif // GAME_COMPONENTS_H

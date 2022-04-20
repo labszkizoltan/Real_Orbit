@@ -53,7 +53,7 @@ void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread, fl
 	Vec3D dr = transform.location;
 	Vec3D v = velocity;
 	// if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < (2.3f + transform.scale + 0.2)) // 2.3 is the radius of the earth, 0.2 is a safety factor
-	if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < markerRadius) // 2.3 is the radius of the earth, 0.2 is a safety factor
+	if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < (markerRadius + transform.scale + 0.2)) // 2.3 is the radius of the earth, 0.2 is a safety factor
 	{
 		/*
 		Vec3D dr = transform.location;
@@ -117,7 +117,7 @@ void EntityManager::SpawnPickupAsteroid(Vec3D center, Vec3D velocity, float spre
 		dr = transform.location;
 	}
 
-	newEntity.AddComponent<PickupComponent>(pickup_type);
+	newEntity.AddComponent<HiddenPickupComponent>(pickup_type);
 	newEntity.AddComponent<TransformComponent>(transform);
 	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
 	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);

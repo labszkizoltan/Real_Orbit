@@ -89,7 +89,7 @@ void InGame_layer::OnAttach()
 	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
 
-	auto connection = m_Scene->m_Registry.on_destroy<PickupComponent>().connect<&InGame_layer::OnPickupDestroyed>(this);
+	// auto connection = m_Scene->m_Registry.on_destroy<HiddenPickupComponent>().connect<&InGame_layer::OnPickupDestroyed>(this);
 
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
@@ -291,7 +291,7 @@ void InGame_layer::ResetLayer()
 	m_EntityManager.SetScene(m_Scene.get());
 	m_SceneRenderer.SetScene(m_Scene);
 
-	m_Scene->m_Registry.on_destroy<PickupComponent>().connect<&InGame_layer::OnPickupDestroyed>(this);
+	// m_Scene->m_Registry.on_destroy<HiddenPickupComponent>().connect<&InGame_layer::OnPickupDestroyed>(this);
 	
 	m_ElapsedTime = 0.0f;
 	m_SimulationSpeed = 1.0f;
@@ -608,6 +608,8 @@ void InGame_layer::ZoomOut()
 void InGame_layer::UpdateScene(Timestep ts)
 {
 	m_Scene->m_MeshLibrary.Clear();
+
+	OnPickupDestroyed();
 
 	auto timed_entities = m_Scene->m_Registry.view<TimerComponent>();
 	for (auto entity : timed_entities)
@@ -1031,6 +1033,52 @@ void InGame_layer::OnPickupDestroyed(entt::registry& registry, entt::entity enti
 
 }
 
+void InGame_layer::OnPickupDestroyed()
+{
+	static int plusIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Plus"];
+	static int dropletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Droplet"];
+	static int missilleIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Missille"];
+
+	static int counter = 0;
+	auto pickupEntities = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, HitPointComponent, HiddenPickupComponent>();
+	for (auto entity : pickupEntities)
+	{
+		HitPointComponent& hpc = pickupEntities.get<HitPointComponent>(entity);
+
+		if (hpc.HP < 0.0f)
+		{
+			counter++;
+			TransformComponent& trf = pickupEntities.get<TransformComponent>(entity); trf.scale = 1.0f;
+			DynamicPropertiesComponent& vel = pickupEntities.get<DynamicPropertiesComponent>(entity);
+			HiddenPickupComponent& pup = pickupEntities.get<HiddenPickupComponent>(entity);
+
+			Entity newEntity = m_Scene->CreateEntity("");
+	
+			newEntity.AddComponent<HiddenPickupComponent>(pup);
+			newEntity.AddComponent<TransformComponent>(trf);
+			if (counter % 3 == 0)
+			{
+				newEntity.AddComponent<MeshIndexComponent>(plusIdx);
+			}
+			else if (counter % 3 == 1)
+			{
+				newEntity.AddComponent<MeshIndexComponent>(dropletIdx);
+			}
+			else if (counter % 3 == 2)
+			{
+				newEntity.AddComponent<MeshIndexComponent>(missilleIdx);
+			}
+
+			newEntity.AddComponent<DynamicPropertiesComponent>(vel);
+			// newEntity.AddComponent<HitPointComponent>(hitPoints);
+			// newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+			newEntity.AddComponent<MarkerComponent>(MarkerComponent(0.0f, 1.0f, 1.0f, 1.0f));
+
+			m_Scene->m_Registry.destroy(entity);
+		}
+	}
+
+}
 
 
 
