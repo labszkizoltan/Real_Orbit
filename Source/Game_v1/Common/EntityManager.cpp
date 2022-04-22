@@ -72,6 +72,7 @@ void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread, fl
 		hitPoints = 100;
 		dynProps.angular_velocity = Vec3D(0,0,0);
 		newEntity.AddComponent<MarkerComponent>(MarkerComponent(1.0f, 0.0f, 0.0f, 1.0f));
+		newEntity.AddComponent<EnemyShipComponent>(EnemyShipComponent());
 		meshIdx = battleshipIdx;
 	}
 
@@ -277,6 +278,15 @@ void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, in
 			TransformComponent trf2 = transform;
 			trf2.location = trf2.location * (trf2.location.length() + trf2.scale + 5) / trf2.location.length();
 			trf2.scale = 1;
+
+			// add pickups to enemy ships:
+			float draw = RORNG::runif();
+			if (draw < 0.33f)
+				newEntity.AddComponent<HiddenPickupComponent>(PickupType::HEALTH);
+			else if(draw < 0.66f)
+				newEntity.AddComponent<HiddenPickupComponent>(PickupType::AMMO);
+			else
+				newEntity.AddComponent<HiddenPickupComponent>(PickupType::FUEL);
 
 			newEntity.AddComponent<TransformComponent>(trf2);
 			newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);

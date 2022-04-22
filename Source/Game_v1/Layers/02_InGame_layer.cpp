@@ -111,6 +111,9 @@ void InGame_layer::OnUpdate(Timestep ts)
 	static int windowHeight = GameApplication::Get().GetWindow().GetHeight();
 	m_AudioManager.PlayMusic();
 
+	TransformComponent& light_trf = m_Scene->GetLight();
+	light_trf.location = m_Player.m_Transform.location+Vec3D(-10, 0, 0);
+
 	HandleUserInput(ts);
 	if (m_Player.m_Transform.location.length() < 5.0f)
 		m_Player.FillReserves();
@@ -610,6 +613,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 	m_Scene->m_MeshLibrary.Clear();
 
 	OnPickupDestroyed();
+	m_Player.TakePickUp(m_Scene, 2.0f, 0.05f);
 
 	auto timed_entities = m_Scene->m_Registry.view<TimerComponent>();
 	for (auto entity : timed_entities)
@@ -1059,14 +1063,17 @@ void InGame_layer::OnPickupDestroyed()
 			if (counter % 3 == 0)
 			{
 				newEntity.AddComponent<MeshIndexComponent>(plusIdx);
+				newEntity.AddComponent<PickupComponent>(PickupType::HEALTH);
 			}
 			else if (counter % 3 == 1)
 			{
 				newEntity.AddComponent<MeshIndexComponent>(dropletIdx);
+				newEntity.AddComponent<PickupComponent>(PickupType::FUEL);
 			}
 			else if (counter % 3 == 2)
 			{
 				newEntity.AddComponent<MeshIndexComponent>(missilleIdx);
+				newEntity.AddComponent<PickupComponent>(PickupType::AMMO);
 			}
 
 			newEntity.AddComponent<DynamicPropertiesComponent>(vel);

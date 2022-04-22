@@ -37,7 +37,7 @@ void Player::DrawStatsOnScreen()
 		Vec3D(10, windowHeight - 110, 0),
 		CalculateColour((float)m_Health / m_MaxHealth),
 		0.5f);
-	GameApplication::Game_DrawText("Fuel: " + std::to_string(m_Fuel) + " / " + std::to_string(m_MaxFuel),
+	GameApplication::Game_DrawText("Fuel: " + std::to_string((int)m_Fuel) + " / " + std::to_string((int)m_MaxFuel),
 		Vec3D(10, windowHeight - 140, 0),
 		CalculateColour((float)m_Fuel / m_MaxFuel),
 		0.5f);
@@ -51,6 +51,33 @@ void Player::DrawStatsOnScreen()
 		0.5f);
 
 
+}
+
+void Player::TakePickUp(std::shared_ptr<Scene> scene, float range, float amount)
+{
+	auto pickups = scene->m_Registry.view<TransformComponent, PickupComponent>();
+	for (auto entity : pickups)
+	{
+		TransformComponent& trf = pickups.get<TransformComponent>(entity);
+		if ((trf.location - m_Transform.location).lengthSquare() < (range * range))
+		{
+			PickupComponent& pckup = pickups.get<PickupComponent>(entity);
+			if (pckup.type == PickupType::HEALTH)
+			{
+				m_Health = std::min(m_Health + amount * m_MaxHealth, m_MaxHealth);
+			}
+			else if (pckup.type == PickupType::AMMO)
+			{
+				m_BulletCount = std::min(m_BulletCount + (int)(amount * m_MaxBulletCount), m_MaxBulletCount);
+				m_MissilleCount = std::min(m_MissilleCount + (int)(amount * m_MaxMissilleCount), m_MaxMissilleCount);
+			}
+			else if (pckup.type == PickupType::FUEL)
+			{
+				m_Fuel = std::min(m_Fuel + amount * m_MaxFuel, m_MaxFuel);
+			}
+			scene->m_Registry.destroy(entity);
+		}
+	}
 }
 
 void Player::FillReserves()

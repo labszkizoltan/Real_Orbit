@@ -87,6 +87,9 @@ void InGame_layer2::OnUpdate(Timestep ts)
 	static int windowHeight = GameApplication::Get().GetWindow().GetHeight();
 	m_AudioManager.PlayMusic();
 
+	TransformComponent& light_trf = m_Scene->GetLight();
+	light_trf.location = m_Player.m_Transform.location + Vec3D(-10, 0, 0);
+
 	HandleUserInput(ts);
 	if (m_Player.m_Transform.location.length() < 15.0f)
 		m_Player.FillReserves();
@@ -512,12 +515,12 @@ void InGame_layer2::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::LShift)) { player_acceleration *= 3; fuel_consumption_multiplier = 6.0f;}
 
 	// moves
-	if (Input::IsKeyPressed(sf::Keyboard::Key::W) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::S) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::A) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::D) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::R) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::F) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel-=(int)(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::W) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel-=(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::S) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel-=(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::A) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel-=(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::D) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel-=(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::R) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel-=(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::F) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel-=(fuel_consumption_multiplier * m_SimulationSpeed/0.2f); }
 	// rotations
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { m_Player.m_Transform.orientation = Rotation(0.001f * ts, m_Player.m_Transform.orientation.f3) * m_Player.m_Transform.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { m_Player.m_Transform.orientation = Rotation(-0.001f * ts, m_Player.m_Transform.orientation.f3) * m_Player.m_Transform.orientation; }
@@ -552,7 +555,7 @@ void InGame_layer2::HandleUserInput(Timestep ts)
 	static int skip = 0;
 	if (Input::IsMouseButtonPressed(sf::Mouse::Left) && m_Player.m_BulletCount > 0)
 	{
-		m_EntityManager.ShootBullett(m_Player.m_Transform, m_Player.m_DynamicProps.velocity + m_Player.m_Transform.orientation.f3 * m_Player.m_BulletSpeed);
+		m_EntityManager.ShootBullett(m_Player.m_Transform, m_Player.m_DynamicProps.velocity + m_Player.m_Transform.orientation.f3 * m_Player.m_BulletSpeed * 5.0f);
 		m_Player.m_BulletCount--;
 		m_AudioManager.PlayShotSound();
 	}
@@ -643,6 +646,9 @@ void InGame_layer2::ZoomOut()
 void InGame_layer2::UpdateScene(Timestep ts)
 {
 	m_Scene->m_MeshLibrary.Clear();
+	
+	OnPickupDestroyed();
+	m_Player.TakePickUp(m_Scene, 2.0f, 0.1f);
 
 	auto timed_entities = m_Scene->m_Registry.view<TimerComponent>();
 	for (auto entity : timed_entities)
@@ -1030,14 +1036,53 @@ void InGame_layer2::OnEnemyShipDestroyed()
 		m_KillCount++;
 }
 
-int InGame_layer2::CountMarkers()
+void InGame_layer2::OnPickupDestroyed()
 {
-	int result = 0;
-	auto markers = m_Scene->m_Registry.view<MarkerComponent>();
-	for (auto e : markers)
-		result++;
+	static int plusIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Plus"];
+	static int dropletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Droplet"];
+	static int missilleIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Missille"];
 
-	return result;
+	static int counter = 0;
+	auto pickupEntities = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, HitPointComponent, HiddenPickupComponent>();
+	for (auto entity : pickupEntities)
+	{
+		HitPointComponent& hpc = pickupEntities.get<HitPointComponent>(entity);
+
+		if (hpc.HP < 0.0f)
+		{
+			counter++;
+			TransformComponent& trf = pickupEntities.get<TransformComponent>(entity); trf.scale = 1.0f;
+			DynamicPropertiesComponent& vel = pickupEntities.get<DynamicPropertiesComponent>(entity);
+			HiddenPickupComponent& pup = pickupEntities.get<HiddenPickupComponent>(entity);
+
+			Entity newEntity = m_Scene->CreateEntity("");
+
+			newEntity.AddComponent<HiddenPickupComponent>(pup);
+			newEntity.AddComponent<TransformComponent>(trf);
+			if (counter % 3 == 0)
+			{
+				newEntity.AddComponent<MeshIndexComponent>(plusIdx);
+				newEntity.AddComponent<PickupComponent>(PickupType::HEALTH);
+			}
+			else if (counter % 3 == 1)
+			{
+				newEntity.AddComponent<MeshIndexComponent>(dropletIdx);
+				newEntity.AddComponent<PickupComponent>(PickupType::FUEL);
+			}
+			else if (counter % 3 == 2)
+			{
+				newEntity.AddComponent<MeshIndexComponent>(missilleIdx);
+				newEntity.AddComponent<PickupComponent>(PickupType::AMMO);
+			}
+
+			newEntity.AddComponent<DynamicPropertiesComponent>(vel);
+			// newEntity.AddComponent<HitPointComponent>(hitPoints);
+			// newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+			newEntity.AddComponent<MarkerComponent>(MarkerComponent(0.0f, 1.0f, 1.0f, 1.0f));
+
+			m_Scene->m_Registry.destroy(entity);
+		}
+	}
+
 }
-
 

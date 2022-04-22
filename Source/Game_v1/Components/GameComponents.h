@@ -84,6 +84,7 @@ struct AntiMissilleComponent { char something = 0; };
 
 struct MarkedForDestructionComponent { char something = 0; };
 
+struct EnemyShipComponent { char something = 0; };
 
 struct MarkerComponent
 { 
@@ -143,6 +144,10 @@ struct HiddenPickupComponent
 struct PickupComponent
 {
 	PickupType type;
+
+//	PickupComponent(PickupType _type) : type(_type) {}
 };
+
+
 
 #endif // GAME_COMPONENTS_H

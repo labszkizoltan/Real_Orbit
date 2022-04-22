@@ -4,7 +4,7 @@
 
 #include <core/scene/CoreComponents.h>
 #include <Game_v1/Components/GameComponents.h>
-
+#include <core/scene/Scene.h>
 
 class Player
 {
@@ -15,6 +15,7 @@ public:
 	void Update(Timestep ts, Vec3D acceleration);
 	void DrawStatsOnScreen();
 
+	void TakePickUp(std::shared_ptr<Scene> scene, float range, float amount);
 	void FillReserves();
 
 private:
@@ -25,7 +26,7 @@ public:
 	DynamicPropertiesComponent m_DynamicProps;
 	// some of these should be float, like fuel, because sim speed should affect burn rate
 	float m_Health, m_MaxHealth;
-	int m_Fuel, m_MaxFuel;
+	float m_Fuel, m_MaxFuel;
 	int m_BulletCount, m_MaxBulletCount;
 	float m_BulletSpeed;
 	int m_MissilleCount, m_MaxMissilleCount;

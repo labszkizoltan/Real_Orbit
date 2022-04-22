@@ -71,7 +71,7 @@ private:
 	void UpdateScene(Timestep ts);
 
 	void OnEnemyShipDestroyed();
-	int CountMarkers();
+	void OnPickupDestroyed();
 
 private:
 	float m_ElapsedTime = 0.0f;
