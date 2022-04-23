@@ -70,6 +70,7 @@ private:
 
 	void UpdateScene(Timestep ts);
 
+	void UpdateEnemyShips(Timestep ts);
 	void OnEnemyShipDestroyed();
 	void OnPickupDestroyed();
 

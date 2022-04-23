@@ -21,7 +21,7 @@ public:
 
 	void SetScene(Scene* scene);
 
-	void EmitMesh(int meshIdx, TransformComponent transform);
+	void EmitMesh(int meshIdx, TransformComponent transform, DynamicPropertiesComponent velocity, float hitPoints, float lifetime);
 	void SpawnAsteroid(Vec3D center, Vec3D velocity, float spread, float markerRadius);
 	void SpawnPickupAsteroid(Vec3D center, Vec3D velocity, float spread, float markerRadius, PickupType pickup_type);
 	void SpawnAsteroidCloud();

@@ -16,7 +16,7 @@ public:
 	void DrawStatsOnScreen();
 
 	void TakePickUp(std::shared_ptr<Scene> scene, float range, float amount);
-	void FillReserves();
+	void FillReserves(Timestep ts);
 
 private:
 	Vec3D CalculateColour(float ratio);

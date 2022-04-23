@@ -116,7 +116,7 @@ void InGame_layer::OnUpdate(Timestep ts)
 
 	HandleUserInput(ts);
 	if (m_Player.m_Transform.location.length() < 5.0f)
-		m_Player.FillReserves();
+		m_Player.FillReserves(ts);
 	
 	if (m_EarthHitCount >= m_MaxEarthHitCount || m_Player.m_Health <= 0.0f)
 	{
@@ -803,7 +803,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 	}
 
 
-	auto colliding_asteroids = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, AsteroidComponent, MarkerComponent>();
+	auto colliding_asteroids = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, EnemyShipComponent>();
 	for (auto asteroid : colliding_asteroids)
 	{
 		TransformComponent& asteroidTrf = colliding_asteroids.get<TransformComponent>(asteroid);

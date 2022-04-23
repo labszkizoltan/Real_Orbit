@@ -84,7 +84,7 @@ struct AntiMissilleComponent { char something = 0; };
 
 struct MarkedForDestructionComponent { char something = 0; };
 
-struct EnemyShipComponent { char something = 0; };
+struct EnemyShipComponent { float shotTimer = 0.0f; };
 
 struct MarkerComponent
 { 

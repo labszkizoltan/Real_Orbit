@@ -59,7 +59,7 @@ void InGame_layer2::OnAttach()
 	m_EntityManager.BuildStaticAsteroidField(m_CollidersOctTree.get(), 2000, 5000);
 	// m_EntityManager.BuildStaticAsteroidField(m_CollidersOctTree.get(), 500, 100); // for debug mode, make things easier
 
-	auto connection = m_Scene->m_Registry.on_destroy<MarkerComponent>().connect<&InGame_layer2::OnEnemyShipDestroyed>(this);
+	auto connection = m_Scene->m_Registry.on_destroy<EnemyShipComponent>().connect<&InGame_layer2::OnEnemyShipDestroyed>(this);
 
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
@@ -92,7 +92,7 @@ void InGame_layer2::OnUpdate(Timestep ts)
 
 	HandleUserInput(ts);
 	if (m_Player.m_Transform.location.length() < 15.0f)
-		m_Player.FillReserves();
+		m_Player.FillReserves(ts);
 
 	if (m_KillCount >= m_MaxKillCount || m_Player.m_Health <= 0.0f)
 	{
@@ -826,58 +826,10 @@ void InGame_layer2::UpdateScene(Timestep ts)
 			m_EntityManager.SpawnExplosion(asteroidTrf, DynamicPropertiesComponent(), ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
 			m_Scene->m_Registry.destroy(asteroid);
 			m_AudioManager.PlayExplosionSound();
-
-			m_KillCount++;
 		}
 	}
 
-	// these were the asteroids on collision course with the Earth in the earth mission, but these objects were replaced by battleships
-	// and the capability to shoot down rockets has been added
-	auto colliding_asteroids = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, AsteroidComponent, MarkerComponent>();
-	for (auto asteroid : colliding_asteroids)
-	{
-		TransformComponent& asteroidTrf = colliding_asteroids.get<TransformComponent>(asteroid);
-		DynamicPropertiesComponent& asteroidVel = colliding_asteroids.get<DynamicPropertiesComponent>(asteroid);
-
-		static std::vector<entt::entity> asteroid_vicinity;
-		Box3D box; box.center = asteroidTrf.location; box.radius = Vec3D(250, 250, 250);
-		asteroid_vicinity.clear();
-		m_MissillesOctTree->GetActiveTree()->QueryRange(box, asteroid_vicinity, 0);
-
-		int counter = 0;
-
-		const int target_limit = 2;
-		for (int i = 0; (i < asteroid_vicinity.size()) && (counter < target_limit); i++)
-		{
-			// i think it can happen that the missille hits an ateroid and gets destroyed by the time we get here
-			// and if i want to get the location of a destroyed entity it will cause memory access violation
-			if (!m_Scene->m_Registry.valid(asteroid_vicinity[i]))
-				continue;
-
-			TransformComponent& missilleTrf = m_Scene->m_Registry.get<TransformComponent>(asteroid_vicinity[i]);
-			DynamicPropertiesComponent& missilleVel = m_Scene->m_Registry.get<DynamicPropertiesComponent>(asteroid_vicinity[i]);
-
-			TransformComponent bulletStartLoc = asteroidTrf;
-			Vec3D v = missilleVel.velocity - asteroidVel.velocity;
-			float u = 0.2f;
-			float a = 0.0001f * (2 * RORNG::runif());
-			Vec3D r0 = missilleTrf.location - asteroidTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
-			float t0 = r0.length() / u;
-			Vec3D ri = r0;
-			for (int l = 0; l < 2; l++)
-			{
-				ri = r0 + v * t0 * (1 + t0 * a / v.length());
-				t0 = ri.length() / u; // v.length();
-			}
-			Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000) / 5000.0f) * t0 * missilleVel.velocity * (1.0f + t0 * a / v.length());
-			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
-			Vec3D bulletVel = asteroidVel.velocity + futureLoc - asteroidTrf.location + dv * u * 0.1f;
-			// bulletStartLoc.location += ri * (1.5f * asteroidTrf.scale / ri.length());
-			bulletStartLoc.location += bulletVel * (1.5f * asteroidTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
-			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
-			counter++;
-		}
-	}
+	UpdateEnemyShips(ts);
 
 	auto anti_missilles = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, AntiMissilleComponent>();
 	for (auto antiMissille : anti_missilles)
@@ -900,7 +852,6 @@ void InGame_layer2::UpdateScene(Timestep ts)
 			missilleTimer = 0.0f;
 			antiMTimer = 0.0f;
 		}
-
 	}
 
 	// update wo collision
@@ -1029,9 +980,81 @@ void InGame_layer2::UpdateScene(Timestep ts)
 
 }
 
+void InGame_layer2::UpdateEnemyShips(Timestep ts)
+{
+	auto enemyShips = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, EnemyShipComponent>();
+	for (auto ship : enemyShips)
+	{
+		TransformComponent& shipTrf = enemyShips.get<TransformComponent>(ship);
+		DynamicPropertiesComponent& shipVel = enemyShips.get<DynamicPropertiesComponent>(ship);
+		EnemyShipComponent& weaponTimer = enemyShips.get<EnemyShipComponent>(ship);
+		weaponTimer.shotTimer -= ts;
+
+		// shoot at the player
+		const float weaponCooldown = 200.0f; // unit is milli seconds
+		const float weaponRange = 250.0f;
+		const float shotVelocity = 0.3f;
+		float ds = (shipTrf.location - m_Player.m_Transform.location).length();
+		if (weaponTimer.shotTimer < 0.0f && ds < weaponRange)
+		{
+			float dt = ds / shotVelocity;
+
+			Vec3D futureLoc = m_Player.m_Transform.location + dt * m_Player.m_DynamicProps.velocity;
+			// Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
+			Vec3D bulletVel = shipVel.velocity + shotVelocity * (futureLoc - shipTrf.location)/ (futureLoc - shipTrf.location).length();
+			TransformComponent bulletStartLoc = shipTrf;
+			bulletStartLoc.location += bulletVel * (2.0f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
+
+			static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+			auto dp = DynamicPropertiesComponent(); dp.velocity = bulletVel; // bulletStartLoc.scale = 0.1f;
+			m_EntityManager.EmitMesh(bulletIdx, bulletStartLoc, dp, 1.0f, 10000.0f);
+
+			weaponTimer.shotTimer = weaponCooldown;
+		}
+
+		static std::vector<entt::entity> ship_vicinity;
+		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(weaponRange, weaponRange, weaponRange);
+		ship_vicinity.clear();
+		m_MissillesOctTree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
+
+		// shoot anti missille bulletts
+		int counter = 0;
+		const int target_limit = 2;
+		for (int i = 0; (i < ship_vicinity.size()) && (counter < target_limit); i++)
+		{
+			// i think it can happen that the missille hits an ateroid and gets destroyed by the time we get here
+			// and if i want to get the location of a destroyed entity it will cause memory access violation
+			if (!m_Scene->m_Registry.valid(ship_vicinity[i]))
+				continue;
+
+			TransformComponent& missilleTrf = m_Scene->m_Registry.get<TransformComponent>(ship_vicinity[i]);
+			DynamicPropertiesComponent& missilleVel = m_Scene->m_Registry.get<DynamicPropertiesComponent>(ship_vicinity[i]);
+
+			TransformComponent bulletStartLoc = shipTrf;
+			Vec3D v = missilleVel.velocity - shipVel.velocity;
+			float u = 0.2f;
+			float a = 0.0001f * (2 * RORNG::runif());
+			Vec3D r0 = missilleTrf.location - shipTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
+			float t0 = r0.length() / u;
+			Vec3D ri = r0;
+			for (int l = 0; l < 2; l++)
+			{
+				ri = r0 + v * t0 * (1 + t0 * a / v.length());
+				t0 = ri.length() / u; // v.length();
+			}
+			Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000) / 5000.0f) * t0 * missilleVel.velocity * (1.0f + t0 * a / v.length());
+			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
+			Vec3D bulletVel = shipVel.velocity + futureLoc - shipTrf.location + dv * u * 0.1f;
+			// bulletStartLoc.location += ri * (1.5f * shipTrf.scale / ri.length());
+			bulletStartLoc.location += bulletVel * (1.5f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
+			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
+			counter++;
+		}
+	}
+}
+
 void InGame_layer2::OnEnemyShipDestroyed()
 {
-	//std::cout << "OnEnemyShipDestroyed() called\n";
 	if(m_ElapsedTime > 1000)
 		m_KillCount++;
 }

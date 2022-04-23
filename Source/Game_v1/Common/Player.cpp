@@ -13,7 +13,7 @@ Player::Player()
 	m_DynamicProps.angular_velocity = Vec3D(0, 0, 0);
 
 	m_Health = m_MaxHealth = 1000;
-	m_Fuel = m_MaxFuel = 20000;
+	m_Fuel = m_MaxFuel = 50000;
 	m_BulletCount = m_MaxBulletCount = 5000;
 	m_BulletSpeed = 0.05f;
 	m_MissilleCount = m_MaxMissilleCount = 500;
@@ -80,12 +80,12 @@ void Player::TakePickUp(std::shared_ptr<Scene> scene, float range, float amount)
 	}
 }
 
-void Player::FillReserves()
+void Player::FillReserves(Timestep ts)
 {
-	m_Health = std::min(m_Health + m_FillRate / 2, m_MaxHealth);
-	m_Fuel = std::min(m_Fuel + 2*m_FillRate, m_MaxFuel);
-	m_BulletCount = std::min(m_BulletCount + m_FillRate, m_MaxBulletCount);
-	m_MissilleCount = std::min(m_MissilleCount + 3*m_FillRate/5, m_MaxMissilleCount);
+	m_Health = std::min(m_Health + ts * m_FillRate / 2, m_MaxHealth);
+	m_Fuel = std::min(m_Fuel + ts * 2*m_FillRate, m_MaxFuel);
+	m_BulletCount = std::min((int)(m_BulletCount + ts * m_FillRate), m_MaxBulletCount);
+	m_MissilleCount = std::min((int)(m_MissilleCount + ts * 3*m_FillRate/5), m_MaxMissilleCount);
 }
 
 Vec3D Player::CalculateColour(float ratio)

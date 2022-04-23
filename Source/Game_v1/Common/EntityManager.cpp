@@ -10,21 +10,16 @@ void EntityManager::SetScene(Scene* scene)
 	m_Scene = scene;
 }
 
-void EntityManager::EmitMesh(int meshIdx, TransformComponent transform)
+void EntityManager::EmitMesh(int meshIdx, TransformComponent transform, DynamicPropertiesComponent velocity, float hitPoints, float lifetime)
 {
-	DynamicPropertiesComponent dynProps;
-	dynProps.inertial_mass = 0.001f;
-	dynProps.velocity = 0.05f * transform.orientation.f3;
-	dynProps.angular_velocity = Vec3D();
-	transform.scale = 0.1f; // 0.02f;
-	transform.location += 0.1 * (transform.orientation.f3 - transform.orientation.f2);
-
 	Entity newEntity = m_Scene->CreateEntity("");
 	newEntity.AddComponent<TransformComponent>(transform);
 	newEntity.AddComponent<MeshIndexComponent>(meshIdx);
-	newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-	newEntity.AddComponent<TimerComponent>(TimerComponent(10000.0f)); // provide ttl in mili seconds
-	newEntity.AddComponent<HitPointComponent>(1.0f);
+	newEntity.AddComponent<DynamicPropertiesComponent>(velocity);
+	newEntity.AddComponent<TimerComponent>(TimerComponent(lifetime)); // provide ttl in mili seconds
+	newEntity.AddComponent<HitPointComponent>(hitPoints);
+	newEntity.AddComponent<ColliderComponent>();
+
 }
 
 
@@ -295,6 +290,7 @@ void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, in
 			newEntity.AddComponent<AsteroidComponent>(AsteroidComponent()); // this component needed so the enemy ships are defending against missilles
 			newEntity.AddComponent<ColliderComponent>(ColliderComponent());
 			newEntity.AddComponent<MarkerComponent>(MarkerComponent(1.0f, 0.0f, 0.0f, 1.0f));
+			newEntity.AddComponent<EnemyShipComponent>();
 		}
 
 	}
