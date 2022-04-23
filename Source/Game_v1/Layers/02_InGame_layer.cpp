@@ -116,7 +116,7 @@ void InGame_layer::OnUpdate(Timestep ts)
 
 	HandleUserInput(ts);
 	if (m_Player.m_Transform.location.length() < 5.0f)
-		m_Player.FillReserves(ts);
+		m_Player.FillReserves(m_SimulationSpeed * ts);
 	
 	if (m_EarthHitCount >= m_MaxEarthHitCount || m_Player.m_Health <= 0.0f)
 	{
@@ -478,14 +478,19 @@ void InGame_layer::HandleUserInput(Timestep ts)
 	// m_Player.m_Transform = cam_trf;
 	cam_trf = m_Player.m_Transform;
 
-	static float player_acceleration = 0.000001f;
+	// static float player_acceleration = 0.000003f;
+	float player_acceleration = 0.000003f;
+	float fuel_consumption_multiplier = 1.0f;
+	if (Input::IsKeyPressed(sf::Keyboard::Key::LShift)) { player_acceleration *= 3; fuel_consumption_multiplier = 6.0f; }
+
 	// moves
-	if (Input::IsKeyPressed(sf::Keyboard::Key::W) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel--;}
-	if (Input::IsKeyPressed(sf::Keyboard::Key::S) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel--;}
-	if (Input::IsKeyPressed(sf::Keyboard::Key::A) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel--;}
-	if (Input::IsKeyPressed(sf::Keyboard::Key::D) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel--;}
-	if (Input::IsKeyPressed(sf::Keyboard::Key::R) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel--;}
-	if (Input::IsKeyPressed(sf::Keyboard::Key::F) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel--;}
+	if (Input::IsKeyPressed(sf::Keyboard::Key::W) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::S) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::A) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::D) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::R) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::F) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
+
 	// rotations
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { m_Player.m_Transform.orientation = Rotation(0.001f * ts, m_Player.m_Transform.orientation.f3) * m_Player.m_Transform.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { m_Player.m_Transform.orientation = Rotation(-0.001f * ts, m_Player.m_Transform.orientation.f3) * m_Player.m_Transform.orientation; }
@@ -748,7 +753,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 		for (int i = 0; i < bullet_vicinity.size(); i++)
 		{
 			// check validity
-			if (m_Scene->m_Registry.valid(bullet_vicinity[i]))
+			if (m_Scene->m_Registry.valid(bullet_vicinity[i]) && bullet_vicinity[i] != bullet) // do not let the entity collide with itself if it has a collider component
 			{
 				TransformComponent& targetLoc = m_Scene->m_Registry.get<TransformComponent>(bullet_vicinity[i]);
 				DynamicPropertiesComponent& targetVelocity = m_Scene->m_Registry.get<DynamicPropertiesComponent>(bullet_vicinity[i]);
@@ -802,76 +807,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 		}
 	}
 
-
-	auto colliding_asteroids = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, EnemyShipComponent>();
-	for (auto asteroid : colliding_asteroids)
-	{
-		TransformComponent& asteroidTrf = colliding_asteroids.get<TransformComponent>(asteroid);
-		DynamicPropertiesComponent& asteroidVel = colliding_asteroids.get<DynamicPropertiesComponent>(asteroid);
-
-		static std::vector<entt::entity> asteroid_vicinity;
-		Box3D box; box.center = asteroidTrf.location; box.radius = Vec3D(50, 50, 50);
-		asteroid_vicinity.clear();
-		m_MissillesOctTree->GetActiveTree()->QueryRange(box, asteroid_vicinity, 0);
-
-		int counter = 0;
-
-		const int target_limit = 4;
-		for (int i = 0; (i < asteroid_vicinity.size()) && (counter < target_limit); i++)
-		{
-			// i think it can happen that the missille hits an ateroid and gets destroyed by the time we get here
-			// and if i want to get the location of a destroyed entity it will cause memory access violation
-			if (!m_Scene->m_Registry.valid(asteroid_vicinity[i]))
-				continue;
-
-			TransformComponent& missilleTrf = m_Scene->m_Registry.get<TransformComponent>(asteroid_vicinity[i]);
-			DynamicPropertiesComponent& missilleVel = m_Scene->m_Registry.get<DynamicPropertiesComponent>(asteroid_vicinity[i]);
-
-			// this is the anti missille targeting part
-			/*
-			TransformComponent bulletStartLoc = asteroidTrf;
-			float v = 0.2f;
-			Vec3D dx = missilleTrf.location - asteroidTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
-			float dt = dx.length() / v;
-			Vec3D futureLoc = missilleTrf.location + dt * missilleVel.velocity;
-			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
-			Vec3D bulletVel = futureLoc - asteroidTrf.location + dv*v*0.1f;
-			bulletStartLoc.location += dx * (1.5f * asteroidTrf.scale / dx.length());
-			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * v);
-			*/
-
-			TransformComponent bulletStartLoc = asteroidTrf;
-			Vec3D v = missilleVel.velocity -asteroidVel.velocity;
-			float u = 0.2f;
-			float a = 0.0001f*(2*RORNG::runif());
-			Vec3D r0 = missilleTrf.location - asteroidTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
-			float t0 = r0.length() / u;
-			Vec3D ri = r0;
-			for (int l = 0; l < 3; l++)
-			{
-				ri = r0 + v * t0 * (1 + t0 * a / v.length());
-				t0 = ri.length() / u; // v.length();
-			}
-			Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000)/5000.0f) * t0 * missilleVel.velocity * (1.0f + t0*a/ v.length());
-			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
-			Vec3D bulletVel = asteroidVel.velocity + futureLoc - asteroidTrf.location + dv * u * 0.1f;
-			// bulletStartLoc.location += ri * (1.5f * asteroidTrf.scale / ri.length());
-			bulletStartLoc.location += bulletVel * (1.5f * asteroidTrf.scale / bulletVel.length());
-			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
-			counter++;
-
-
-			/*
-			// m_Scene->m_Registry.destroy(asteroid_vicinity[i]); // dont destroy like this
-			if (m_Scene->m_Registry.all_of<TimerComponent>(asteroid_vicinity[i]))
-			{
-				TimerComponent& missilleTimer = m_Scene->m_Registry.get<TimerComponent>(asteroid_vicinity[i]);
-				missilleTimer = 0.0f;
-			}
-			*/
-		}
-
-	}
+	UpdateEnemyShips(ts);
 
 	auto anti_missilles = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, AntiMissilleComponent>();
 	for (auto antiMissille : anti_missilles)
@@ -1085,6 +1021,82 @@ void InGame_layer::OnPickupDestroyed()
 		}
 	}
 
+}
+
+
+void InGame_layer::UpdateEnemyShips(Timestep ts)
+{
+	auto enemyShips = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, EnemyShipComponent>();
+	for (auto ship : enemyShips)
+	{
+		TransformComponent& shipTrf = enemyShips.get<TransformComponent>(ship);
+		DynamicPropertiesComponent& shipVel = enemyShips.get<DynamicPropertiesComponent>(ship);
+		EnemyShipComponent& weaponTimer = enemyShips.get<EnemyShipComponent>(ship);
+		weaponTimer.shotTimer -= ts;
+
+		// shoot at the player
+		const float weaponCooldown = 200.0f; // unit is milli seconds
+		const float weaponRange = 250.0f;
+		const float shotVelocity = 0.3f;
+		float ds = (shipTrf.location - m_Player.m_Transform.location).length();
+		if (weaponTimer.shotTimer < 0.0f && ds < weaponRange)
+		{
+			float dt = ds / shotVelocity;
+
+			Vec3D futureLoc = m_Player.m_Transform.location + dt * m_Player.m_DynamicProps.velocity;
+			// Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
+			Vec3D bulletVel = shipVel.velocity + shotVelocity * (futureLoc - shipTrf.location) / (futureLoc - shipTrf.location).length();
+			TransformComponent bulletStartLoc = shipTrf;
+			bulletStartLoc.location += bulletVel * (2.0f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
+
+			static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+			auto dp = DynamicPropertiesComponent(); dp.velocity = bulletVel; // bulletStartLoc.scale = 0.1f;
+			m_EntityManager.EmitMesh(bulletIdx, bulletStartLoc, dp, 1.0f, 10000.0f);
+
+			weaponTimer.shotTimer = weaponCooldown;
+		}
+
+		static std::vector<entt::entity> ship_vicinity;
+		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(weaponRange, weaponRange, weaponRange);
+		ship_vicinity.clear();
+		m_MissillesOctTree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
+
+		if (ts == 0.0f) { return; }
+
+		// shoot anti missille bulletts
+		int counter = 0;
+		const int target_limit = 2;
+		for (int i = 0; (i < ship_vicinity.size()) && (counter < target_limit); i++)
+		{
+			// i think it can happen that the missille hits an ateroid and gets destroyed by the time we get here
+			// and if i want to get the location of a destroyed entity it will cause memory access violation
+			if (!m_Scene->m_Registry.valid(ship_vicinity[i]))
+				continue;
+
+			TransformComponent& missilleTrf = m_Scene->m_Registry.get<TransformComponent>(ship_vicinity[i]);
+			DynamicPropertiesComponent& missilleVel = m_Scene->m_Registry.get<DynamicPropertiesComponent>(ship_vicinity[i]);
+
+			TransformComponent bulletStartLoc = shipTrf;
+			Vec3D v = missilleVel.velocity - shipVel.velocity;
+			float u = 0.2f;
+			float a = 0.0001f * (2 * RORNG::runif());
+			Vec3D r0 = missilleTrf.location - shipTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
+			float t0 = r0.length() / u;
+			Vec3D ri = r0;
+			for (int l = 0; l < 2; l++)
+			{
+				ri = r0 + v * t0 * (1 + t0 * a / v.length());
+				t0 = ri.length() / u; // v.length();
+			}
+			Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000) / 5000.0f) * t0 * missilleVel.velocity * (1.0f + t0 * a / v.length());
+			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
+			Vec3D bulletVel = /* shipVel.velocity + */ futureLoc - shipTrf.location + dv * u * 0.1f;
+			// bulletStartLoc.location += ri * (1.5f * shipTrf.scale / ri.length());
+			bulletStartLoc.location += bulletVel * (1.5f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
+			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
+			counter++;
+		}
+	}
 }
 
 

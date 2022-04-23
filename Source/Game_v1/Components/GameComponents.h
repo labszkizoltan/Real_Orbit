@@ -48,7 +48,7 @@ struct HitPointComponent
 //----- Other -----//
 struct TargetComponent
 {
-	entt::entity targetEntity;
+	entt::entity targetEntity = entt::null;
 	TargetComponent(entt::entity tgt) : targetEntity(tgt) {};
 };
 

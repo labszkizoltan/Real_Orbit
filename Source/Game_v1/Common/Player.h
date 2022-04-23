@@ -31,7 +31,7 @@ public:
 	float m_BulletSpeed;
 	int m_MissilleCount, m_MaxMissilleCount;
 	int m_SalvoCount;
-	int m_FillRate;
+	float m_FillRate;
 
 };
 

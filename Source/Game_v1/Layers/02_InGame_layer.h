@@ -68,6 +68,7 @@ private:
 
 	void UpdateScene(Timestep ts);
 
+	void UpdateEnemyShips(Timestep ts);
 	void OnPickupDestroyed(entt::registry& registry, entt::entity entity);
 	void OnPickupDestroyed();
 

@@ -19,6 +19,8 @@ void EntityManager::EmitMesh(int meshIdx, TransformComponent transform, DynamicP
 	newEntity.AddComponent<TimerComponent>(TimerComponent(lifetime)); // provide ttl in mili seconds
 	newEntity.AddComponent<HitPointComponent>(hitPoints);
 	newEntity.AddComponent<ColliderComponent>();
+	newEntity.AddComponent<BulletComponent>();
+//	newEntity.AddComponent<TargetComponent>(entt::entity());
 
 }
 

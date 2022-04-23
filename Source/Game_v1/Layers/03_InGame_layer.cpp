@@ -92,9 +92,10 @@ void InGame_layer2::OnUpdate(Timestep ts)
 
 	HandleUserInput(ts);
 	if (m_Player.m_Transform.location.length() < 15.0f)
-		m_Player.FillReserves(ts);
+		m_Player.FillReserves(m_SimulationSpeed * ts);
 
-	if (m_KillCount >= m_MaxKillCount || m_Player.m_Health <= 0.0f)
+	if (m_KillCount >= m_MaxKillCount || m_IsLost)
+	// if (m_KillCount >= m_MaxKillCount || m_Player.m_Health <= 0.0f)
 	{
 		m_SceneRenderer.RenderScene();
 		m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
@@ -112,7 +113,8 @@ void InGame_layer2::OnUpdate(Timestep ts)
 				1.0f);
 		}
 
-		if (m_Player.m_Health <= 0.0f)
+		// if (m_Player.m_Health <= 0.0f)
+		if (m_IsLost)
 		{
 			GameApplication::Game_DrawText("Game Over",
 				Vec3D(700, 600, 0), // parameterize the screen coordinates
@@ -125,7 +127,7 @@ void InGame_layer2::OnUpdate(Timestep ts)
 		}
 
 		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
-		GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_KillCount) + " / " + std::to_string(m_MaxKillCount),
+		GameApplication::Game_DrawText("Enemy Ships Destroyed - " + std::to_string(m_KillCount) + " / " + std::to_string(m_MaxKillCount),
 			Vec3D(700, windowHeight - 70, 0),
 			Vec3D(0.3f, 0.9f, 0.5f),
 			1.0f);
@@ -139,17 +141,18 @@ void InGame_layer2::OnUpdate(Timestep ts)
 	PartialUpdate();
 	m_SceneRenderer.RenderScene();
 	UpdateScene(m_SimulationSpeed * ts);
-	m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
-	m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
+	// These were moved to the partial update function:
+//	m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
+//	m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
 
 	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
 
 	//	m_FbDisplay.Draw();
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
-	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, 1200 - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 	GameApplication::Game_DrawText("Enemy Ships Destroyed - " + std::to_string(m_KillCount) + " / " + std::to_string(m_MaxKillCount),
-		Vec3D(700, 1200 - 70, 0),
+		Vec3D(700, windowHeight - 70, 0),
 		Vec3D(0.3f, 0.9f, 0.5f),
 		1.0f);
 	m_Player.DrawStatsOnScreen();
@@ -297,6 +300,7 @@ void InGame_layer2::ResetLayer()
 	m_CameraContinuousRotation = false;
 
 	m_KillCount = 0;
+	m_IsLost = false;
 }
 
 
@@ -368,7 +372,7 @@ bool InGame_layer2::OnKeyPressed(Event& e)
 	if (event.key.code == sf::Keyboard::Key::Escape)
 	{
 		DeActivate(); // this automatically activates the menu layer
-		if (m_Player.m_Health <= 0.0f)
+		if (m_IsLost)
 			ResetLayer();
 
 		if (m_KillCount >= m_MaxKillCount)
@@ -468,12 +472,15 @@ void InGame_layer2::PartialUpdate()
 
 	if (phaseCounter == 0)
 	{
+		EvaluateLossCondition();
 	}
 	else if (phaseCounter == 1)
 	{
+		m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
 	}
 	else if (phaseCounter == 2)
 	{
+		m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
 	}
 	else if (phaseCounter == 3)
 	{
@@ -671,7 +678,6 @@ void InGame_layer2::UpdateScene(Timestep ts)
 			m_EntityManager.SpawnExplosion(trf, dyn, ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
 			m_Scene->m_Registry.destroy(entity);
 			m_AudioManager.PlayExplosionSound();
-			//m_ExplosionSound.play();
 		}
 	}
 
@@ -783,7 +789,7 @@ void InGame_layer2::UpdateScene(Timestep ts)
 		for (int i = 0; i < bullet_vicinity.size(); i++)
 		{
 			// check validity
-			if (m_Scene->m_Registry.valid(bullet_vicinity[i]))
+			if (m_Scene->m_Registry.valid(bullet_vicinity[i]) && bullet_vicinity[i] != bullet) // do not let the entity collide with itself if it has a collider component
 			{
 				TransformComponent& targetLoc = m_Scene->m_Registry.get<TransformComponent>(bullet_vicinity[i]);
 				DynamicPropertiesComponent& targetVelocity = m_Scene->m_Registry.get<DynamicPropertiesComponent>(bullet_vicinity[i]);
@@ -991,7 +997,7 @@ void InGame_layer2::UpdateEnemyShips(Timestep ts)
 		weaponTimer.shotTimer -= ts;
 
 		// shoot at the player
-		const float weaponCooldown = 200.0f; // unit is milli seconds
+		const float weaponCooldown = 1000.0f; // unit is milli seconds
 		const float weaponRange = 250.0f;
 		const float shotVelocity = 0.3f;
 		float ds = (shipTrf.location - m_Player.m_Transform.location).length();
@@ -1006,8 +1012,8 @@ void InGame_layer2::UpdateEnemyShips(Timestep ts)
 			bulletStartLoc.location += bulletVel * (2.0f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
 
 			static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
-			auto dp = DynamicPropertiesComponent(); dp.velocity = bulletVel; // bulletStartLoc.scale = 0.1f;
-			m_EntityManager.EmitMesh(bulletIdx, bulletStartLoc, dp, 1.0f, 10000.0f);
+			auto dp = DynamicPropertiesComponent(); dp.velocity = bulletVel; bulletStartLoc.scale = 0.1f;
+			m_EntityManager.EmitMesh(bulletIdx, bulletStartLoc, dp, 15.0f, 10000.0f);
 
 			weaponTimer.shotTimer = weaponCooldown;
 		}
@@ -1016,6 +1022,8 @@ void InGame_layer2::UpdateEnemyShips(Timestep ts)
 		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(weaponRange, weaponRange, weaponRange);
 		ship_vicinity.clear();
 		m_MissillesOctTree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
+
+		if (ts == 0.0f) { return; }
 
 		// shoot anti missille bulletts
 		int counter = 0;
@@ -1107,5 +1115,13 @@ void InGame_layer2::OnPickupDestroyed()
 		}
 	}
 
+}
+
+// returns true if the game is lost
+void InGame_layer2::EvaluateLossCondition()
+{
+	if (m_Player.m_Health <= 0.0f) { m_IsLost = true; }
+	const float mapBoundariesSqr = 2000 * 2000;
+	if (m_Player.m_Transform.location.lengthSquare() > mapBoundariesSqr && m_Player.m_Fuel <= 0.0f) { m_IsLost = true; }
 }
 

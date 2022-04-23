@@ -74,6 +74,8 @@ private:
 	void OnEnemyShipDestroyed();
 	void OnPickupDestroyed();
 
+	void EvaluateLossCondition();
+
 private:
 	float m_ElapsedTime = 0.0f;
 	float m_SimulationSpeed = 1.0f;
@@ -100,6 +102,8 @@ private:
 
 	int m_KillCount = 0;
 	int m_MaxKillCount = 20;
+
+	bool m_IsLost = false;
 
 };
 

@@ -18,7 +18,7 @@ Player::Player()
 	m_BulletSpeed = 0.05f;
 	m_MissilleCount = m_MaxMissilleCount = 500;
 	m_SalvoCount = 0;
-	m_FillRate = 10;
+	m_FillRate = 1;
 }
 
 void Player::Update(Timestep ts, Vec3D acceleration)
@@ -85,7 +85,7 @@ void Player::FillReserves(Timestep ts)
 	m_Health = std::min(m_Health + ts * m_FillRate / 2, m_MaxHealth);
 	m_Fuel = std::min(m_Fuel + ts * 2*m_FillRate, m_MaxFuel);
 	m_BulletCount = std::min((int)(m_BulletCount + ts * m_FillRate), m_MaxBulletCount);
-	m_MissilleCount = std::min((int)(m_MissilleCount + ts * 3*m_FillRate/5), m_MaxMissilleCount);
+	m_MissilleCount = std::min((int)(m_MissilleCount + ts * m_FillRate/5), m_MaxMissilleCount);
 }
 
 Vec3D Player::CalculateColour(float ratio)
