@@ -24,6 +24,38 @@ void EntityManager::EmitMesh(int meshIdx, TransformComponent transform, DynamicP
 
 }
 
+void EntityManager::SpawnShipFormation(TransformComponent trf, DynamicPropertiesComponent dynProp)
+{
+	static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
+	static int bcIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battlecruiser"];
+
+	for (int i = -1; i < 2; i++)
+	{
+		Entity newEntity = m_Scene->CreateEntity("");
+
+		TransformComponent trf2 = trf;
+		trf2.location = trf.location + 4 * trf.scale * (i * trf.orientation.f1 + i * i * trf.orientation.f3);
+		trf2.scale *= i == 0 ? 1.5 : 1.0f;
+		
+		// add pickups to enemy ships:
+		float draw = RORNG::runif();
+		if (draw < 0.6f)
+			newEntity.AddComponent<HiddenPickupComponent>(PickupType::AMMO);
+		else if (draw < 0.85f)
+			newEntity.AddComponent<HiddenPickupComponent>(PickupType::FUEL);
+		else
+			newEntity.AddComponent<HiddenPickupComponent>(PickupType::HEALTH);
+
+		newEntity.AddComponent<TransformComponent>(trf2);
+		newEntity.AddComponent<DynamicPropertiesComponent>(dynProp);
+		newEntity.AddComponent<MeshIndexComponent>(i == 0 ? bcIdx : battleshipIdx);
+		newEntity.AddComponent<HitPointComponent>(100.0f);
+		newEntity.AddComponent<AsteroidComponent>(AsteroidComponent()); // this component needed so the enemy ships are defending against missilles
+		newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+		newEntity.AddComponent<MarkerComponent>(MarkerComponent(1.0f, 0.0f, 0.0f, 1.0f));
+		newEntity.AddComponent<EnemyShipComponent>();
+	}
+}
 
 void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread, float markerRadius)
 {
@@ -51,16 +83,10 @@ void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread, fl
 	Vec3D v = velocity;
 	// if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < (2.3f + transform.scale + 0.2)) // 2.3 is the radius of the earth, 0.2 is a safety factor
 	if (sqrt(dr.lengthSquare() - pow(dr * v, 2) / v.lengthSquare()) < (markerRadius + transform.scale + 0.2)) // 2.3 is the radius of the earth, 0.2 is a safety factor
+	// if (false)
 	{
+		transform.location += Vec3D(0, markerRadius + transform.scale + 0.2f, spread/2);
 		/*
-		Vec3D dr = transform.location;
-		Vec3D z = transform.orientation.f3;
-		// turn towards the target:
-		Vec3D n = CrossProduct(z, dr); // no need to normalize the vector, since the Rotation matrix generator function does that
-		float phi = acos(z * dr / (z.length() * dr.length()));
-		phi = !std::isfinite(phi) ? 0.0f : (phi);
-		transform.orientation = Rotation(phi, n) * transform.orientation;
-		*/
 		transform.orientation.f1 = Vec3D(0, -1, 0);
 		transform.orientation.f2 = Vec3D(0, 0, -1);
 		transform.orientation.f3 = Vec3D(1, 0, 0);
@@ -71,6 +97,7 @@ void EntityManager::SpawnAsteroid(Vec3D center, Vec3D velocity, float spread, fl
 		newEntity.AddComponent<MarkerComponent>(MarkerComponent(1.0f, 0.0f, 0.0f, 1.0f));
 		newEntity.AddComponent<EnemyShipComponent>(EnemyShipComponent());
 		meshIdx = battleshipIdx;
+		*/
 	}
 
 	newEntity.AddComponent<TransformComponent>(transform);
@@ -181,11 +208,12 @@ void EntityManager::ShootBullett(TransformComponent transform, Vec3D velocity, b
 
 void EntityManager::LaunchMissile(int meshIdx, TransformComponent hostTransform, DynamicPropertiesComponent hostVelocity, entt::entity target)
 {
+	static int parity = 1; parity *= -1;
 	DynamicPropertiesComponent dynProps;
 	dynProps.inertial_mass = 0.001f;
-	dynProps.velocity = hostVelocity.velocity + 0.02f * hostTransform.orientation.f1; // 0.00000001f
+	dynProps.velocity = hostVelocity.velocity + parity * 0.02f * hostTransform.orientation.f1; // 0.00000001f
 	dynProps.angular_velocity = Vec3D();
-	hostTransform.location += hostTransform.scale * (hostTransform.orientation.f3 + hostTransform.orientation.f1);
+	hostTransform.location += hostTransform.scale * (hostTransform.orientation.f3 + parity * hostTransform.orientation.f1);
 	hostTransform.scale = 0.05f;
 
 	Entity newEntity = m_Scene->CreateEntity("");
@@ -242,8 +270,10 @@ void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, in
 	for (int i = 0; i < asteroidCount; i++)
 	{
 		static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DeformedSphere"];
+		static int asteroidIdx2 = m_Scene->GetMeshLibrary().m_NameIndexLookup["Asteroid2"];
 		static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
-		int meshIdx = asteroidIdx;
+		static int bcIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battlecruiser"];
+		// int meshIdx = asteroidIdx;
 
 		TransformComponent transform;
 		transform.location = Vec3D(RORNG::runif(), RORNG::runif(), RORNG::runif()) * 2 * radius - Vec3D(radius, radius, radius);
@@ -257,12 +287,12 @@ void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, in
 			// i--;
 			float hitPoints = transform.scale * 100;
 
-
 			Entity newEntity = m_Scene->CreateEntity("");
 
 			newEntity.AddComponent<TransformComponent>(transform);
 			newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-			newEntity.AddComponent<MeshIndexComponent>(meshIdx);
+			newEntity.AddComponent<MeshIndexComponent>(i % 2 == 0 ? asteroidIdx : asteroidIdx2);
+			// newEntity.AddComponent<MeshIndexComponent>(asteroidIdx2);
 			newEntity.AddComponent<HitPointComponent>(hitPoints);
 			newEntity.AddComponent<AsteroidComponent>(AsteroidComponent());
 			newEntity.AddComponent<ColliderComponent>(ColliderComponent());
@@ -287,7 +317,8 @@ void EntityManager::BuildStaticAsteroidField(DualOctTree* tree, float radius, in
 
 			newEntity.AddComponent<TransformComponent>(trf2);
 			newEntity.AddComponent<DynamicPropertiesComponent>(dynProps);
-			newEntity.AddComponent<MeshIndexComponent>(battleshipIdx);
+			// newEntity.AddComponent<MeshIndexComponent>(battleshipIdx);
+			newEntity.AddComponent<MeshIndexComponent>((i/10)%2 == 0 ? battleshipIdx : bcIdx);
 			newEntity.AddComponent<HitPointComponent>(100.0f);
 			newEntity.AddComponent<AsteroidComponent>(AsteroidComponent()); // this component needed so the enemy ships are defending against missilles
 			newEntity.AddComponent<ColliderComponent>(ColliderComponent());

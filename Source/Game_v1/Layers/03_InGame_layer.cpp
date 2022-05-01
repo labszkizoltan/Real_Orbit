@@ -91,7 +91,7 @@ void InGame_layer2::OnUpdate(Timestep ts)
 	light_trf.location = m_Player.m_Transform.location + Vec3D(-10, 0, 0);
 
 	HandleUserInput(ts);
-	if (m_Player.m_Transform.location.length() < 15.0f)
+	if (m_Player.m_Transform.location.length() < 30.0f)
 		m_Player.FillReserves(m_SimulationSpeed * ts);
 
 	if (m_KillCount >= m_MaxKillCount || m_IsLost)
@@ -156,20 +156,6 @@ void InGame_layer2::OnUpdate(Timestep ts)
 		Vec3D(0.3f, 0.9f, 0.5f),
 		1.0f);
 	m_Player.DrawStatsOnScreen();
-
-
-	// auto sink = m_Scene->m_Registry.on_destroy<MarkerComponent>().connect<&InGame_layer2::OnEnemyShipDestroyed>(this);
-
-	// https://skypjack.github.io/entt/md_docs_md_signal.html
-	// entt::delegate<void(void)> delegate{};
-	// bind a member function to the delegate
-	// delegate.connect<&InGame_layer2::OnEnemyShipDestroyed>(this);
-
-	// this doesnt even build:
-	// m_Scene->m_Registry.on_destroy<MarkerComponent>().connect<entt::invoke<&InGame_layer2::OnEnemyShipDestroyed>>();
-	// registry.on_construct<clazz>().connect<entt::invoke<&clazz::func>>();
-
-
 
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }
@@ -843,10 +829,11 @@ void InGame_layer2::UpdateScene(Timestep ts)
 		TransformComponent& antiMTrf = anti_missilles.get<TransformComponent>(antiMissille);
 
 		static std::vector<entt::entity> antiM_vicinity;
-		Box3D box; box.center = antiMTrf.location; box.radius = 2.0f * Vec3D(antiMTrf.scale, antiMTrf.scale, antiMTrf.scale);
+//		Box3D box; box.center = antiMTrf.location; box.radius = 2.0f * Vec3D(antiMTrf.scale, antiMTrf.scale, antiMTrf.scale);
+		Box3D box; box.center = antiMTrf.location; box.radius = 10.0f * Vec3D(antiMTrf.scale, antiMTrf.scale, antiMTrf.scale);
 		antiM_vicinity.clear();
 		m_MissillesOctTree->GetActiveTree()->QueryRange(box, antiM_vicinity, 0);
-		const float hit_chance = 0.1f;
+		const float hit_chance = 0.005f;
 		if (antiM_vicinity.size() > 0 && m_Scene->m_Registry.valid(antiM_vicinity[0]) && RORNG::runif() < hit_chance)
 		{
 			TimerComponent& missilleTimer = m_Scene->m_Registry.get<TimerComponent>(antiM_vicinity[0]);
@@ -959,7 +946,7 @@ void InGame_layer2::UpdateScene(Timestep ts)
 		TransformComponent& entityTrf = marked_entities.get<TransformComponent>(marked_entity);
 		MarkerComponent& marker = marked_entities.get<MarkerComponent>(marked_entity);
 		// draw marker only within a certain range
-		const float detectionRange = 500.0f;
+		const float detectionRange = 750.0f;
 		if (marker.marker_colour.r < 0.8f || (entityTrf.location - m_Player.m_Transform.location).lengthSquare() < detectionRange * detectionRange)
 		{
 			m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(entityTrf);
@@ -988,6 +975,8 @@ void InGame_layer2::UpdateScene(Timestep ts)
 
 void InGame_layer2::UpdateEnemyShips(Timestep ts)
 {
+	if (ts == 0.0f) { return; }
+
 	auto enemyShips = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, EnemyShipComponent>();
 	for (auto ship : enemyShips)
 	{
@@ -1011,7 +1000,8 @@ void InGame_layer2::UpdateEnemyShips(Timestep ts)
 			TransformComponent bulletStartLoc = shipTrf;
 			bulletStartLoc.location += bulletVel * (2.0f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
 
-			static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+			// static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+			static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["RustySlug"];
 			auto dp = DynamicPropertiesComponent(); dp.velocity = bulletVel; bulletStartLoc.scale = 0.1f;
 			m_EntityManager.EmitMesh(bulletIdx, bulletStartLoc, dp, 15.0f, 10000.0f);
 
@@ -1023,12 +1013,11 @@ void InGame_layer2::UpdateEnemyShips(Timestep ts)
 		ship_vicinity.clear();
 		m_MissillesOctTree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
 
-		if (ts == 0.0f) { return; }
-
 		// shoot anti missille bulletts
 		int counter = 0;
 		const int target_limit = 2;
-		for (int i = 0; (i < ship_vicinity.size()) && (counter < target_limit); i++)
+		// for (int i = 0; (i < ship_vicinity.size()) && (counter < target_limit); i++)
+		for (int i = ship_vicinity.size()-1; i > 0 && (counter < target_limit); i--)
 		{
 			// i think it can happen that the missille hits an ateroid and gets destroyed by the time we get here
 			// and if i want to get the location of a destroyed entity it will cause memory access violation
@@ -1043,20 +1032,24 @@ void InGame_layer2::UpdateEnemyShips(Timestep ts)
 			float u = 0.2f;
 			float a = 0.0001f * (2 * RORNG::runif());
 			Vec3D r0 = missilleTrf.location - shipTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
-			float t0 = r0.length() / u;
-			Vec3D ri = r0;
-			for (int l = 0; l < 2; l++)
+			if (v * r0 < 0.0f)
 			{
-				ri = r0 + v * t0 * (1 + t0 * a / v.length());
-				t0 = ri.length() / u; // v.length();
+				float t0 = r0.length() / (u + v.length());
+				Vec3D ri = r0;
+				for (int l = 0; l < 2; l++)
+				{
+					ri = r0 + v * t0 * (1 + t0 * a / v.length());
+					// t0 = ri.length() / u;
+					t0 = ri.length() / (u + v.length());
+				}
+				Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000) / 5000.0f) * t0 * missilleVel.velocity * (1.0f + t0 * a / v.length());
+				Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
+				Vec3D bulletVel = shipVel.velocity + futureLoc - shipTrf.location + dv * u * 0.1f;
+				// bulletStartLoc.location += ri * (1.5f * shipTrf.scale / ri.length());
+				bulletStartLoc.location += bulletVel * (1.5f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
+				m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
+				counter++;
 			}
-			Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000) / 5000.0f) * t0 * missilleVel.velocity * (1.0f + t0 * a / v.length());
-			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
-			Vec3D bulletVel = shipVel.velocity + futureLoc - shipTrf.location + dv * u * 0.1f;
-			// bulletStartLoc.location += ri * (1.5f * shipTrf.scale / ri.length());
-			bulletStartLoc.location += bulletVel * (1.5f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
-			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
-			counter++;
 		}
 	}
 }

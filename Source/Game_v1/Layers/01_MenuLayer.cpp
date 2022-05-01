@@ -316,8 +316,8 @@ void Menu_layer::InitStates()
 
 	m_StateManager.m_States.push_back(tmp_state);
 
-	// Earth mission (4):
-	tmp_state.camera_location.location = Vec3D(-0.44f, 0.44f, -13.0f);
+	// Moon mission (4):
+	tmp_state.camera_location.location = Vec3D(-0.19f, 0.44f, -13.0f);
 	tmp_state.camera_location.orientation = Identity(1.0f);
 	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
 
@@ -326,16 +326,16 @@ void Menu_layer::InitStates()
 	tmp_state.previous_state = 6;
 	tmp_state.child_state = -1;
 	tmp_state.activation_function = [this]() {
-		std::cout << "earth mission activation was called\n";
+		std::cout << "moon mission activation was called\n";
 		DeActivate();
 		Application& app = Application::Get();
-		((GameApplication*)(&app))->ActitivateLayer(GameLayers::INGAME_LAYER);
+		((GameApplication*)(&app))->ActitivateLayer(GameLayers::INGAME_LAYER2);
 	};
 
 	m_StateManager.m_States.push_back(tmp_state);
 
-	// Moon mission (5):
-	tmp_state.camera_location.location = Vec3D(-0.19f, 0.44f, -13.0f);
+	// Earth mission (5):
+	tmp_state.camera_location.location = Vec3D(-0.44f, 0.44f, -13.0f);
 	tmp_state.camera_location.orientation = Identity(1.0f);
 	tmp_state.camera_location.scale = 200.0f; // use the scale of the trf component to store the zoom level
 
@@ -344,10 +344,10 @@ void Menu_layer::InitStates()
 	tmp_state.previous_state = 4;
 	tmp_state.child_state = -1;
 	tmp_state.activation_function = [this]() {
-		std::cout << "moon mission activation was called\n";
+		std::cout << "earth mission activation was called\n";
 		DeActivate();
 		Application& app = Application::Get();
-		((GameApplication*)(&app))->ActitivateLayer(GameLayers::INGAME_LAYER2);
+		((GameApplication*)(&app))->ActitivateLayer(GameLayers::INGAME_LAYER);
 	};
 
 	m_StateManager.m_States.push_back(tmp_state);

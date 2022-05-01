@@ -69,7 +69,7 @@ void Player::TakePickUp(std::shared_ptr<Scene> scene, float range, float amount)
 			else if (pckup.type == PickupType::AMMO)
 			{
 				m_BulletCount = std::min(m_BulletCount + (int)(amount * m_MaxBulletCount), m_MaxBulletCount);
-				m_MissilleCount = std::min(m_MissilleCount + (int)(amount * m_MaxMissilleCount), m_MaxMissilleCount);
+				m_MissilleCount = std::min(m_MissilleCount + (int)(2 * amount * m_MaxMissilleCount), m_MaxMissilleCount);
 			}
 			else if (pckup.type == PickupType::FUEL)
 			{
@@ -85,7 +85,7 @@ void Player::FillReserves(Timestep ts)
 	m_Health = std::min(m_Health + ts * m_FillRate / 2, m_MaxHealth);
 	m_Fuel = std::min(m_Fuel + ts * 2*m_FillRate, m_MaxFuel);
 	m_BulletCount = std::min((int)(m_BulletCount + ts * m_FillRate), m_MaxBulletCount);
-	m_MissilleCount = std::min((int)(m_MissilleCount + ts * m_FillRate/5), m_MaxMissilleCount);
+	m_MissilleCount = std::min((int)(m_MissilleCount + ts * m_FillRate), m_MaxMissilleCount);
 }
 
 Vec3D Player::CalculateColour(float ratio)

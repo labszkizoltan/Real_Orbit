@@ -145,12 +145,15 @@ void InGame_layer::OnUpdate(Timestep ts)
 	}
 
 	{
+		static int fleetSpawnCounter = 0;
+
 		int asteroid_count = 128;
 		float spawn_frequency = 10000.0f;
 		static float asteroid_spawn_timer = spawn_frequency; // in milli seconds
 		asteroid_spawn_timer -= m_SimulationSpeed * ts;
 		if (asteroid_spawn_timer < 0.0f)
 		{
+			fleetSpawnCounter++;
 			asteroid_spawn_timer = spawn_frequency;
 			Vec3D center = Vec3D(50, 0, 0);
 			Vec3D velocity = -0.01 * center / center.length();
@@ -158,6 +161,13 @@ void InGame_layer::OnUpdate(Timestep ts)
 				m_EntityManager.SpawnAsteroid(500.0f * center / center.length(), velocity, 80.0f, 2.5f);
 
 			m_EntityManager.SpawnPickupAsteroid(500.0f * center / center.length(), velocity, 80.0f, 2.5f, PickupType::HEALTH);
+
+			if (fleetSpawnCounter % 4 == 0)
+			{
+				TransformComponent trf; trf.location = 500.0f * center / center.length(); trf.orientation = Mat_3D(Vec3D(0, -1, 0), Vec3D(0, 0, -1), Vec3D(1, 0, 0)); trf.scale = 0.5f;
+				DynamicPropertiesComponent dynProp; dynProp.velocity = velocity;
+				m_EntityManager.SpawnShipFormation(trf, dynProp);
+			}
 		}
 	}
 
@@ -183,10 +193,6 @@ void InGame_layer::OnUpdate(Timestep ts)
 		Vec3D(0.3f, 0.9f, 0.5f),
 		1.0f);
 	m_Player.DrawStatsOnScreen();
-
-//	m_Font->RODrawText("abcdefghijklmnopqrstuvwxyz", Vec3D(10, 10, 0), Vec3D(0.1f, 0.9f, 0.2f), 1.0f);
-//	m_Font->RODrawText("ABCDEFGHIJLMNOPQRSTUVWXYZ", Vec3D(10, 100, 0), Vec3D(0.9f, 0.9f, 0.2f), 1.0f);
-//	m_Font->RODrawText("0123456789._,;!?-+/()<>{}[]", Vec3D(10, 200, 0), Vec3D(0.9f, 0.9f, 0.2f), 1.0f);
 
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }
@@ -1026,6 +1032,8 @@ void InGame_layer::OnPickupDestroyed()
 
 void InGame_layer::UpdateEnemyShips(Timestep ts)
 {
+	if (ts == 0.0f) { return; }
+
 	auto enemyShips = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, EnemyShipComponent>();
 	for (auto ship : enemyShips)
 	{
@@ -1035,7 +1043,7 @@ void InGame_layer::UpdateEnemyShips(Timestep ts)
 		weaponTimer.shotTimer -= ts;
 
 		// shoot at the player
-		const float weaponCooldown = 200.0f; // unit is milli seconds
+		const float weaponCooldown = 1000.0f; // unit is milli seconds
 		const float weaponRange = 250.0f;
 		const float shotVelocity = 0.3f;
 		float ds = (shipTrf.location - m_Player.m_Transform.location).length();
@@ -1045,13 +1053,14 @@ void InGame_layer::UpdateEnemyShips(Timestep ts)
 
 			Vec3D futureLoc = m_Player.m_Transform.location + dt * m_Player.m_DynamicProps.velocity;
 			// Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
-			Vec3D bulletVel = shipVel.velocity + shotVelocity * (futureLoc - shipTrf.location) / (futureLoc - shipTrf.location).length();
+			Vec3D bulletVel = /* shipVel.velocity + */ shotVelocity * (futureLoc - shipTrf.location) / (futureLoc - shipTrf.location).length();
 			TransformComponent bulletStartLoc = shipTrf;
 			bulletStartLoc.location += bulletVel * (2.0f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
 
-			static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
-			auto dp = DynamicPropertiesComponent(); dp.velocity = bulletVel; // bulletStartLoc.scale = 0.1f;
-			m_EntityManager.EmitMesh(bulletIdx, bulletStartLoc, dp, 1.0f, 10000.0f);
+			// static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+			static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["RustySlug"];
+			auto dp = DynamicPropertiesComponent(); dp.velocity = bulletVel; bulletStartLoc.scale = 0.1f;
+			m_EntityManager.EmitMesh(bulletIdx, bulletStartLoc, dp, 15.0f, 10000.0f);
 
 			weaponTimer.shotTimer = weaponCooldown;
 		}
@@ -1061,12 +1070,11 @@ void InGame_layer::UpdateEnemyShips(Timestep ts)
 		ship_vicinity.clear();
 		m_MissillesOctTree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
 
-		if (ts == 0.0f) { return; }
-
 		// shoot anti missille bulletts
 		int counter = 0;
 		const int target_limit = 2;
-		for (int i = 0; (i < ship_vicinity.size()) && (counter < target_limit); i++)
+		// for (int i = 0; (i < ship_vicinity.size()) && (counter < target_limit); i++)
+		for (int i = ship_vicinity.size() - 1; i > 0 && (counter < target_limit); i--)
 		{
 			// i think it can happen that the missille hits an ateroid and gets destroyed by the time we get here
 			// and if i want to get the location of a destroyed entity it will cause memory access violation
@@ -1081,23 +1089,26 @@ void InGame_layer::UpdateEnemyShips(Timestep ts)
 			float u = 0.2f;
 			float a = 0.0001f * (2 * RORNG::runif());
 			Vec3D r0 = missilleTrf.location - shipTrf.location; // once the code broke here, I dont know why, so I put in that validity check, perhaps it will solve the issue
-			float t0 = r0.length() / u;
-			Vec3D ri = r0;
-			for (int l = 0; l < 2; l++)
+			if (v * r0 < 0.0f)
 			{
-				ri = r0 + v * t0 * (1 + t0 * a / v.length());
-				t0 = ri.length() / u; // v.length();
+				float t0 = r0.length() / (u + v.length());
+				Vec3D ri = r0;
+				for (int l = 0; l < 2; l++)
+				{
+					ri = r0 + v * t0 * (1 + t0 * a / v.length());
+					// t0 = ri.length() / u;
+					t0 = ri.length() / (u + v.length());
+				}
+				Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000) / 5000.0f) * t0 * missilleVel.velocity * (1.0f + t0 * a / v.length());
+				Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
+				Vec3D bulletVel = shipVel.velocity + futureLoc - shipTrf.location + dv * u * 0.1f;
+				// bulletStartLoc.location += ri * (1.5f * shipTrf.scale / ri.length());
+				bulletStartLoc.location += bulletVel * (1.5f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
+				m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
+				counter++;
 			}
-			Vec3D futureLoc = missilleTrf.location + (1.0f + (rand() % 2000 - 1000) / 5000.0f) * t0 * missilleVel.velocity * (1.0f + t0 * a / v.length());
-			Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
-			Vec3D bulletVel = /* shipVel.velocity + */ futureLoc - shipTrf.location + dv * u * 0.1f;
-			// bulletStartLoc.location += ri * (1.5f * shipTrf.scale / ri.length());
-			bulletStartLoc.location += bulletVel * (1.5f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
-			m_EntityManager.ShootBullett(bulletStartLoc, bulletVel / bulletVel.length() * u, true);
-			counter++;
 		}
 	}
 }
-
 
 
