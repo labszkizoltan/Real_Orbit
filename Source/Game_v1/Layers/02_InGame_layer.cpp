@@ -89,7 +89,7 @@ void InGame_layer::OnAttach()
 	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
 
-	// auto connection = m_Scene->m_Registry.on_destroy<HiddenPickupComponent>().connect<&InGame_layer::OnPickupDestroyed>(this);
+	m_Scene->m_Registry.on_destroy<VictoryComponent>().connect<&InGame_layer::OnVictoryComponentDestroyed>(this);
 
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
@@ -118,20 +118,34 @@ void InGame_layer::OnUpdate(Timestep ts)
 	if (m_Player.m_Transform.location.length() < 5.0f)
 		m_Player.FillReserves(m_SimulationSpeed * ts);
 	
-	if (m_EarthHitCount >= m_MaxEarthHitCount || m_Player.m_Health <= 0.0f)
+	if (m_Loose || m_Victory)
 	{
 		m_SceneRenderer.RenderScene();
 		m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
 		m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
-		GameApplication::Game_DrawText("Game Over",
-			Vec3D(700, 600, 0), // parameterize the screen coordinates
-			Vec3D(0.9f, 0.3f, 0.3f),
-			2.0f);
-		GameApplication::Game_DrawText("press Esc to return to menu",
-			Vec3D(650, 550, 0),
-			Vec3D(0.9f, 0.3f, 0.3f),
-			1.0f);
+		if (m_Loose)
+		{
+			GameApplication::Game_DrawText("Game Over",
+				Vec3D(700, 600, 0), // parameterize the screen coordinates
+				Vec3D(0.9f, 0.3f, 0.3f),
+				2.0f);
+			GameApplication::Game_DrawText("press Esc to return to menu",
+				Vec3D(650, 550, 0),
+				Vec3D(0.9f, 0.3f, 0.3f),
+				1.0f);
+		}
+		else if (m_Victory)
+		{
+			GameApplication::Game_DrawText("Victory",
+				Vec3D(800, 600, 0), // parameterize the screen coordinates
+				Vec3D(0.3f, 0.9f, 0.3f),
+				2.0f);
+			GameApplication::Game_DrawText("press Esc to return to menu",
+				Vec3D(650, 550, 0),
+				Vec3D(0.3f, 0.9f, 0.3f),
+				1.0f);
+		}
 
 
 		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
@@ -171,14 +185,13 @@ void InGame_layer::OnUpdate(Timestep ts)
 		}
 	}
 
+	PartialUpdate();
 	// if the update-render order is swapped, something is un-initialized and the program fails at alpha mesh rendering
 	m_SceneRenderer.RenderScene();
 	// m_SceneUpdater.UpdateScene(m_SimulationSpeed * ts);
 	UpdateScene(m_SimulationSpeed * ts);
-//	m_CollidersOctTree->Update(m_Scene.get());
-//	m_MissillesOctTree->Update(m_Scene.get());
-	m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
-	m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
+//	m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
+//	m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
 	//m_AntiMissilleOctTree->Update<AntiMissilleComponent>(m_Scene.get());
 
 	//	m_ImgProcessor->Blur(g_RendererBlurDepthSlot, Renderer::s_BlurBuffer); // this is not working, as expected
@@ -300,7 +313,7 @@ void InGame_layer::ResetLayer()
 	m_EntityManager.SetScene(m_Scene.get());
 	m_SceneRenderer.SetScene(m_Scene);
 
-	// m_Scene->m_Registry.on_destroy<HiddenPickupComponent>().connect<&InGame_layer::OnPickupDestroyed>(this);
+	m_Scene->m_Registry.on_destroy<VictoryComponent>().connect<&InGame_layer::OnVictoryComponentDestroyed>(this);
 	
 	m_ElapsedTime = 0.0f;
 	m_SimulationSpeed = 1.0f;
@@ -313,6 +326,9 @@ void InGame_layer::ResetLayer()
 	m_EarthHitCount = 0;
 
 	m_EntityManager.CreateStars();
+
+	m_Loose = false;
+	m_Victory = false;
 }
 
 
@@ -384,7 +400,7 @@ bool InGame_layer::OnKeyPressed(Event& e)
 	if (event.key.code == sf::Keyboard::Key::Escape)
 	{
 		DeActivate(); // this automatically activates the menu layer
-		if (m_EarthHitCount >= m_MaxEarthHitCount || m_Player.m_Health <= 0.0f)
+		if (m_Loose || m_Victory)
 			ResetLayer();
 	}
 	else if (event.key.code == sf::Keyboard::Key::Space)
@@ -617,6 +633,47 @@ void InGame_layer::ZoomOut()
 	m_ZoomLevel /= 1.05f;
 	m_ZoomLevel = m_ZoomLevel < g_InitialZoomLevel ? g_InitialZoomLevel : m_ZoomLevel;
 	Renderer::SetZoomLevel(m_ZoomLevel);
+}
+
+void InGame_layer::PartialUpdate()
+{
+	static int phaseCounter = 0;
+
+	if (phaseCounter == 0)
+	{
+		EvaluateLossCondition();
+	}
+	else if (phaseCounter == 1)
+	{
+		m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
+	}
+	else if (phaseCounter == 2)
+	{
+		m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
+	}
+	else if (phaseCounter == 3)
+	{
+	}
+	else if (phaseCounter == 4)
+	{
+	}
+	else if (phaseCounter == 5)
+	{
+	}
+	else if (phaseCounter == 6)
+	{
+	}
+	else if (phaseCounter == 7)
+	{
+	}
+	else if (phaseCounter == 8)
+	{
+	}
+	else if (phaseCounter == 9)
+	{
+	}
+
+	phaseCounter = (phaseCounter + 1) % 10;
 }
 
 void InGame_layer::UpdateScene(Timestep ts)
@@ -854,7 +911,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 
 	// check collisions of the player:
 	static std::vector<entt::entity> player_vicinity;
-	Box3D box; box.center = m_Player.m_Transform.location; box.radius = Vec3D(2,2,2);
+	Box3D box; box.center = m_Player.m_Transform.location; box.radius = Vec3D(50, 50, 50);
 	player_vicinity.clear();
 	m_CollidersOctTree->GetActiveTree()->QueryRange(box, player_vicinity, 0);
 	for (int i = 0; i < player_vicinity.size(); i++)
@@ -1111,4 +1168,15 @@ void InGame_layer::UpdateEnemyShips(Timestep ts)
 	}
 }
 
+
+void InGame_layer::OnVictoryComponentDestroyed()
+{
+	m_Victory = true;
+}
+
+void InGame_layer::EvaluateLossCondition()
+{
+	if (m_EarthHitCount >= m_MaxEarthHitCount || m_Player.m_Health <= 0.0f)
+		m_Loose = true;
+}
 

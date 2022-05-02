@@ -61,6 +61,7 @@ void InGame_layer2::OnAttach()
 
 	auto connection = m_Scene->m_Registry.on_destroy<EnemyShipComponent>().connect<&InGame_layer2::OnEnemyShipDestroyed>(this);
 
+	
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
 

@@ -86,6 +86,10 @@ struct MarkedForDestructionComponent { char something = 0; };
 
 struct EnemyShipComponent { float shotTimer = 0.0f; };
 
+struct VictoryComponent { float shotTimer = 0.0f; };
+
+struct LoosingComponent { float shotTimer = 0.0f; };
+
 struct MarkerComponent
 { 
 	ColourComponent marker_colour = { 0.0f, 0.0f, 1.0f, 1.0f };

@@ -62,6 +62,8 @@ private:
 	bool OnMouseEntered(Event& e);
 	bool OnMouseLeft(Event& e);
 
+	void PartialUpdate();
+
 	void HandleUserInput(Timestep ts);
 	void ZoomIn();
 	void ZoomOut();
@@ -71,7 +73,9 @@ private:
 	void UpdateEnemyShips(Timestep ts);
 	void OnPickupDestroyed(entt::registry& registry, entt::entity entity);
 	void OnPickupDestroyed();
+	void OnVictoryComponentDestroyed();
 
+	void EvaluateLossCondition();
 
 private:
 	float m_ElapsedTime = 0.0f;
@@ -99,6 +103,8 @@ private:
 	int m_EarthHitCount = 0;
 	int m_MaxEarthHitCount = 5;
 
+	bool m_Victory = false;
+	bool m_Loose = false;
 };
 
 

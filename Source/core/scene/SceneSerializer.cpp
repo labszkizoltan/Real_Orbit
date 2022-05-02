@@ -196,6 +196,28 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 		}
 
 
+		//----- EnemyShipComponent -----//
+		auto enemy_ship_com = entity["EnemyShipComponent"];
+		if (enemy_ship_com)
+		{
+			deserializedEntity.AddComponent<EnemyShipComponent>();
+		}
+
+		//----- VictoryComponent -----//
+		auto victory_com = entity["VictoryComponent"];
+		if (victory_com)
+		{
+			deserializedEntity.AddComponent<VictoryComponent>();
+		}
+
+		//----- LoosingComponent -----//
+		auto loosing_com = entity["LoosingComponent"];
+		if (loosing_com)
+		{
+			deserializedEntity.AddComponent<LoosingComponent>();
+		}
+
+
 		//----- PlayerComponent -----//
 		auto player_com = entity["PlayerComponent"];
 		if (player_com)
