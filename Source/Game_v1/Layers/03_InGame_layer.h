@@ -78,7 +78,7 @@ private:
 
 private:
 	float m_ElapsedTime = 0.0f;
-	float m_SimulationSpeed = 1.0f;
+	float m_SimulationSpeed = 0.2f;
 	float m_ZoomLevel = g_InitialZoomLevel;
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
@@ -88,7 +88,7 @@ private:
 
 	Player m_Player;
 	EntityManager m_EntityManager;
-	AudioManager m_AudioManager;
+	AudioManager m_AudioManager; // ("assets/audio/MoonMission_introSpeech.wav");
 
 	std::shared_ptr<DualOctTree> m_CollidersOctTree = nullptr;
 	// std::shared_ptr<DualOctTree> m_AsteroidsOctTree = nullptr;

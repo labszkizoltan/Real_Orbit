@@ -69,6 +69,7 @@ void InGame_layer2::OnAttach()
 	m_ImgProcessor->SetMipMapLevel(4);
 
 	m_AudioManager.SetVolume(10.0f);
+	m_AudioManager.SetIntroSpeech("assets/audio/MoonMission_introSpeech.wav");
 
 	m_Player.m_Transform.location = Vec3D(0, 0, -50);
 	m_Player.m_Transform.orientation.f1 = Vec3D(1, 0, 0);
@@ -87,6 +88,7 @@ void InGame_layer2::OnUpdate(Timestep ts)
 {
 	static int windowHeight = GameApplication::Get().GetWindow().GetHeight();
 	m_AudioManager.PlayMusic();
+	m_AudioManager.PlayIntroSpeech();
 
 	TransformComponent& light_trf = m_Scene->GetLight();
 	light_trf.location = m_Player.m_Transform.location + Vec3D(-10, 0, 0);
@@ -187,6 +189,7 @@ void InGame_layer2::DeActivate()
 	Application& app = Application::Get();
 	((GameApplication*)(&app))->ActitivateLayer(GameLayers::MENU_LAYER);
 	m_AudioManager.PauseMusic();
+	m_AudioManager.StopIntroSpeech();
 	// m_Music.pause();
 	m_IsActive = false;
 }
@@ -274,7 +277,7 @@ void InGame_layer2::ResetLayer()
 	m_Scene->m_Registry.on_destroy<MarkerComponent>().connect<&InGame_layer2::OnEnemyShipDestroyed>(this);
 
 	m_ElapsedTime = 0.0f;
-	m_SimulationSpeed = 1.0f;
+	m_SimulationSpeed = 0.2f;
 	m_ZoomLevel = g_InitialZoomLevel;
 
 	m_Player = Player();
@@ -285,6 +288,8 @@ void InGame_layer2::ResetLayer()
 	m_Player.m_Transform.orientation.f3 = Vec3D(0, 0, 1);
 
 	m_CameraContinuousRotation = false;
+
+	m_AudioManager.m_IntroPlayed = false;
 
 	m_KillCount = 0;
 	m_IsLost = false;
@@ -549,7 +554,10 @@ void InGame_layer2::HandleUserInput(Timestep ts)
 	static int skip = 0;
 	if (Input::IsMouseButtonPressed(sf::Mouse::Left) && m_Player.m_BulletCount > 0)
 	{
-		m_EntityManager.ShootBullett(m_Player.m_Transform, m_Player.m_DynamicProps.velocity + m_Player.m_Transform.orientation.f3 * m_Player.m_BulletSpeed * 5.0f);
+		float phi = RORNG::runif() * 2 * 3.1415926535, r = RORNG::runif();
+		float x = cos(phi), y = sin(phi);
+		m_EntityManager.ShootBullett(m_Player.m_Transform,
+			m_Player.m_DynamicProps.velocity + (m_Player.m_Transform.orientation.f3 + 0.002f * r * (x * m_Player.m_Transform.orientation.f1 + y * m_Player.m_Transform.orientation.f2)) * m_Player.m_BulletSpeed);
 		m_Player.m_BulletCount--;
 		m_AudioManager.PlayShotSound();
 	}

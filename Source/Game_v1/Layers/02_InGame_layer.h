@@ -79,7 +79,7 @@ private:
 
 private:
 	float m_ElapsedTime = 0.0f;
-	float m_SimulationSpeed = 1.0f;
+	float m_SimulationSpeed = 0.2f;
 	float m_ZoomLevel = g_InitialZoomLevel;
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
