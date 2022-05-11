@@ -13,6 +13,7 @@
 #include <core/scene/SceneSerializer.h>
 #include <core/scene/CoreComponents.h>
 #include <Game_v1/Components/GameComponents.h>
+#include <Game_v1/Common/CollisionDetection.h>
 
 
 
@@ -87,6 +88,7 @@ void InGame_layer2::OnDetach()
 void InGame_layer2::OnUpdate(Timestep ts)
 {
 	static int windowHeight = GameApplication::Get().GetWindow().GetHeight();
+	static int windowWidth = GameApplication::Get().GetWindow().GetWidth();
 	m_AudioManager.PlayMusic();
 	m_AudioManager.PlayIntroSpeech();
 
@@ -130,6 +132,7 @@ void InGame_layer2::OnUpdate(Timestep ts)
 		}
 
 		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+		GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth- 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 		GameApplication::Game_DrawText("Enemy Ships Destroyed - " + std::to_string(m_KillCount) + " / " + std::to_string(m_MaxKillCount),
 			Vec3D(700, windowHeight - 70, 0),
 			Vec3D(0.3f, 0.9f, 0.5f),
@@ -154,6 +157,7 @@ void InGame_layer2::OnUpdate(Timestep ts)
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
 	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+	GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth - 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 	GameApplication::Game_DrawText("Enemy Ships Destroyed - " + std::to_string(m_KillCount) + " / " + std::to_string(m_MaxKillCount),
 		Vec3D(700, windowHeight - 70, 0),
 		Vec3D(0.3f, 0.9f, 0.5f),
@@ -715,6 +719,7 @@ void InGame_layer2::UpdateScene(Timestep ts)
 					// avoidanceVector += dx / dx.lengthSquare();
 					avoidanceVector += dx / dx.length() / (dx.length() - targetLoc.scale);
 
+					/*
 					// check collision:
 					float lambda = dv.lengthSquare() < 0.00001f ? 0 : -(dx * dv) / (ts * dv.lengthSquare());
 					Vec3D hit_location = dx + dv * ts * std::min(1.0f, std::max(lambda, 0.0f));
@@ -735,6 +740,27 @@ void InGame_layer2::UpdateScene(Timestep ts)
 							m_EntityManager.SpawnDebris(missileTrf.location + hit_location - dx, targetVelocity.velocity, 0.05, m_BulletSpawnChance);
 							m_EntityManager.SpawnDebris(missileTrf.location + hit_location - dx, missileVelocity.velocity / 4, 0.1, m_BulletSpawnChance);
 							m_EntityManager.SpawnDebris(missileTrf.location + hit_location - dx, missileVelocity.velocity / 4, 0.1, m_BulletSpawnChance);
+						}
+					}
+					*/
+
+					// check collision:
+
+					Vec3D hit_location = CollisionDetector::CheckRoughCollision(missileTrf, targetLoc, missileVelocity, targetVelocity, ts);
+					if (hit_location.x < std::numeric_limits<float>::max())
+					{
+						TimerComponent& ttl = timed_entities.get<TimerComponent>(missile);
+						ttl = 0.0f;
+						HitPointComponent& targetHP = m_Scene->m_Registry.get<HitPointComponent>(missille_vicinity[i]);
+						targetHP.HP -= 10.0f;
+
+						missileTrf.scale /= 8;
+
+						for (int k = 0; k < 15; k++)
+						{
+							m_EntityManager.SpawnDebris(hit_location, targetVelocity.velocity, 0.05, m_BulletSpawnChance);
+							m_EntityManager.SpawnDebris(hit_location, missileVelocity.velocity / 4, 0.1, m_BulletSpawnChance);
+							m_EntityManager.SpawnDebris(hit_location, missileVelocity.velocity / 4, 0.1, m_BulletSpawnChance);
 						}
 					}
 				}

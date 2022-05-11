@@ -158,7 +158,8 @@ void EntityManager::SpawnAsteroidCloud()
 
 void EntityManager::SpawnDebris(Vec3D center, Vec3D velocity, float spread, float bulletChance)
 {
-	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+	// static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
+	static int asteroidIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Spark"]; // spark is just a yellow coloured bullet
 
 	TransformComponent transform;
 	transform.location = center;

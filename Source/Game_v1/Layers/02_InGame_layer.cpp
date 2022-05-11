@@ -110,6 +110,7 @@ void InGame_layer::OnDetach()
 void InGame_layer::OnUpdate(Timestep ts)
 {
 	static int windowHeight = GameApplication::Get().GetWindow().GetHeight();
+	static int windowWidth = GameApplication::Get().GetWindow().GetWidth();
 	m_AudioManager.PlayMusic();
 	m_AudioManager.PlayIntroSpeech();
 
@@ -151,6 +152,7 @@ void InGame_layer::OnUpdate(Timestep ts)
 
 
 		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+		GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth - 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 		GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_EarthHitCount) + " / " + std::to_string(m_MaxEarthHitCount),
 			Vec3D(700, windowHeight - 70, 0),
 			Vec3D(0.3f, 0.9f, 0.5f),
@@ -202,9 +204,10 @@ void InGame_layer::OnUpdate(Timestep ts)
 	//	m_FbDisplay.Draw();
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
-	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, 1200 - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+	GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth - 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 	GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_EarthHitCount) + " / " + std::to_string(m_MaxEarthHitCount),
-		Vec3D(700, 1200 - 70, 0),
+		Vec3D(700, windowHeight - 70, 0),
 		Vec3D(0.3f, 0.9f, 0.5f),
 		1.0f);
 	m_Player.DrawStatsOnScreen();
