@@ -1,6 +1,7 @@
 
 #include "GameApp_v1.h"
 #include <Game_v1/Layers/01_MenuLayer.h>
+#include <Game_v1/Layers/01b_ImGuiTestMenuLayer.h>
 #include <Game_v1/Layers/02_InGame_layer.h>
 #include <Game_v1/Layers/03_InGame_layer.h>
 
@@ -10,7 +11,8 @@ GameApplication::GameApplication()
 {
 	s_Font = std::make_unique<ROFont>("assets/fonts/ImageJ_alphabet_3.png", "assets/fonts/ImageJ_alphabet_3_description.txt");
 
-	Menu_layer* menuLayer = new Menu_layer();
+	// Menu_layer* menuLayer = new Menu_layer();
+	ImGui_Menu_layer* menuLayer = new ImGui_Menu_layer();
 	InGame_layer* ingameLayer = new InGame_layer();
 	InGame_layer2* ingameLayer2 = new InGame_layer2();
 

@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC ;NOMINMAX;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)vendor\yaml-cpp-yaml-cpp-0.7.0\include;$(SolutionDir)vendor\stb_image;$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)vendor\yaml-cpp-yaml-cpp-0.7.0\include;$(SolutionDir)vendor\stb_image;$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;$(SolutionDir)vendor\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -140,7 +140,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC ;NOMINMAX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)vendor\yaml-cpp-yaml-cpp-0.7.0\include;$(SolutionDir)vendor\stb_image;$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)vendor\yaml-cpp-yaml-cpp-0.7.0\include;$(SolutionDir)vendor\stb_image;$(SolutionDir);$(SolutionDir)Source;$(SolutionDir)vendor\GLAD\include;$(SolutionDir)vendor\SFML\include;$(SolutionDir)vendor\spdlog\include;$(SolutionDir)vendor\GLM;$(SolutionDir)vendor\EnTT\entt-3.8.1\src;$(SolutionDir)vendor\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
@@ -199,6 +199,7 @@
     <ClCompile Include="Source\Game_v1\Common\Player.cpp" />
     <ClCompile Include="Source\Game_v1\Common\UnitControl.cpp" />
     <ClCompile Include="Source\Game_v1\GameApp_v1.cpp" />
+    <ClCompile Include="Source\Game_v1\Layers\01b_ImGuiTestMenuLayer.cpp" />
     <ClCompile Include="Source\Game_v1\Layers\01_MenuLayer.cpp" />
     <ClCompile Include="Source\Game_v1\Layers\02_InGame_layer.cpp" />
     <ClCompile Include="Source\Game_v1\Layers\03_InGame_layer.cpp" />
@@ -208,6 +209,13 @@
     <ClCompile Include="Source\utils\shape_creator.cpp" />
     <ClCompile Include="Source\utils\Vector_2D.cpp" />
     <ClCompile Include="Source\utils\Vector_3D.cpp" />
+    <ClCompile Include="vendor\imgui\imgui\imgui-SFML.cpp" />
+    <ClCompile Include="vendor\imgui\imgui\imgui.cpp" />
+    <ClCompile Include="vendor\imgui\imgui\imgui_demo.cpp" />
+    <ClCompile Include="vendor\imgui\imgui\imgui_draw.cpp" />
+    <ClCompile Include="vendor\imgui\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="vendor\imgui\imgui\imgui_tables.cpp" />
+    <ClCompile Include="vendor\imgui\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -273,6 +281,7 @@
     <ClInclude Include="Source\Game_v1\Common\UnitControl.h" />
     <ClInclude Include="Source\Game_v1\Components\GameComponents.h" />
     <ClInclude Include="Source\Game_v1\GameApp_v1.h" />
+    <ClInclude Include="Source\Game_v1\Layers\01b_ImGuiTestMenuLayer.h" />
     <ClInclude Include="Source\Game_v1\Layers\02_InGame_layer.h" />
     <ClInclude Include="Source\Game_v1\Layers\01_MenuLayer.h" />
     <ClInclude Include="Source\Game_v1\Layers\03_InGame_layer.h" />
@@ -283,6 +292,17 @@
     <ClInclude Include="Source\utils\shape_creator.h" />
     <ClInclude Include="Source\utils\Vector_2D.h" />
     <ClInclude Include="Source\utils\Vector_3D.h" />
+    <ClInclude Include="vendor\imgui\imgui\imconfig-SFML.h" />
+    <ClInclude Include="vendor\imgui\imgui\imconfig.h" />
+    <ClInclude Include="vendor\imgui\imgui\imgui-SFML.h" />
+    <ClInclude Include="vendor\imgui\imgui\imgui-SFML_export.h" />
+    <ClInclude Include="vendor\imgui\imgui\imgui.h" />
+    <ClInclude Include="vendor\imgui\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="vendor\imgui\imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="vendor\imgui\imgui\imgui_internal.h" />
+    <ClInclude Include="vendor\imgui\imgui\imstb_rectpack.h" />
+    <ClInclude Include="vendor\imgui\imgui\imstb_textedit.h" />
+    <ClInclude Include="vendor\imgui\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assetfactory\textures\menu\font_des.bin" />

@@ -343,3 +343,5 @@ healthchecksdb
 # Exclude folders
 assets/**
 /Source/core/rendering/shader_source_files/textured_shaders_FAILSAVE.h
+/vendor/imgui/imgui-1.87
+/vendor/imgui/imgui-sfml-2.5

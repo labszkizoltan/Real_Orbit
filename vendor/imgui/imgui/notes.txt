@@ -1,0 +1,10 @@
+
+ImGui and ImGui-SFML releases:
+https://github.com/ocornut/imgui/releases/tag/v1.87
+https://github.com/eliasdaler/imgui-sfml
+
+How to use ImGui in SFML (this didn't work for me):
+https://www.youtube.com/watch?v=2YS5WJTeKpI
+
+
+
