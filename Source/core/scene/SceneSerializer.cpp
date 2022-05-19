@@ -483,8 +483,7 @@ namespace YAML {
 
 	};
 
-	/*
-	*/
+
 	template<>
 	struct convert<WeaponType>
 	{

@@ -100,7 +100,6 @@ void InGame_layer2::OnUpdate(Timestep ts)
 		m_Player.FillReserves(m_SimulationSpeed * ts);
 
 	if (m_KillCount >= m_MaxKillCount || m_IsLost)
-	// if (m_KillCount >= m_MaxKillCount || m_Player.m_Health <= 0.0f)
 	{
 		m_SceneRenderer.RenderScene();
 		m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
@@ -118,7 +117,6 @@ void InGame_layer2::OnUpdate(Timestep ts)
 				1.0f);
 		}
 
-		// if (m_Player.m_Health <= 0.0f)
 		if (m_IsLost)
 		{
 			GameApplication::Game_DrawText("Game Over",
@@ -745,7 +743,6 @@ void InGame_layer2::UpdateScene(Timestep ts)
 					*/
 
 					// check collision:
-
 					Vec3D hit_location = CollisionDetector::CheckRoughCollision(missileTrf, targetLoc, missileVelocity, targetVelocity, ts);
 					if (hit_location.x < std::numeric_limits<float>::max())
 					{
@@ -753,7 +750,6 @@ void InGame_layer2::UpdateScene(Timestep ts)
 						ttl = 0.0f;
 						HitPointComponent& targetHP = m_Scene->m_Registry.get<HitPointComponent>(missille_vicinity[i]);
 						targetHP.HP -= 10.0f;
-
 						missileTrf.scale /= 8;
 
 						for (int k = 0; k < 15; k++)
