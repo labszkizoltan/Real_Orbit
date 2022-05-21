@@ -5,7 +5,7 @@
 #include <core/Application.h>
 #include <core/rendering/drawables/text_rendering/ROFont.h>
 
-enum class GameLayers { MENU_LAYER, INGAME_LAYER, INGAME_LAYER2 };
+enum class GameLayers { MENU_LAYER, INGAME_LAYER, INGAME_LAYER2, MARS_MISSION_LAYER };
 
 class GameApplication : public Application
 {

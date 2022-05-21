@@ -19,6 +19,7 @@ struct Box3D
 	Vec3D radius = { 1,1,1 };
 
 	Box3D() = default;
+	Box3D(Vec3D _center, Vec3D _radius) : center(_center), radius(_radius) {}
 	bool ContainsPoint(const Vec3D& point);
 	bool IntersectsBox3D(const Box3D& other);
 

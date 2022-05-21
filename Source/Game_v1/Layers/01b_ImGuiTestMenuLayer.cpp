@@ -17,8 +17,8 @@
 #include <glad/glad.h>
 
 #include <imgui/imgui.h>
+#include <imgui/imgui-SFML.h>
 #include <imgui/imgui_impl_opengl3.h>
-//#include <imgui/imgui-SFML.h>
 
 //#include "scene_descriptions.h"
 
@@ -34,13 +34,14 @@ void ImGui_Menu_layer::OnAttach()
 {
 	LOG_INFO("ImGui_Menu_layer attached");
 
-	// ImGui::SFML::Init(Application::Get().GetWindow().GetNativeWindow());
+
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	ImGuiIO& io = ImGui::GetIO();
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
 	ImGui_ImplOpenGL3_Init("#version 460 core");
+	// ImGui::SFML::Init(Application::Get().GetWindow().GetNativeWindow());
 
 
 	m_Scene = std::make_shared<Scene>();
@@ -65,6 +66,7 @@ void ImGui_Menu_layer::OnDetach()
 {
 	LOG_INFO("ImGui_Menu_layer detached");
 
+	ImGui_ImplOpenGL3_Shutdown();
 	// ImGui::SFML::Shutdown();
 }
 
@@ -91,34 +93,39 @@ void ImGui_Menu_layer::OnUpdate(Timestep ts)
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 	// GameApplication::Game_DrawText("Hello Real Orbit!", Vec3D(10, 10, 0), Vec3D(0.3f, 0.9f, 0.5f), 2.0f);
 
-	// test ImGui with SFML:
-	/*
-	sf::RenderWindow& window = Application::Get().GetWindow().GetNativeWindow();
-
-	sf::Event event;
-	while (window.pollEvent(event)) {
-		ImGui::SFML::ProcessEvent(window, event);
-	}
-
-	ImGui::SFML::Update(window, sf::Time(sf::milliseconds(10)));
-	ImGui::Begin("myWindow");
-	ImGui::Text("myText");
-	ImGui::End();
-
-	ImGui::SFML::Render(Application::Get().GetWindow().GetNativeWindow());
-	*/
-
 	// test ImGui with OpenGL:
 	// This one works, at least visually, but since Im not using GLFW, I dont know how to link my events with ImGui
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui::NewFrame();
+	// Some helper materials:
+	// http://cg.elte.hu/~msc_cg/Gyak/06/OpenGL%20UI.pdf
+	// another code snippet about how to combine SFML and ImGui:
+	// https://github.com/eliasdaler/imgui-sfml/issues/109
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.DisplaySize = ImVec2(Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
 //	io.DeltaTime = 1.0f / 60.0f;
 
-	static bool show = true;
-	ImGui::ShowDemoWindow(&show);
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui::NewFrame();
+
+	static int displayedNumber = 0;
+
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { displayedNumber++; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { displayedNumber--; }
+
+	ImGui::SetNextWindowPos(ImVec2(300, 400));
+	ImGui::SetNextWindowSize(ImVec2(500,500));
+
+	ImGui::Begin("ImGui::Begin()");
+	ImGui::Text("ImGui::Text() %d", displayedNumber);
+	ImGui::Button("ImGui::Button()");
+	ImGui::SliderInt("SliderInt()", &displayedNumber, -100, 100);
+
+	ImGui::BeginChild("ImGui::BeginChild()");
+	for (int n = 0; n < 3; n++)
+		ImGui::Text("%04d: Child Text", n);
+	ImGui::EndChild();
+
+	ImGui::End();
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -130,6 +137,10 @@ void ImGui_Menu_layer::OnUpdate(Timestep ts)
 
 void ImGui_Menu_layer::OnEvent(Event& event)
 {
+	// static sf::Clock deltaClock;
+	// ImGui::SFML::ProcessEvent(event.GetEvent());
+	// ImGui::SFML::Update(Application::Get().GetWindow().GetNativeWindow(), deltaClock.restart());
+
 	event.Dispatch<sf::Event::EventType::Resized>(BIND_EVENT_FN(OnWindowResize)); // this should be removed when this is resolved through the renderer
 	event.Dispatch<sf::Event::EventType::LostFocus>(BIND_EVENT_FN(OnLoosingFocus));
 	event.Dispatch<sf::Event::EventType::GainedFocus>(BIND_EVENT_FN(OnGainingFocus));

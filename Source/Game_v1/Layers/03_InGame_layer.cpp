@@ -37,11 +37,6 @@ void InGame_layer2::OnAttach()
 {
 	LOG_INFO("InGame_layer2 attached");
 
-	FrameBufferSpecification fbSpec;
-	fbSpec.Width = Application::Get().GetWindow().GetWidth();
-	fbSpec.Height = Application::Get().GetWindow().GetHeight();
-	fbSpec.Samples = 1;
-
 	m_Scene = std::make_shared<Scene>();
 
 	SceneSerializer serializer(m_Scene);
@@ -53,7 +48,6 @@ void InGame_layer2::OnAttach()
 	m_SceneRenderer.SetScene(m_Scene);
 
 	Box3D tmp_box; tmp_box.radius = Vec3D(10000, 10000, 10000);
-	// m_AsteroidsOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
 

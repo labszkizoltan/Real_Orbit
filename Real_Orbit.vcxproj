@@ -203,6 +203,7 @@
     <ClCompile Include="Source\Game_v1\Layers\01_MenuLayer.cpp" />
     <ClCompile Include="Source\Game_v1\Layers\02_InGame_layer.cpp" />
     <ClCompile Include="Source\Game_v1\Layers\03_InGame_layer.cpp" />
+    <ClCompile Include="Source\Game_v1\Layers\04_MarsMission_layer.cpp" />
     <ClCompile Include="Source\utils\Matrix_3D.cpp" />
     <ClCompile Include="Source\utils\OctTree.cpp" />
     <ClCompile Include="Source\utils\RandomGeneration.cpp" />
@@ -285,6 +286,7 @@
     <ClInclude Include="Source\Game_v1\Layers\02_InGame_layer.h" />
     <ClInclude Include="Source\Game_v1\Layers\01_MenuLayer.h" />
     <ClInclude Include="Source\Game_v1\Layers\03_InGame_layer.h" />
+    <ClInclude Include="Source\Game_v1\Layers\04_MarsMission_layer.h" />
     <ClInclude Include="Source\Game_v1\Layers\scene_descriptions.h" />
     <ClInclude Include="Source\utils\Matrix_3D.h" />
     <ClInclude Include="Source\utils\OctTree.h" />

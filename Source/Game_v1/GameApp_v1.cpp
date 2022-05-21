@@ -4,6 +4,7 @@
 #include <Game_v1/Layers/01b_ImGuiTestMenuLayer.h>
 #include <Game_v1/Layers/02_InGame_layer.h>
 #include <Game_v1/Layers/03_InGame_layer.h>
+#include <Game_v1/Layers/04_MarsMission_layer.h>
 
 std::unique_ptr<ROFont> GameApplication::s_Font = nullptr;
 
@@ -11,18 +12,23 @@ GameApplication::GameApplication()
 {
 	s_Font = std::make_unique<ROFont>("assets/fonts/ImageJ_alphabet_3.png", "assets/fonts/ImageJ_alphabet_3_description.txt");
 
-	// Menu_layer* menuLayer = new Menu_layer();
-	ImGui_Menu_layer* menuLayer = new ImGui_Menu_layer();
+	Menu_layer* menuLayer = new Menu_layer();
+	// ImGui_Menu_layer* menuLayer = new ImGui_Menu_layer();
 	InGame_layer* ingameLayer = new InGame_layer();
 	InGame_layer2* ingameLayer2 = new InGame_layer2();
+	MarsMission_layer* ingameLayer3 = new MarsMission_layer();
+
+	
 
 	PushLayer(menuLayer);
 	PushLayer(ingameLayer);
 	PushLayer(ingameLayer2);
+	PushLayer(ingameLayer3);
 
 	menuLayer->Activate();
 	ingameLayer->DeActivate();
 	ingameLayer2->DeActivate();
+	ingameLayer3->DeActivate();
 }
 
 GameApplication::~GameApplication()

@@ -86,9 +86,14 @@ struct MarkedForDestructionComponent { char something = 0; };
 
 struct EnemyShipComponent { float shotTimer = 0.0f; };
 
-struct VictoryComponent { float shotTimer = 0.0f; };
+struct ControllComponent
+{
+	std::vector<Vec3D> waypoints;
+};
 
-struct LoosingComponent { float shotTimer = 0.0f; };
+struct VictoryComponent { char something = 0; };
+
+struct LoosingComponent { char something = 0; };
 
 struct MarkerComponent
 { 

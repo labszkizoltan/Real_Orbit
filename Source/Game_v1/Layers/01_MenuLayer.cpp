@@ -361,8 +361,11 @@ void Menu_layer::InitStates()
 	tmp_state.next_state = 4;
 	tmp_state.previous_state = 5;
 	tmp_state.child_state = -1;
-	tmp_state.activation_function = []() {
-		std::cout << "mars mission activation was called\n";
+	tmp_state.activation_function = [this]() {
+		std::cout << "earth mission activation was called\n";
+		DeActivate();
+		Application& app = Application::Get();
+		((GameApplication*)(&app))->ActitivateLayer(GameLayers::MARS_MISSION_LAYER);
 	};
 
 	m_StateManager.m_States.push_back(tmp_state);

@@ -195,12 +195,18 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			deserializedEntity.AddComponent<WeaponComponent>(result);
 		}
 
-
 		//----- EnemyShipComponent -----//
 		auto enemy_ship_com = entity["EnemyShipComponent"];
 		if (enemy_ship_com)
 		{
 			deserializedEntity.AddComponent<EnemyShipComponent>();
+		}
+
+		//----- ControllComponent -----//
+		auto controll_com = entity["ControllComponent"];
+		if (controll_com)
+		{
+			deserializedEntity.AddComponent<ControllComponent>();
 		}
 
 		//----- VictoryComponent -----//

@@ -1,5 +1,6 @@
 
 #include "02_InGame_layer.h"
+#include "04_MarsMission_layer.h"
 #include <core/Application.h>
 #include <Game_v1/GameApp_v1.h>
 #include <SFML/Window/Event.hpp>
@@ -12,6 +13,7 @@
 #include <core/scene/SceneSerializer.h>
 #include <core/scene/CoreComponents.h>
 #include <Game_v1/Components/GameComponents.h>
+#include <Game_v1/Common/CollisionDetection.h>
 
 
 
@@ -23,69 +25,38 @@
 
 #include <queue> // the priority_queue uses it in the targeting function
 
-#define BIND_EVENT_FN(x) std::bind(&InGame_layer::x, this, std::placeholders::_1)
+#define BIND_EVENT_FN(x) std::bind(&MarsMission_layer::x, this, std::placeholders::_1)
 
-OGLBufferData ParseVertexFile(const std::string& filename)
+MarsMission_layer::MarsMission_layer()
+	: Layer("MarsMission_layer")
 {
-	OGLBufferData result;
-	std::ifstream myfile(filename.c_str());
-	if (!myfile.is_open())
-	{
-		LOG_CORE_WARN("InGame_layer::ParseVertexFile() was unable to open file: {0}", filename);
-		return result;
-	}
-
-	int v_count = 0, i_count = 0;
-
-	myfile >> v_count;
-	myfile >> i_count;
-
-	result.vertex_data.resize(v_count);
-	result.index_data.resize(i_count);
-
-	for (int i = 0; i < (v_count); i++)
-		myfile >> result.vertex_data[i];
-
-	for (int i = 0; i < i_count; i++)
-		myfile >> result.index_data[i];
-
-	myfile.close();
-
-	if (result.vertex_data.size() == 0 || result.index_data.size() == 0)
-		LOG_CORE_WARN("InGame_layer::ParseVertexFile(): vertex or index data missing from file: ", filename);
-
-	return result;
+	LOG_INFO("MarsMission_layer constructed");
 }
 
-
-InGame_layer::InGame_layer()
-	: Layer("InGame_layer")
+void MarsMission_layer::OnAttach()
 {
-	LOG_INFO("InGame_layer constructed");
-}
-
-void InGame_layer::OnAttach()
-{
-	LOG_INFO("InGame_layer attached");
+	LOG_INFO("MarsMission_layer attached");
 
 	m_Scene = std::make_shared<Scene>();
+	m_UnitController.m_Layer = this;
 
 	SceneSerializer serializer(m_Scene);
-	//	serializer.DeSerialize_file("D:/cpp_codes/37_RealOrbit/Real_Orbit/assets/scenes/test_scene_3.yaml");
-	serializer.DeSerialize_file("assets/scenes/02_InGameLayer.yaml");
+	serializer.DeSerialize_file("assets/scenes/04_MarsMissionLayer2.yaml");
+	AddWaypoints();
 
 	m_EntityManager.SetScene(m_Scene.get());
-	m_EntityManager.CreateStars();
 
-	// m_Font = std::make_unique<ROFont>("assets/fonts/ImageJ_alphabet_3.png", "assets/fonts/ImageJ_alphabet_3_description.txt");
 	m_SceneRenderer.SetScene(m_Scene);
 
 	Box3D tmp_box; tmp_box.radius = Vec3D(10000, 10000, 10000);
+	// m_AsteroidsOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
 
-	m_Scene->m_Registry.on_destroy<VictoryComponent>().connect<&InGame_layer::OnVictoryComponentDestroyed>(this);
+	m_Scene->m_Registry.on_destroy<TeamComponent_0>().connect<&MarsMission_layer::OnTeam0ShipDestroyed>(this);
+	m_Scene->m_Registry.on_destroy<TeamComponent_1>().connect<&MarsMission_layer::OnTeam1ShipDestroyed>(this);
 
+	
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
 	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
 
@@ -93,16 +64,22 @@ void InGame_layer::OnAttach()
 	m_ImgProcessor->SetMipMapLevel(4);
 
 	m_AudioManager.SetVolume(10.0f);
-	m_AudioManager.SetIntroSpeech("assets/audio/EarthMission_introSpeech.wav");
+	m_AudioManager.SetIntroSpeech("assets/audio/MoonMission_introSpeech.wav");
+
+	m_Player.m_Transform.location = Vec3D(550, 0, 0);
+	m_Player.m_Transform.orientation.f1 = Vec3D(1, 0, 0);
+	m_Player.m_Transform.orientation.f2 = Vec3D(0, 1, 0);
+	m_Player.m_Transform.orientation.f3 = Vec3D(0, 0, 1);
+
 
 }
 
-void InGame_layer::OnDetach()
+void MarsMission_layer::OnDetach()
 {
-	LOG_INFO("InGame_layer detached");
+	LOG_INFO("MarsMission_layer detached");
 }
 
-void InGame_layer::OnUpdate(Timestep ts)
+void MarsMission_layer::OnUpdate(Timestep ts)
 {
 	static int windowHeight = GameApplication::Get().GetWindow().GetHeight();
 	static int windowWidth = GameApplication::Get().GetWindow().GetWidth();
@@ -110,30 +87,19 @@ void InGame_layer::OnUpdate(Timestep ts)
 	m_AudioManager.PlayIntroSpeech();
 
 	TransformComponent& light_trf = m_Scene->GetLight();
-	light_trf.location = m_Player.m_Transform.location+Vec3D(-10, 0, 0);
+	light_trf.location = m_Player.m_Transform.location + Vec3D(-10, 0, 0);
 
 	HandleUserInput(ts);
-	if (m_Player.m_Transform.location.length() < 5.0f)
+	if (m_Player.m_Transform.location.length() < 30.0f)
 		m_Player.FillReserves(m_SimulationSpeed * ts);
-	
-	if (m_Loose || m_Victory)
+
+	if (m_IsLost)
 	{
 		m_SceneRenderer.RenderScene();
 		m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
 		m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
-		if (m_Loose)
-		{
-			GameApplication::Game_DrawText("Game Over",
-				Vec3D(700, 600, 0), // parameterize the screen coordinates
-				Vec3D(0.9f, 0.3f, 0.3f),
-				2.0f);
-			GameApplication::Game_DrawText("press Esc to return to menu",
-				Vec3D(650, 550, 0),
-				Vec3D(0.9f, 0.3f, 0.3f),
-				1.0f);
-		}
-		else if (m_Victory)
+		if (false)
 		{
 			GameApplication::Game_DrawText("Victory",
 				Vec3D(800, 600, 0), // parameterize the screen coordinates
@@ -145,55 +111,32 @@ void InGame_layer::OnUpdate(Timestep ts)
 				1.0f);
 		}
 
+		if (m_IsLost)
+		{
+			GameApplication::Game_DrawText("Game Over",
+				Vec3D(700, 600, 0), // parameterize the screen coordinates
+				Vec3D(0.9f, 0.3f, 0.3f),
+				2.0f);
+			GameApplication::Game_DrawText("press Esc to return to menu",
+				Vec3D(650, 550, 0),
+				Vec3D(0.9f, 0.3f, 0.3f),
+				1.0f);
+		}
 
 		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
-		GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth - 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
-		GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_EarthHitCount) + " / " + std::to_string(m_MaxEarthHitCount),
-			Vec3D(700, windowHeight - 70, 0),
-			Vec3D(0.3f, 0.9f, 0.5f),
-			1.0f);
+		GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth- 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+
 		m_Player.DrawStatsOnScreen();
 
 		return;
 	}
 
-	{
-		static int fleetSpawnCounter = 0;
 
-		int asteroid_count = 128;
-		float spawn_frequency = 10000.0f;
-		static float asteroid_spawn_timer = spawn_frequency; // in milli seconds
-		asteroid_spawn_timer -= m_SimulationSpeed * ts;
-		if (asteroid_spawn_timer < 0.0f)
-		{
-			fleetSpawnCounter++;
-			asteroid_spawn_timer = spawn_frequency;
-			Vec3D center = Vec3D(50, 0, 0);
-			Vec3D velocity = -0.01 * center / center.length();
-			for (int i = 0; i < asteroid_count; i++)
-				m_EntityManager.SpawnAsteroid(500.0f * center / center.length(), velocity, 80.0f, 2.5f);
-
-			m_EntityManager.SpawnPickupAsteroid(500.0f * center / center.length(), velocity, 80.0f, 2.5f, PickupType::HEALTH);
-
-			if (fleetSpawnCounter % 4 == 0)
-			{
-				TransformComponent trf; trf.location = 500.0f * center / center.length(); trf.orientation = Mat_3D(Vec3D(0, -1, 0), Vec3D(0, 0, -1), Vec3D(1, 0, 0)); trf.scale = 0.5f;
-				DynamicPropertiesComponent dynProp; dynProp.velocity = velocity;
-				m_EntityManager.SpawnShipFormation(trf, dynProp);
-			}
-		}
-	}
-
-	PartialUpdate();
 	// if the update-render order is swapped, something is un-initialized and the program fails at alpha mesh rendering
+	PartialUpdate(m_SimulationSpeed * ts);
 	m_SceneRenderer.RenderScene();
-	// m_SceneUpdater.UpdateScene(m_SimulationSpeed * ts);
 	UpdateScene(m_SimulationSpeed * ts);
-//	m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
-//	m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
-	//m_AntiMissilleOctTree->Update<AntiMissilleComponent>(m_Scene.get());
 
-	//	m_ImgProcessor->Blur(g_RendererBlurDepthSlot, Renderer::s_BlurBuffer); // this is not working, as expected
 	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
 
 	//	m_FbDisplay.Draw();
@@ -201,29 +144,26 @@ void InGame_layer::OnUpdate(Timestep ts)
 
 	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 	GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth - 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
-	GameApplication::Game_DrawText("Asteroid Impacts - " + std::to_string(m_EarthHitCount) + " / " + std::to_string(m_MaxEarthHitCount),
-		Vec3D(700, windowHeight - 70, 0),
-		Vec3D(0.3f, 0.9f, 0.5f),
-		1.0f);
+
 	m_Player.DrawStatsOnScreen();
 
 	m_ElapsedTime += m_SimulationSpeed * ts;
 }
 
-void InGame_layer::OnEvent(Event& event)
+void MarsMission_layer::OnEvent(Event& event)
 {
-	event.Dispatch<sf::Event::EventType::Resized>				(BIND_EVENT_FN(OnWindowResize));
-	event.Dispatch<sf::Event::EventType::LostFocus>				(BIND_EVENT_FN(OnLoosingFocus));
-	event.Dispatch<sf::Event::EventType::GainedFocus>			(BIND_EVENT_FN(OnGainingFocus));
-	event.Dispatch<sf::Event::EventType::KeyPressed>			(BIND_EVENT_FN(OnKeyPressed));
-	event.Dispatch<sf::Event::EventType::KeyReleased>			(BIND_EVENT_FN(OnKeyReleased));
-	event.Dispatch<sf::Event::EventType::MouseWheelScrolled>	(BIND_EVENT_FN(MouseWheelScrolled));
-	event.Dispatch<sf::Event::EventType::MouseButtonPressed>	(BIND_EVENT_FN(OnMouseButtonPressed));
-	event.Dispatch<sf::Event::EventType::MouseButtonReleased>	(BIND_EVENT_FN(OnMouseButtonReleased));
+	event.Dispatch<sf::Event::EventType::Resized>(BIND_EVENT_FN(OnWindowResize));
+	event.Dispatch<sf::Event::EventType::LostFocus>(BIND_EVENT_FN(OnLoosingFocus));
+	event.Dispatch<sf::Event::EventType::GainedFocus>(BIND_EVENT_FN(OnGainingFocus));
+	event.Dispatch<sf::Event::EventType::KeyPressed>(BIND_EVENT_FN(OnKeyPressed));
+	event.Dispatch<sf::Event::EventType::KeyReleased>(BIND_EVENT_FN(OnKeyReleased));
+	event.Dispatch<sf::Event::EventType::MouseWheelScrolled>(BIND_EVENT_FN(MouseWheelScrolled));
+	event.Dispatch<sf::Event::EventType::MouseButtonPressed>(BIND_EVENT_FN(OnMouseButtonPressed));
+	event.Dispatch<sf::Event::EventType::MouseButtonReleased>(BIND_EVENT_FN(OnMouseButtonReleased));
 	//	event.Dispatch<sf::Event::EventType::MouseMoved>			(BIND_EVENT_FN(OnMouseMoved));
 }
 
-void InGame_layer::Activate()
+void MarsMission_layer::Activate()
 {
 	m_IsActive = true;
 	m_AudioManager.ContinueMusic();
@@ -231,7 +171,7 @@ void InGame_layer::Activate()
 	Renderer::SetZoomLevel(m_ZoomLevel);
 }
 
-void InGame_layer::DeActivate()
+void MarsMission_layer::DeActivate()
 {
 	Application& app = Application::Get();
 	((GameApplication*)(&app))->ActitivateLayer(GameLayers::MENU_LAYER);
@@ -242,12 +182,12 @@ void InGame_layer::DeActivate()
 }
 
 
-entt::entity InGame_layer::GetTarget()
+entt::entity MarsMission_layer::GetTarget()
 {
 	return GetTarget(m_Scene->GetCamera().location, m_Scene->GetCamera().orientation.f3);
 }
 
-entt::entity InGame_layer::GetTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection)
+entt::entity MarsMission_layer::GetTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection)
 {
 	static int counter = 0;
 	int queue_size = 15;
@@ -302,44 +242,59 @@ entt::entity InGame_layer::GetTarget(const Vec3D& acquisitionLocation, const Vec
 		return targeting_queue.top().user_data;
 }
 
-void InGame_layer::ResetLayer()
+void MarsMission_layer::ResetLayer()
 {
-	LOG_INFO("InGame_layer reset");
+	LOG_INFO("InGame_layer3 reset");
 
+	// New scne is created here, so the asteroid field has to be regenerated
+	// and the on_destroy... listener should be set again
 	m_Scene = std::make_shared<Scene>();
 
 	SceneSerializer serializer(m_Scene);
-	serializer.DeSerialize_file("assets/scenes/02_InGameLayer.yaml");
+	serializer.DeSerialize_file("assets/scenes/04_MarsMissionLayer2.yaml");
+	AddWaypoints();
 
 	m_EntityManager.SetScene(m_Scene.get());
 	m_SceneRenderer.SetScene(m_Scene);
 
-	m_Scene->m_Registry.on_destroy<VictoryComponent>().connect<&InGame_layer::OnVictoryComponentDestroyed>(this);
-	
+	Box3D tmp_box; tmp_box.radius = Vec3D(10000, 10000, 10000);
+	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
+	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
+
+	m_Scene->m_Registry.on_destroy<TeamComponent_0>().connect<&MarsMission_layer::OnTeam0ShipDestroyed>(this);
+	m_Scene->m_Registry.on_destroy<TeamComponent_1>().connect<&MarsMission_layer::OnTeam1ShipDestroyed>(this);
+
 	m_ElapsedTime = 0.0f;
 	m_SimulationSpeed = 0.2f;
 	m_ZoomLevel = g_InitialZoomLevel;
 
 	m_Player = Player();
+	m_Player.m_Transform.location = Vec3D(0, 0, -50);
+
+	m_Player.m_Transform.orientation.f1 = Vec3D(1, 0, 0);
+	m_Player.m_Transform.orientation.f2 = Vec3D(0, 1, 0);
+	m_Player.m_Transform.orientation.f3 = Vec3D(0, 0, 1);
 
 	m_CameraContinuousRotation = false;
-	
-	m_EarthHitCount = 0;
-
-	m_EntityManager.CreateStars();
 
 	m_AudioManager.m_IntroPlayed = false;
 
-	m_Loose = false;
-	m_Victory = false;
+	int m_Team0_kill_counter = 0;
+	int m_Team1_kill_counter = 0;
+	m_IsLost = false;
 }
 
 
-entt::entity InGame_layer::GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection)
+entt::entity MarsMission_layer::GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection)
 {
 	static int counter = 0;
+	int targeting_range = 500;
 	int queue_size = 15;
 	std::priority_queue<targeting_data<entt::entity>> targeting_queue;
+
+	static std::vector<entt::entity> entities; entities.clear();
+	Box3D box(acquisitionLocation, Vec3D(targeting_range, targeting_range, targeting_range));
+	m_CollidersOctTree->GetActiveTree()->QueryRange(box, entities, 0);
 
 	Vec3D pos = acquisitionLocation;
 	Vec3D dir = acquisitionDirection;
@@ -347,15 +302,12 @@ entt::entity InGame_layer::GetClosestTarget(const Vec3D& acquisitionLocation, co
 	entt::entity result = entt::null;
 
 	float maxScalarProd = -1.0f;
-
-	// exclude TargetComponent, so missiles wont target other missiles
-	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent, AsteroidComponent>();
-	if (view.begin() == view.end())
-		return entt::null;
-
-	for (auto entity : view)
+	for (auto entity : entities)
 	{
-		TransformComponent& entity_trf = view.get<TransformComponent>(entity);
+		if (!m_Scene->m_Registry.valid(entity))
+			continue;
+
+		TransformComponent& entity_trf = m_Scene->m_Registry.get<TransformComponent>(entity);
 		Vec3D dx = entity_trf.location - pos;
 
 		float scalarProd = dx * dir / dx.length();
@@ -375,35 +327,35 @@ entt::entity InGame_layer::GetClosestTarget(const Vec3D& acquisitionLocation, co
 ***** Private member functions *****
 ************************************/
 
-bool InGame_layer::OnWindowResize(Event& e)
+bool MarsMission_layer::OnWindowResize(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::OnLoosingFocus(Event& e)
+bool MarsMission_layer::OnLoosingFocus(Event& e)
 {
 	m_InFocus = false;
 	return false;
 }
 
-bool InGame_layer::OnGainingFocus(Event& e)
+bool MarsMission_layer::OnGainingFocus(Event& e)
 {
 	m_InFocus = true;
 	return false;
 }
 
-bool InGame_layer::OnTextEntered(Event& e)
+bool MarsMission_layer::OnTextEntered(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::OnKeyPressed(Event& e)
+bool MarsMission_layer::OnKeyPressed(Event& e)
 {
 	sf::Event& event = e.GetEvent();
 	if (event.key.code == sf::Keyboard::Key::Escape)
 	{
 		DeActivate(); // this automatically activates the menu layer
-		if (m_Loose || m_Victory)
+		if (m_IsLost)
 			ResetLayer();
 	}
 	else if (event.key.code == sf::Keyboard::Key::Space)
@@ -424,12 +376,12 @@ bool InGame_layer::OnKeyPressed(Event& e)
 	return false;
 }
 
-bool InGame_layer::OnKeyReleased(Event& e)
+bool MarsMission_layer::OnKeyReleased(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::MouseWheelScrolled(Event& e)
+bool MarsMission_layer::MouseWheelScrolled(Event& e)
 {
 	sf::Event& event = e.GetEvent();
 
@@ -442,17 +394,17 @@ bool InGame_layer::MouseWheelScrolled(Event& e)
 	return false;
 }
 
-bool InGame_layer::OnMouseButtonPressed(Event& e)
+bool MarsMission_layer::OnMouseButtonPressed(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::OnMouseButtonReleased(Event& e)
+bool MarsMission_layer::OnMouseButtonReleased(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::OnMouseMoved(Event& e)
+bool MarsMission_layer::OnMouseMoved(Event& e)
 {
 	static int center_x = Application::Get().GetWindow().GetWidth() / 2;
 	static int center_y = Application::Get().GetWindow().GetHeight() / 2;
@@ -484,17 +436,59 @@ bool InGame_layer::OnMouseMoved(Event& e)
 	return false;
 }
 
-bool InGame_layer::OnMouseEntered(Event& e)
+bool MarsMission_layer::OnMouseEntered(Event& e)
 {
 	return false;
 }
 
-bool InGame_layer::OnMouseLeft(Event& e)
+bool MarsMission_layer::OnMouseLeft(Event& e)
 {
 	return false;
 }
 
-void InGame_layer::HandleUserInput(Timestep ts)
+void MarsMission_layer::PartialUpdate(Timestep ts)
+{
+	static int phaseCounter = 0;
+
+	if (phaseCounter == 0)
+	{
+		EvaluateLossCondition();
+	}
+	else if (phaseCounter == 1)
+	{
+		m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
+	}
+	else if (phaseCounter == 2)
+	{
+		m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
+	}
+	else if (phaseCounter == 3)
+	{
+		// ControlUnits(ts);
+	}
+	else if (phaseCounter == 4)
+	{
+	}
+	else if (phaseCounter == 5)
+	{
+	}
+	else if (phaseCounter == 6)
+	{
+	}
+	else if (phaseCounter == 7)
+	{
+	}
+	else if (phaseCounter == 8)
+	{
+	}
+	else if (phaseCounter == 9)
+	{
+	}
+
+	phaseCounter = (phaseCounter + 1) % 10;
+}
+
+void MarsMission_layer::HandleUserInput(Timestep ts)
 {
 	TransformComponent& cam_trf = m_Scene->GetCamera();
 	//	static TransformComponent cam_trf = TransformComponent();
@@ -506,16 +500,15 @@ void InGame_layer::HandleUserInput(Timestep ts)
 	// static float player_acceleration = 0.000003f;
 	float player_acceleration = 0.000003f;
 	float fuel_consumption_multiplier = 1.0f;
-	if (Input::IsKeyPressed(sf::Keyboard::Key::LShift)) { player_acceleration *= 3; fuel_consumption_multiplier = 6.0f; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::LShift)) { player_acceleration *= 3; fuel_consumption_multiplier = 6.0f;}
 
 	// moves
-	if (Input::IsKeyPressed(sf::Keyboard::Key::W) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::S) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::A) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::D) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::R) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
-	if (Input::IsKeyPressed(sf::Keyboard::Key::F) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; m_Player.m_Fuel -= (fuel_consumption_multiplier * m_SimulationSpeed / 0.2f); }
-
+	if (Input::IsKeyPressed(sf::Keyboard::Key::W) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::S) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f3; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::A) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::D) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f1; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::R) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity += m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::F) && m_Player.m_Fuel > 0) { m_Player.m_DynamicProps.velocity -= m_SimulationSpeed * ts * player_acceleration * m_Player.m_Transform.orientation.f2; }
 	// rotations
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Q)) { m_Player.m_Transform.orientation = Rotation(0.001f * ts, m_Player.m_Transform.orientation.f3) * m_Player.m_Transform.orientation; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::E)) { m_Player.m_Transform.orientation = Rotation(-0.001f * ts, m_Player.m_Transform.orientation.f3) * m_Player.m_Transform.orientation; }
@@ -526,10 +519,7 @@ void InGame_layer::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::P)) { ZoomIn(); }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::O)) { ZoomOut(); }
 
-	// if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { player_acceleration *= 1.1f; }
-	// if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { player_acceleration /= 1.1f; }
-
-	if (Input::IsKeyPressed(sf::Keyboard::Key::B)) { m_Player.m_DynamicProps.velocity = Vec3D(0,0,0); }
+	if (Input::IsKeyPressed(sf::Keyboard::Key::B)) { m_Player.m_DynamicProps.velocity = Vec3D(0, 0, 0); }
 
 	static float cam_velocity = 0.001f;
 	// moves, for debugging
@@ -550,11 +540,10 @@ void InGame_layer::HandleUserInput(Timestep ts)
 	static int skip = 0;
 	if (Input::IsMouseButtonPressed(sf::Mouse::Left) && m_Player.m_BulletCount > 0)
 	{
-		float phi = RORNG::runif()*2*3.1415926535, r = RORNG::runif();
+		float phi = RORNG::runif() * 2 * 3.1415926535, r = RORNG::runif();
 		float x = cos(phi), y = sin(phi);
 		m_EntityManager.ShootBullett(m_Player.m_Transform,
-			m_Player.m_DynamicProps.velocity + (m_Player.m_Transform.orientation.f3+0.01f*r*(x* m_Player.m_Transform.orientation.f1+y* m_Player.m_Transform.orientation.f2)) * m_Player.m_BulletSpeed);
-		// m_EntityManager.ShootBullett(m_Player.m_Transform, m_Player.m_DynamicProps.velocity + m_Player.m_Transform.orientation.f3 * m_Player.m_BulletSpeed);
+			m_Player.m_DynamicProps.velocity + (m_Player.m_Transform.orientation.f3 + 0.002f * r * (x * m_Player.m_Transform.orientation.f1 + y * m_Player.m_Transform.orientation.f2)) * m_Player.m_BulletSpeed);
 		m_Player.m_BulletCount--;
 		m_AudioManager.PlayShotSound();
 	}
@@ -572,12 +561,12 @@ void InGame_layer::HandleUserInput(Timestep ts)
 			TransformComponent& shipTrf = armed_ships.get<TransformComponent>(armed_ship);
 			DynamicPropertiesComponent& shipVelocity = armed_ships.get<DynamicPropertiesComponent>(armed_ship);
 			// LaunchMissile(bulletIdx, shipTrf, GetTarget());
-			if ((skip/2) % 2 == 0)
+			if ((skip / 2) % 2 == 0)
 				m_EntityManager.LaunchMissile(yellowIdx, shipTrf, shipVelocity, GetTarget());
-				//m_EntityManager.LaunchMissile(yellowIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
+			//m_EntityManager.LaunchMissile(yellowIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
 			else
 				m_EntityManager.LaunchMissile(blueIdx, shipTrf, shipVelocity, GetTarget());
-				//m_EntityManager.LaunchMissile(blueIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
+			//m_EntityManager.LaunchMissile(blueIdx, shipTrf, GetClosestTarget(cam_trf.location, cam_trf.orientation.f3));
 		}
 	}
 	if (!Input::IsMouseButtonPressed(sf::Mouse::Left) && !Input::IsMouseButtonPressed(sf::Mouse::Right) && !Input::IsMouseButtonPressed(sf::Mouse::Middle))
@@ -628,67 +617,26 @@ void InGame_layer::HandleUserInput(Timestep ts)
 
 }
 
-void InGame_layer::ZoomIn()
+void MarsMission_layer::ZoomIn()
 {
 	m_ZoomLevel *= 1.05f;
 	m_ZoomLevel = m_ZoomLevel > 128.0f ? 128.0f : m_ZoomLevel;
 	Renderer::SetZoomLevel(m_ZoomLevel);
 }
 
-void InGame_layer::ZoomOut()
+void MarsMission_layer::ZoomOut()
 {
 	m_ZoomLevel /= 1.05f;
 	m_ZoomLevel = m_ZoomLevel < g_InitialZoomLevel ? g_InitialZoomLevel : m_ZoomLevel;
 	Renderer::SetZoomLevel(m_ZoomLevel);
 }
 
-void InGame_layer::PartialUpdate()
-{
-	static int phaseCounter = 0;
-
-	if (phaseCounter == 0)
-	{
-		EvaluateLossCondition();
-	}
-	else if (phaseCounter == 1)
-	{
-		m_CollidersOctTree->Update<ColliderComponent>(m_Scene.get());
-	}
-	else if (phaseCounter == 2)
-	{
-		m_MissillesOctTree->Update<TargetComponent, DynamicPropertiesComponent>(m_Scene.get());
-	}
-	else if (phaseCounter == 3)
-	{
-	}
-	else if (phaseCounter == 4)
-	{
-	}
-	else if (phaseCounter == 5)
-	{
-	}
-	else if (phaseCounter == 6)
-	{
-	}
-	else if (phaseCounter == 7)
-	{
-	}
-	else if (phaseCounter == 8)
-	{
-	}
-	else if (phaseCounter == 9)
-	{
-	}
-
-	phaseCounter = (phaseCounter + 1) % 10;
-}
-
-void InGame_layer::UpdateScene(Timestep ts)
+void MarsMission_layer::UpdateScene(Timestep ts)
 {
 	m_Scene->m_MeshLibrary.Clear();
-
-	OnPickupDestroyed();
-	m_Player.TakePickUp(m_Scene, 2.0f, 0.05f);
+	
+//	OnPickupDestroyed();
+//	m_Player.TakePickUp(m_Scene, 2.0f, 0.1f);
 
 	auto timed_entities = m_Scene->m_Registry.view<TimerComponent>();
 	for (auto entity : timed_entities)
@@ -711,7 +659,6 @@ void InGame_layer::UpdateScene(Timestep ts)
 			m_EntityManager.SpawnExplosion(trf, dyn, ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
 			m_Scene->m_Registry.destroy(entity);
 			m_AudioManager.PlayExplosionSound();
-			//m_ExplosionSound.play();
 		}
 	}
 
@@ -724,6 +671,8 @@ void InGame_layer::UpdateScene(Timestep ts)
 		col.a = 1.0f / (trf.scale * trf.scale * trf.scale);
 	}
 
+	m_UnitController.MoveUnits(ts);
+
 	auto missiles = m_Scene->m_Registry.view<TargetComponent, TransformComponent, DynamicPropertiesComponent>();
 	for (auto missile : missiles)
 	{
@@ -734,11 +683,10 @@ void InGame_layer::UpdateScene(Timestep ts)
 			DynamicPropertiesComponent& missileVelocity = missiles.get<DynamicPropertiesComponent>(missile);
 
 			static std::vector<entt::entity> missille_vicinity;
-			Box3D box; box.center = missileTrf.location; box.radius = Vec3D(10, 10, 10);
+			Box3D box; box.center = missileTrf.location; box.radius = Vec3D(20, 20, 20);
 			missille_vicinity.clear();
 			m_CollidersOctTree->GetActiveTree()->QueryRange(box, missille_vicinity, 0);
 
-			Vec3D avoidanceVector = Vec3D();
 
 			for (int i = 0; i < missille_vicinity.size(); i++)
 			{
@@ -751,29 +699,21 @@ void InGame_layer::UpdateScene(Timestep ts)
 					Vec3D dx = targetLoc.location - missileTrf.location;
 					Vec3D dv = targetVelocity.velocity - missileVelocity.velocity;
 
-					// avoidanceVector += dx / dx.lengthSquare();
-					avoidanceVector += dx / dx.length() / (dx.length()- targetLoc.scale);
-
 					// check collision:
-					float lambda = dv.lengthSquare() < 0.00001f ? 0 : -(dx * dv) / (ts * dv.lengthSquare());
-					Vec3D hit_location = dx + dv * ts * std::min(1.0f, std::max(lambda, 0.0f));
-					float distance = hit_location.length();
-
-					// delete bullet on hit (by setting its timer to 0, so it will be removed automatically)
-					if (distance < (targetLoc.scale + missileTrf.scale))
+					Vec3D hit_location = CollisionDetector::CheckRoughCollision(missileTrf, targetLoc, missileVelocity, targetVelocity, ts);
+					if (hit_location.x < std::numeric_limits<float>::max())
 					{
 						TimerComponent& ttl = timed_entities.get<TimerComponent>(missile);
 						ttl = 0.0f;
 						HitPointComponent& targetHP = m_Scene->m_Registry.get<HitPointComponent>(missille_vicinity[i]);
 						targetHP.HP -= 10.0f;
-
 						missileTrf.scale /= 8;
 
 						for (int k = 0; k < 15; k++)
 						{
-							m_EntityManager.SpawnDebris(missileTrf.location + hit_location - dx, targetVelocity.velocity, 0.05, m_BulletSpawnChance);
-							m_EntityManager.SpawnDebris(missileTrf.location + hit_location - dx, missileVelocity.velocity / 4, 0.1, m_BulletSpawnChance);
-							m_EntityManager.SpawnDebris(missileTrf.location + hit_location - dx, missileVelocity.velocity / 4, 0.1, m_BulletSpawnChance);
+							m_EntityManager.SpawnDebris(hit_location, targetVelocity.velocity, 0.05, 0.0f);
+							m_EntityManager.SpawnDebris(hit_location, missileVelocity.velocity / 4, 0.1, 0.0f);
+							m_EntityManager.SpawnDebris(hit_location, missileVelocity.velocity / 4, 0.1, 0.0f);
 						}
 					}
 				}
@@ -786,12 +726,11 @@ void InGame_layer::UpdateScene(Timestep ts)
 			Vec3D dv = targetVelocity.velocity - missileVelocity.velocity;
 
 			float dt = sqrt(dx.lengthSquare() / dv.lengthSquare());
-			dx += dt * dv*0.9f;
+			dx += dt * dv * 0.9f;
 			float accel = 0.0001f;
 
 			// This is the place where I can add repulsive forces, so the missilles avoid nearby objects and focus on reaching the target!!!
-			// missileVelocity.velocity += accel * ts * dx / dx.length();
-			missileVelocity.velocity += accel * ts * (dx + 2 * avoidanceVector) / (dx + 2 * avoidanceVector).length();
+			missileVelocity.velocity += accel * ts * dx / dx.length();
 		}
 		else
 		{
@@ -815,7 +754,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 		DynamicPropertiesComponent& bulletVelocity = bullets.get<DynamicPropertiesComponent>(bullet);
 
 		static std::vector<entt::entity> bullet_vicinity;
-		Box3D box; box.center = bulletTrf.location; box.radius = Vec3D(10, 10, 10);
+		Box3D box; box.center = bulletTrf.location; box.radius = Vec3D(20, 20, 20);
 		bullet_vicinity.clear();
 		m_CollidersOctTree->GetActiveTree()->QueryRange(box, bullet_vicinity, 0);
 
@@ -848,36 +787,27 @@ void InGame_layer::UpdateScene(Timestep ts)
 					// m_EntityManager.SpawnExplosion(bulletTrf, targetVelocity);
 					for (int k = 0; k < 30; k++)
 					{
-						m_EntityManager.SpawnDebris(bulletTrf.location+ hit_location-dx, targetVelocity.velocity, 0.05, m_BulletSpawnChance);
-						// m_EntityManager.SpawnDebris(hit_location, targetVelocity.velocity, 0.1);
+						m_EntityManager.SpawnDebris(bulletTrf.location + hit_location - dx, targetVelocity.velocity, 0.05, 0.0f);
 					}
 				}
 			}
 
 		}
-
-		// based on ~5500 averaged bullet update time, updating one bullet takes ~ 2.8 micro seconds
-		// auto finish = std::chrono::high_resolution_clock::now();
-		// auto duration = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
-		// std::cout << "bullet update took:" << duration.count() << "\n";
-
 	}
 
 	auto asteroids = m_Scene->m_Registry.view<TransformComponent, AsteroidComponent>();
 	for (auto asteroid : asteroids)
 	{
 		TransformComponent& asteroidTrf = asteroids.get<TransformComponent>(asteroid);
-		if (asteroidTrf.location.length() < 2.3f + asteroidTrf.scale) // 2.3 is the radius of the earth
+		if (asteroidTrf.location.length() < 10.0f + asteroidTrf.scale) // 10.0f is the radius of the Moon
 		{
 			m_EntityManager.SpawnExplosion(asteroidTrf, DynamicPropertiesComponent(), ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
 			m_Scene->m_Registry.destroy(asteroid);
 			m_AudioManager.PlayExplosionSound();
-
-			m_EarthHitCount++;
 		}
 	}
 
-	UpdateEnemyShips(ts);
+	UpdateShips(ts);
 
 	auto anti_missilles = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, AntiMissilleComponent>();
 	for (auto antiMissille : anti_missilles)
@@ -885,10 +815,11 @@ void InGame_layer::UpdateScene(Timestep ts)
 		TransformComponent& antiMTrf = anti_missilles.get<TransformComponent>(antiMissille);
 
 		static std::vector<entt::entity> antiM_vicinity;
-		Box3D box; box.center = antiMTrf.location; box.radius = 2.0f * Vec3D(antiMTrf.scale, antiMTrf.scale, antiMTrf.scale);
+//		Box3D box; box.center = antiMTrf.location; box.radius = 2.0f * Vec3D(antiMTrf.scale, antiMTrf.scale, antiMTrf.scale);
+		Box3D box; box.center = antiMTrf.location; box.radius = 10.0f * Vec3D(antiMTrf.scale, antiMTrf.scale, antiMTrf.scale);
 		antiM_vicinity.clear();
 		m_MissillesOctTree->GetActiveTree()->QueryRange(box, antiM_vicinity, 0);
-		const float hit_chance = 0.1f;
+		const float hit_chance = 0.005f;
 		if (antiM_vicinity.size() > 0 && m_Scene->m_Registry.valid(antiM_vicinity[0]) && RORNG::runif() < hit_chance)
 		{
 			TimerComponent& missilleTimer = m_Scene->m_Registry.get<TimerComponent>(antiM_vicinity[0]);
@@ -900,7 +831,6 @@ void InGame_layer::UpdateScene(Timestep ts)
 			missilleTimer = 0.0f;
 			antiMTimer = 0.0f;
 		}
-
 	}
 
 	// update wo collision
@@ -935,12 +865,13 @@ void InGame_layer::UpdateScene(Timestep ts)
 		}
 	}
 
+
 	// then the rest of the objects
 	auto view = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MeshIndexComponent>();
 	for (auto entity : view)
 	{
 		TransformComponent& entity_trf = view.get<TransformComponent>(entity);
-		if (entity_trf.location.lengthSquare() > 1000000)
+		if (entity_trf.location.lengthSquare() > 2000*2000)
 		{
 			m_Scene->m_Registry.destroy(entity);
 			continue;
@@ -995,13 +926,27 @@ void InGame_layer::UpdateScene(Timestep ts)
 	/*static*/ std::shared_ptr<Mesh> marker_mesh = m_Scene->m_MeshLibrary.m_Meshes[markerIdx];
 	/*static*/ int markerColBufIdx = marker_mesh->GetColourInstances();
 
-	auto marked_entities= m_Scene->m_Registry.view<TransformComponent, MarkerComponent>();
+	auto marked_entities = m_Scene->m_Registry.view<TransformComponent, MarkerComponent>();
 	for (auto marked_entity : marked_entities)
 	{
 		TransformComponent& entityTrf = marked_entities.get<TransformComponent>(marked_entity);
 		MarkerComponent& marker = marked_entities.get<MarkerComponent>(marked_entity);
+
+		// infinite sight range of markers
 		m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(entityTrf);
 		m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(marker.marker_colour);
+
+
+		// finite sight range of markers
+		/*
+		// draw marker only within a certain range
+		const float detectionRange = 750.0f;
+		if (marker.marker_colour.r < 0.8f || (entityTrf.location - m_Player.m_Transform.location).lengthSquare() < detectionRange * detectionRange)
+		{
+			m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(entityTrf);
+			m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(marker.marker_colour);
+		}
+		*/
 	}
 
 	// add velocity markers:
@@ -1009,7 +954,7 @@ void InGame_layer::UpdateScene(Timestep ts)
 	// yellow -> forward velocity marker
 	velocityMarkerLoc.location = m_Player.m_Transform.location + 0.5f * m_Player.m_DynamicProps.velocity / m_Player.m_DynamicProps.velocity.length();
 	m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(velocityMarkerLoc);
-	m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(1, 1, 0, 1));
+	m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(1,1,0,1));
 
 	// orange -> backward velocity marker
 	velocityMarkerLoc.location = m_Player.m_Transform.location - 0.5f * m_Player.m_DynamicProps.velocity / m_Player.m_DynamicProps.velocity.length();
@@ -1017,117 +962,28 @@ void InGame_layer::UpdateScene(Timestep ts)
 	m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(1, 0.6f, 0, 1));
 
 	// blue -> center marker for easier navigation
-	velocityMarkerLoc.location = m_Player.m_Transform.location * (1.0f - 1.0f / m_Player.m_Transform.location.length());
+	velocityMarkerLoc.location = m_Player.m_Transform.location - 0.5f* m_Player.m_Transform.location / m_Player.m_Transform.location.length();
 	m_Scene->m_MeshLibrary.m_MeshTransforms[markerIdx].push_back(velocityMarkerLoc);
 	m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(0, 0, 1, 1));
-}
-
-void InGame_layer::OnPickupDestroyed(entt::registry& registry, entt::entity entity)
-{
-
-	if (registry.all_of<TransformComponent>(entity))
-	{
-		TransformComponent& trf = registry.get<TransformComponent>(entity);
-		Vec3D center = trf.location;
-		// Vec3D center = Vec3D(0, 50, 0);
-		Vec3D velocity = -0.01 * center / center.length();
-		m_EntityManager.SpawnAsteroid(500.0f * center / center.length(), velocity, 0.0f, 50.0f);
-	}
-	else
-	{
-		TransformComponent& trf = registry.get<TransformComponent>(entity);
-		Vec3D center = Vec3D(0, 50, 0);
-		Vec3D velocity = -0.01 * center / center.length();
-		m_EntityManager.SpawnAsteroid(500.0f * center / center.length(), velocity, 50.0f, 2.3f);
-	}
 
 }
 
-void InGame_layer::OnPickupDestroyed()
-{
-	static int plusIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Plus"];
-	static int dropletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Droplet"];
-	static int missilleIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Missille"];
-
-	static int counter = 0;
-	auto pickupEntities = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, HitPointComponent, HiddenPickupComponent>();
-	for (auto entity : pickupEntities)
-	{
-		HitPointComponent& hpc = pickupEntities.get<HitPointComponent>(entity);
-
-		if (hpc.HP < 0.0f)
-		{
-			counter++;
-			TransformComponent& trf = pickupEntities.get<TransformComponent>(entity); trf.scale = 1.0f;
-			DynamicPropertiesComponent& vel = pickupEntities.get<DynamicPropertiesComponent>(entity);
-			HiddenPickupComponent& pup = pickupEntities.get<HiddenPickupComponent>(entity);
-
-			Entity newEntity = m_Scene->CreateEntity("");
-	
-			newEntity.AddComponent<HiddenPickupComponent>(pup);
-			newEntity.AddComponent<TransformComponent>(trf);
-			if (counter % 3 == 0)
-			{
-				newEntity.AddComponent<MeshIndexComponent>(plusIdx);
-				newEntity.AddComponent<PickupComponent>(PickupType::HEALTH);
-			}
-			else if (counter % 3 == 1)
-			{
-				newEntity.AddComponent<MeshIndexComponent>(dropletIdx);
-				newEntity.AddComponent<PickupComponent>(PickupType::FUEL);
-			}
-			else if (counter % 3 == 2)
-			{
-				newEntity.AddComponent<MeshIndexComponent>(missilleIdx);
-				newEntity.AddComponent<PickupComponent>(PickupType::AMMO);
-			}
-
-			newEntity.AddComponent<DynamicPropertiesComponent>(vel);
-			// newEntity.AddComponent<HitPointComponent>(hitPoints);
-			// newEntity.AddComponent<ColliderComponent>(ColliderComponent());
-			newEntity.AddComponent<MarkerComponent>(MarkerComponent(0.0f, 1.0f, 1.0f, 1.0f));
-
-			m_Scene->m_Registry.destroy(entity);
-		}
-	}
-
-}
-
-
-void InGame_layer::UpdateEnemyShips(Timestep ts)
+void MarsMission_layer::UpdateShips(Timestep ts)
 {
 	if (ts == 0.0f) { return; }
 
-	auto enemyShips = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, EnemyShipComponent>();
-	for (auto ship : enemyShips)
+	auto ships = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, ControllComponent>();
+	for (auto ship : ships)
 	{
-		TransformComponent& shipTrf = enemyShips.get<TransformComponent>(ship);
-		DynamicPropertiesComponent& shipVel = enemyShips.get<DynamicPropertiesComponent>(ship);
-		EnemyShipComponent& weaponTimer = enemyShips.get<EnemyShipComponent>(ship);
-		weaponTimer.shotTimer -= ts;
+		TransformComponent& shipTrf = ships.get<TransformComponent>(ship);
+		DynamicPropertiesComponent& shipVel = ships.get<DynamicPropertiesComponent>(ship);
 
 		// shoot at the player
 		const float weaponCooldown = 1000.0f; // unit is milli seconds
 		const float weaponRange = 250.0f;
 		const float shotVelocity = 0.3f;
 		float ds = (shipTrf.location - m_Player.m_Transform.location).length();
-		if (weaponTimer.shotTimer < 0.0f && ds < weaponRange)
-		{
-			float dt = ds / shotVelocity;
 
-			Vec3D futureLoc = m_Player.m_Transform.location + dt * m_Player.m_DynamicProps.velocity;
-			// Vec3D dv = Vec3D(rand() % 2000 - 1000, rand() % 2000 - 1000, rand() % 2000 - 1000) / 1000.0f;
-			Vec3D bulletVel = /* shipVel.velocity + */ shotVelocity * (futureLoc - shipTrf.location) / (futureLoc - shipTrf.location).length();
-			TransformComponent bulletStartLoc = shipTrf;
-			bulletStartLoc.location += bulletVel * (2.0f * shipTrf.scale / bulletVel.length()); // this is definitely better than the above line, the ships doesnt blow themselves up
-
-			// static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Bullet"];
-			static int bulletIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["RustySlug"];
-			auto dp = DynamicPropertiesComponent(); dp.velocity = bulletVel; bulletStartLoc.scale = 0.1f;
-			m_EntityManager.EmitMesh(bulletIdx, bulletStartLoc, dp, 15.0f, 10000.0f);
-
-			weaponTimer.shotTimer = weaponCooldown;
-		}
 
 		static std::vector<entt::entity> ship_vicinity;
 		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(weaponRange, weaponRange, weaponRange);
@@ -1138,7 +994,7 @@ void InGame_layer::UpdateEnemyShips(Timestep ts)
 		int counter = 0;
 		const int target_limit = 2;
 		// for (int i = 0; (i < ship_vicinity.size()) && (counter < target_limit); i++)
-		for (int i = ship_vicinity.size() - 1; i > 0 && (counter < target_limit); i--)
+		for (int i = ship_vicinity.size()-1; i > 0 && (counter < target_limit); i--)
 		{
 			// i think it can happen that the missille hits an ateroid and gets destroyed by the time we get here
 			// and if i want to get the location of a destroyed entity it will cause memory access violation
@@ -1175,15 +1031,39 @@ void InGame_layer::UpdateEnemyShips(Timestep ts)
 	}
 }
 
-
-void InGame_layer::OnVictoryComponentDestroyed()
+void MarsMission_layer::AddWaypoints()
 {
-	m_Victory = true;
+	auto controlledUnits = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, ControllComponent>();
+	for (auto unit : controlledUnits)
+	{
+		ControllComponent& wp = controlledUnits.get<ControllComponent>(unit);
+		if (m_Scene->m_Registry.all_of<TeamComponent_0>(unit))
+		{
+			wp.waypoints.push_back(Vec3D(350, 50, 0));
+			wp.waypoints.push_back(Vec3D(450, 50, 0));
+		}
+		else if (m_Scene->m_Registry.all_of<TeamComponent_1>(unit))
+		{
+			wp.waypoints.push_back(Vec3D(-350, -50, 0));
+			wp.waypoints.push_back(Vec3D(-450, -50, 0));
+		}
+	}
 }
 
-void InGame_layer::EvaluateLossCondition()
+void MarsMission_layer::OnTeam0ShipDestroyed()
 {
-	if (m_EarthHitCount >= m_MaxEarthHitCount || m_Player.m_Health <= 0.0f)
-		m_Loose = true;
+	m_Team1_kill_counter++;
+}
+
+void MarsMission_layer::OnTeam1ShipDestroyed()
+{
+	m_Team0_kill_counter++;
+}
+
+// returns true if the game is lost
+void MarsMission_layer::EvaluateLossCondition()
+{
+	if (m_Player.m_Health < 0.0f)
+		m_IsLost = true;
 }
 
