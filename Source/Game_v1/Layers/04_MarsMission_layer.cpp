@@ -1039,6 +1039,9 @@ void MarsMission_layer::AddWaypoints()
 		ControllComponent& wp = controlledUnits.get<ControllComponent>(unit);
 		if (m_Scene->m_Registry.all_of<TeamComponent_0>(unit))
 		{
+			wp.waypoints.push_back(Vec3D(250, -50, 50));
+			wp.waypoints.push_back(Vec3D(250, 50, 50));
+			wp.waypoints.push_back(Vec3D(350, 50, 50));
 			wp.waypoints.push_back(Vec3D(350, 50, 0));
 			wp.waypoints.push_back(Vec3D(450, 50, 0));
 		}

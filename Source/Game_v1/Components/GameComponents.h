@@ -89,6 +89,19 @@ struct EnemyShipComponent { float shotTimer = 0.0f; };
 struct ControllComponent
 {
 	std::vector<Vec3D> waypoints;
+
+	float GetPathLength()
+	{
+		if (waypoints.size() < 2)
+			return 0;
+		//	return (waypoints[1] - waypoints[0]).length();
+
+		float pathLen = 0.0f;
+		for (int i = waypoints.size(); i > 1; i--)
+			pathLen += (waypoints[i - 1] - waypoints[i - 2]).length();
+
+		return pathLen;
+	}
 };
 
 struct VictoryComponent { char something = 0; };

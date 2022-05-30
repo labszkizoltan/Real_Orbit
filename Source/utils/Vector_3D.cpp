@@ -63,6 +63,7 @@ float Vec3D::angle(Vec3D & v1, Vec3D & v2)
 void Vec3D::normalize()
 {
 	float l = length();
+	if (l == 0.0f) { return; }
 	x /= l;
 	y /= l;
 	z /= l;
