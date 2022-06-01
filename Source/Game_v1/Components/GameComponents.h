@@ -86,7 +86,8 @@ struct MarkedForDestructionComponent { char something = 0; };
 
 struct EnemyShipComponent { float shotTimer = 0.0f; };
 
-struct ControllComponent
+
+struct MovementControllComponent
 {
 	std::vector<Vec3D> waypoints;
 
@@ -103,6 +104,21 @@ struct ControllComponent
 		return pathLen;
 	}
 };
+
+struct WeaponControllComponent
+{
+	short int gunShots;
+	short int gunShotTimer; // in milli seconds
+	short int missilleShots;
+	short int missilleShotTimer; // in milli seconds
+	short int antiMissilleShots;
+	short int antiMissilleShotTimer; // in milli seconds
+
+//	bool hasGun = false;
+//	bool hasMissille = false;
+//	bool hasAntiMissille = false;
+};
+
 
 struct VictoryComponent { char something = 0; };
 

@@ -4,28 +4,6 @@
 #include <Game_v1/Layers/04_MarsMission_layer.h>
 
 
-//std::shared_ptr<Scene> UnitController::s_Scene = nullptr;
-//std::shared_ptr<DualOctTree> UnitController::s_MissillesOctTree = nullptr;
-// std::vector<entt::entity> UnitController::s_UnitVicinity;
-
-/*
-UnitController::UnitController()
-	: m_Entity(entt::tombstone)
-{
-}
-
-UnitController::UnitController(entt::entity entity)
-	: m_Entity(entity)
-{
-}
-
-void UnitController::SetMissilleOctTree(std::shared_ptr<DualOctTree> tree)
-{
-	// s_MissillesOctTree = tree;
-	// m_MissillesOctTree = tree;
-}
-*/
-
 void UnitController::Update()
 {
 }
@@ -53,26 +31,26 @@ void UnitController::MoveUnits(Timestep ts)
 	const float accel = 0.000002f;
 	const float waypointRemovalRangeSqr = 10*10;
 	const float ccRemovelSpeedSqr = 0.0000001f;
-	auto controlledUnits = m_Layer->m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, ControllComponent>();
+	auto controlledUnits = m_Layer->m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MovementControllComponent>();
 	for (auto unit : controlledUnits)
 	{
 		TransformComponent& trf = controlledUnits.get<TransformComponent>(unit);
 		DynamicPropertiesComponent& vel = controlledUnits.get<DynamicPropertiesComponent>(unit);
-		ControllComponent& wp = controlledUnits.get<ControllComponent>(unit);
+		MovementControllComponent& wp = controlledUnits.get<MovementControllComponent>(unit);
 		
 		if (wp.waypoints.size() > 0)
 			if ((wp.waypoints[wp.waypoints.size() - 1] - trf.location).lengthSquare() < waypointRemovalRangeSqr)
 				wp.waypoints.pop_back();
 
 
-		// when there are no more waypoints, stop, or even remove the ControllComponent
+		// when there are no more waypoints, stop, or even remove the MovementControllComponent
 		if (wp.waypoints.size() == 0)
 		{
 			if(vel.velocity.lengthSquare() > 0.0f)
 				vel.velocity *= (vel.velocity.length() - ts * accel) / vel.velocity.length();
 			
 			if (vel.velocity.lengthSquare() < ccRemovelSpeedSqr)
-				m_Layer->m_Scene->m_Registry.remove<ControllComponent>(unit);
+				m_Layer->m_Scene->m_Registry.remove<MovementControllComponent>(unit);
 		}
 		else
 		{
@@ -92,102 +70,15 @@ void UnitController::MoveUnits(Timestep ts)
 			vel.velocity += -ts * accel * v_ortho;
 		}
 	}
-
 }
 
-// previous trial versions of MoveUnits()
-/*
-void UnitController::MoveUnits(Timestep ts)
+void UnitController::FireControl(Timestep ts)
 {
-	const float maxVel = 0.00001f;
-	const float accel = 0.000002f;
-	const float waypointRemovalRangeSqr = 4*4;
-	auto controlledUnits = m_Layer->m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, ControllComponent>();
-	for (auto unit : controlledUnits)
-	{
-		TransformComponent& trf = controlledUnits.get<TransformComponent>(unit);
-		DynamicPropertiesComponent& vel = controlledUnits.get<DynamicPropertiesComponent>(unit);
-		ControllComponent& wp = controlledUnits.get<ControllComponent>(unit);
-
-		if (wp.waypoints.size() > 0)
-			if ((wp.waypoints[wp.waypoints.size() - 1] - trf.location).lengthSquare() < waypointRemovalRangeSqr)
-				wp.waypoints.pop_back();
 
 
-		// when there are no more waypoints, stop
-		if (wp.waypoints.size() == 0)
-		{
-			if(vel.velocity.lengthSquare() > 0.0f)
-				vel.velocity *= (vel.velocity.length() - ts * accel) / vel.velocity.length();
-			// vel.velocity += -1.0f * ts * accel * vel.velocity / vel.velocity.length();
-		}
-		else if (wp.waypoints.size() == 1)
-		{
-			Vec3D nextWayPoint = wp.waypoints[0];
-			Vec3D dx = nextWayPoint - trf.location;
-			float pathLen = dx.length();
-			dx.normalize();
-
-			Vec3D v_ortho = vel.velocity - dx * (dx * vel.velocity);
-			v_ortho.normalize();
-			Vec3D dv = Vec3D();
-
-			float stopLen = vel.velocity * vel.velocity / (2 * accel);
-
-			if ((stopLen * 1.1f) > pathLen)
-				dv = vel.velocity;
-			else
-				dv = -1 * vel.velocity;
-
-			dv.normalize();
-			dv = dv - v_ortho + dx;
-			dv.normalize();
-			vel.velocity += accel * ts * dv;
-
-//			if (dx * vel.velocity > 0)
-//				vel.velocity += 0.75f * ts * accel * dx;
-//			else
-//				vel.velocity += ts * accel * dx;
-		}
-		else
-		{
-			Vec3D nextWayPoint = wp.waypoints[wp.waypoints.size() - 1];
-			Vec3D nextNextWayPoint = wp.waypoints[wp.waypoints.size() - 2];
-			Vec3D dw = nextNextWayPoint - nextWayPoint;
-			Vec3D dx = nextWayPoint - trf.location;
-
-			// float pathLen = wp.GetPathLength();
-			// float pathLen = dw.length()+dx.length();
-			float pathLen = dx.length();
-			float stopLen = vel.velocity * vel.velocity / (2 * accel);// +dx.length();
-
-			dx.normalize();
-			Vec3D v_ortho = vel.velocity - dx * (dx * vel.velocity);
-			v_ortho.normalize();
-			Vec3D dv = Vec3D();
-
-			if ((stopLen * 1.1f) > pathLen)
-				// dv = -1 * vel.velocity;
-				dv = -1 * dx;
-			else
-				// dv = vel.velocity;
-				dv = dx;
-
-			dv.normalize();
-//			dv = dv - v_ortho + dx;
-			dv = dv - 0.1f*v_ortho;
-			dv.normalize();
-			vel.velocity += accel * ts * dv;
-
-//			if (dx * vel.velocity > 0)
-//				vel.velocity += 0.75f * ts * accel * dx / dx.length();
-//			else
-//				vel.velocity += ts * accel * dx / dx.length();
-		}
-	}
 
 }
-*/
+
 
 entt::entity UnitController::GetClosestTargetFromTeam(const Vec3D& acquisitionLocation, const float acquisitionRange, const int teamNumber)
 {

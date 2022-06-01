@@ -74,8 +74,13 @@ private:
 	void UpdateShips(Timestep ts);
 	void AddWaypoints();
 
+	void SpawnShips(Timestep ts);
+
 	void OnTeam0ShipDestroyed();
 	void OnTeam1ShipDestroyed();
+
+	void OnVictoryComponentDestroyed();
+	void OnLoosingComponentDestroyed();
 
 	void EvaluateLossCondition();
 
@@ -97,6 +102,12 @@ private:
 	std::shared_ptr<DualOctTree> m_MissillesOctTree = nullptr;
 	std::shared_ptr<DualOctTree> m_AntiMissilleOctTree = nullptr;
 
+	std::shared_ptr<DualOctTree> m_Team0_Tree = nullptr;
+	std::shared_ptr<DualOctTree> m_Team1_Tree = nullptr;
+	std::shared_ptr<DualOctTree> m_Team0_missilles_Tree = nullptr;
+	std::shared_ptr<DualOctTree> m_Team1_missilles_Tree = nullptr;
+
+
 	FramebufferDisplay m_FbDisplay;
 	std::unique_ptr<ImageProcessor> m_ImgProcessor = nullptr;
 	bool m_CameraContinuousRotation = false;
@@ -105,8 +116,8 @@ private:
 	int m_Team1_kill_counter = 0;
 	int m_MaxKillCount = 20;
 
+	bool m_Victory = false;
 	bool m_IsLost = false;
-
 
 	friend class UnitController;
 

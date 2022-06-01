@@ -202,11 +202,13 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			deserializedEntity.AddComponent<EnemyShipComponent>();
 		}
 
-		//----- ControllComponent -----//
+		//----- ControllComponents -----//
 		auto controll_com = entity["ControllComponent"];
 		if (controll_com)
 		{
-			deserializedEntity.AddComponent<ControllComponent>();
+			deserializedEntity.AddComponent<MovementControllComponent>();
+			WeaponControllComponent wcc = controll_com.as<WeaponControllComponent>();
+			deserializedEntity.AddComponent<WeaponControllComponent>(wcc);
 		}
 
 		//----- VictoryComponent -----//
@@ -511,6 +513,40 @@ namespace YAML {
 		}
 
 	};
+
+
+	template<>
+	struct convert<WeaponControllComponent>
+	{
+		static Node encode(const WeaponControllComponent v)
+		{
+			Node node;
+			node.push_back(v.gunShots);
+			node.push_back(v.gunShotTimer);
+			node.push_back(v.missilleShots);
+			node.push_back(v.missilleShotTimer);
+			node.push_back(v.antiMissilleShots);
+			node.push_back(v.antiMissilleShotTimer);
+
+			return node;
+		}
+
+		static bool decode(const Node& node, WeaponControllComponent& v)
+		{
+			if (!node.IsSequence() || node.size() != 6)
+				return false;
+
+			v.gunShots = node[0].as<short int>();
+			v.gunShotTimer = node[1].as<short int>();
+			v.missilleShots = node[2].as<short int>();
+			v.missilleShotTimer = node[3].as<short int>();
+			v.antiMissilleShots = node[4].as<short int>();
+			v.antiMissilleShotTimer = node[5].as<short int>();
+			return true;
+		}
+
+	};
+
 
 }
 

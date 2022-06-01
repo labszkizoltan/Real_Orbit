@@ -53,8 +53,16 @@ void MarsMission_layer::OnAttach()
 	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
 
+	m_Team0_Tree = std::make_shared<DualOctTree>(tmp_box);
+	m_Team1_Tree = std::make_shared<DualOctTree>(tmp_box);
+	m_Team0_missilles_Tree = std::make_shared<DualOctTree>(tmp_box);
+	m_Team1_missilles_Tree = std::make_shared<DualOctTree>(tmp_box);
+
+
 	m_Scene->m_Registry.on_destroy<TeamComponent_0>().connect<&MarsMission_layer::OnTeam0ShipDestroyed>(this);
 	m_Scene->m_Registry.on_destroy<TeamComponent_1>().connect<&MarsMission_layer::OnTeam1ShipDestroyed>(this);
+	m_Scene->m_Registry.on_destroy<VictoryComponent>().connect<&MarsMission_layer::OnVictoryComponentDestroyed>(this);
+	m_Scene->m_Registry.on_destroy<LoosingComponent>().connect<&MarsMission_layer::OnLoosingComponentDestroyed>(this);
 
 	
 	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
@@ -93,13 +101,13 @@ void MarsMission_layer::OnUpdate(Timestep ts)
 	if (m_Player.m_Transform.location.length() < 30.0f)
 		m_Player.FillReserves(m_SimulationSpeed * ts);
 
-	if (m_IsLost)
+	if (m_IsLost || m_Victory)
 	{
 		m_SceneRenderer.RenderScene();
 		m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
 		m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
-		if (false)
+		if (m_Victory)
 		{
 			GameApplication::Game_DrawText("Victory",
 				Vec3D(800, 600, 0), // parameterize the screen coordinates
@@ -125,6 +133,10 @@ void MarsMission_layer::OnUpdate(Timestep ts)
 
 		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 		GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth- 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+		GameApplication::Game_DrawText("Team red vs green kills - " + std::to_string(m_Team1_kill_counter) + " / " + std::to_string(m_Team0_kill_counter),
+			Vec3D(700, windowHeight - 70, 0),
+			Vec3D(0.3f, 0.9f, 0.5f),
+			1.0f);
 
 		m_Player.DrawStatsOnScreen();
 
@@ -144,6 +156,10 @@ void MarsMission_layer::OnUpdate(Timestep ts)
 
 	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 	GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth - 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
+	GameApplication::Game_DrawText("Team red vs green kills - " + std::to_string(m_Team1_kill_counter) + " / " + std::to_string(m_Team0_kill_counter),
+		Vec3D(700, windowHeight - 70, 0),
+		Vec3D(0.3f, 0.9f, 0.5f),
+		1.0f);
 
 	m_Player.DrawStatsOnScreen();
 
@@ -260,9 +276,15 @@ void MarsMission_layer::ResetLayer()
 	Box3D tmp_box; tmp_box.radius = Vec3D(10000, 10000, 10000);
 	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
+	m_Team0_Tree = std::make_shared<DualOctTree>(tmp_box);
+	m_Team1_Tree = std::make_shared<DualOctTree>(tmp_box);
+	m_Team0_missilles_Tree = std::make_shared<DualOctTree>(tmp_box);
+	m_Team1_missilles_Tree = std::make_shared<DualOctTree>(tmp_box);
 
 	m_Scene->m_Registry.on_destroy<TeamComponent_0>().connect<&MarsMission_layer::OnTeam0ShipDestroyed>(this);
 	m_Scene->m_Registry.on_destroy<TeamComponent_1>().connect<&MarsMission_layer::OnTeam1ShipDestroyed>(this);
+	m_Scene->m_Registry.on_destroy<VictoryComponent>().connect<&MarsMission_layer::OnVictoryComponentDestroyed>(this);
+	m_Scene->m_Registry.on_destroy<LoosingComponent>().connect<&MarsMission_layer::OnLoosingComponentDestroyed>(this);
 
 	m_ElapsedTime = 0.0f;
 	m_SimulationSpeed = 0.2f;
@@ -279,8 +301,9 @@ void MarsMission_layer::ResetLayer()
 
 	m_AudioManager.m_IntroPlayed = false;
 
-	int m_Team0_kill_counter = 0;
-	int m_Team1_kill_counter = 0;
+	m_Team0_kill_counter = 0;
+	m_Team1_kill_counter = 0;
+	m_Victory = false;
 	m_IsLost = false;
 }
 
@@ -355,7 +378,7 @@ bool MarsMission_layer::OnKeyPressed(Event& e)
 	if (event.key.code == sf::Keyboard::Key::Escape)
 	{
 		DeActivate(); // this automatically activates the menu layer
-		if (m_IsLost)
+		if (m_IsLost || m_Victory)
 			ResetLayer();
 	}
 	else if (event.key.code == sf::Keyboard::Key::Space)
@@ -465,18 +488,23 @@ void MarsMission_layer::PartialUpdate(Timestep ts)
 	else if (phaseCounter == 3)
 	{
 		// ControlUnits(ts);
+		SpawnShips(ts);
 	}
 	else if (phaseCounter == 4)
 	{
+		m_Team0_Tree->Update<TeamComponent_0, ColliderComponent>(m_Scene.get());
 	}
 	else if (phaseCounter == 5)
 	{
+		m_Team1_Tree->Update<TeamComponent_1, ColliderComponent>(m_Scene.get());
 	}
 	else if (phaseCounter == 6)
 	{
+		m_Team0_missilles_Tree->Update<TeamComponent_0, TargetComponent>(m_Scene.get());
 	}
 	else if (phaseCounter == 7)
 	{
+		m_Team1_missilles_Tree->Update<TeamComponent_1, TargetComponent>(m_Scene.get());
 	}
 	else if (phaseCounter == 8)
 	{
@@ -972,7 +1000,7 @@ void MarsMission_layer::UpdateShips(Timestep ts)
 {
 	if (ts == 0.0f) { return; }
 
-	auto ships = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, ControllComponent>();
+	auto ships = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, WeaponControllComponent>();
 	for (auto ship : ships)
 	{
 		TransformComponent& shipTrf = ships.get<TransformComponent>(ship);
@@ -1033,10 +1061,10 @@ void MarsMission_layer::UpdateShips(Timestep ts)
 
 void MarsMission_layer::AddWaypoints()
 {
-	auto controlledUnits = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, ControllComponent>();
+	auto controlledUnits = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MovementControllComponent>();
 	for (auto unit : controlledUnits)
 	{
-		ControllComponent& wp = controlledUnits.get<ControllComponent>(unit);
+		MovementControllComponent& wp = controlledUnits.get<MovementControllComponent>(unit);
 		if (m_Scene->m_Registry.all_of<TeamComponent_0>(unit))
 		{
 			wp.waypoints.push_back(Vec3D(250, -50, 50));
@@ -1047,10 +1075,50 @@ void MarsMission_layer::AddWaypoints()
 		}
 		else if (m_Scene->m_Registry.all_of<TeamComponent_1>(unit))
 		{
+			wp.waypoints.push_back(Vec3D(450, -50, 0));
+			// wp.waypoints.push_back(Vec3D(350, -50, 0));
 			wp.waypoints.push_back(Vec3D(-350, -50, 0));
 			wp.waypoints.push_back(Vec3D(-450, -50, 0));
 		}
 	}
+}
+
+void MarsMission_layer::SpawnShips(Timestep ts)
+{
+	static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
+	static int bcIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battlecruiser"];
+
+	static float spawnTimer = 200.0f;
+	spawnTimer -= ts;
+	if (spawnTimer > 0.0f)
+		return;
+
+	spawnTimer = spawnTimer < 0.0f ? 500.0f : spawnTimer;
+	static int parity = 1;
+	parity *= -1;
+
+	Entity newEntity = m_Scene->CreateEntity("");
+
+	TransformComponent trf;
+	trf.location = Vec3D(parity * 550, 0, 0); // negative - supply ship, positive - Mars
+
+	MovementControllComponent mcc;
+	float phi1 = RORNG::runif() * (2 * 3.1415926535f);
+	float phi2 = RORNG::runif() * (2 * 3.1415926535f);
+	mcc.waypoints.push_back(Vec3D(-parity * 450, 50 * cos(phi1), 50 * sin(phi1)));
+	mcc.waypoints.push_back(Vec3D(parity * 500, 50 * cos(phi2), 50 * sin(phi2)));
+
+	newEntity.AddComponent<TransformComponent>(trf);
+	newEntity.AddComponent<DynamicPropertiesComponent>();
+	newEntity.AddComponent<MeshIndexComponent>(parity <0 ? bcIdx : battleshipIdx);
+	newEntity.AddComponent<HitPointComponent>(100.0f);
+	newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+	newEntity.AddComponent<MarkerComponent>(MarkerComponent(-parity, parity, 0.0f, 1.0f));
+	newEntity.AddComponent<MovementControllComponent>(mcc);
+	if(parity < 0.0)
+		newEntity.AddComponent<TeamComponent_1>();
+	else
+		newEntity.AddComponent<TeamComponent_0>();
 }
 
 void MarsMission_layer::OnTeam0ShipDestroyed()
@@ -1063,10 +1131,31 @@ void MarsMission_layer::OnTeam1ShipDestroyed()
 	m_Team0_kill_counter++;
 }
 
+void MarsMission_layer::OnVictoryComponentDestroyed()
+{
+	m_Victory = true;
+}
+
+void MarsMission_layer::OnLoosingComponentDestroyed()
+{
+	m_IsLost = true;
+}
+
+
 // returns true if the game is lost
 void MarsMission_layer::EvaluateLossCondition()
 {
 	if (m_Player.m_Health < 0.0f)
 		m_IsLost = true;
+
+	if (m_Team1_kill_counter > m_MaxKillCount)
+		m_IsLost = true;
+
+	if (m_Team0_kill_counter > m_MaxKillCount)
+		m_Victory = true;
+
+
+
+
 }
 
