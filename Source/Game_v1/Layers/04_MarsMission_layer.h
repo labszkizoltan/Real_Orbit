@@ -114,7 +114,7 @@ private:
 
 	int m_Team0_kill_counter = 0;
 	int m_Team1_kill_counter = 0;
-	int m_MaxKillCount = 20;
+	int m_MaxKillCount = 200;
 
 	bool m_Victory = false;
 	bool m_IsLost = false;

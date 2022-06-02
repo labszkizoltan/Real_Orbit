@@ -2,6 +2,7 @@
 #include "UnitControl.h"
 #include "Game_v1/Components/GameComponents.h"
 #include <Game_v1/Layers/04_MarsMission_layer.h>
+#include <Game_v1/Common/EntityManager.h>
 
 
 void UnitController::Update()
@@ -74,10 +75,75 @@ void UnitController::MoveUnits(Timestep ts)
 
 void UnitController::FireControl(Timestep ts)
 {
+	static int blueIdx = m_Layer->m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
+	static int yellowIdx = m_Layer->m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
 
+	auto team0_ships = m_Layer->m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, WeaponControllComponent, TeamComponent_0>();
+	auto team1_ships = m_Layer->m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, WeaponControllComponent, TeamComponent_1>();
 
+	static std::vector<entt::entity> ship_vicinity;
+
+	for (auto ship : team0_ships)
+	{
+		TransformComponent& shipTrf = team0_ships.get<TransformComponent>(ship);
+		DynamicPropertiesComponent& shipVel = team0_ships.get<DynamicPropertiesComponent>(ship);
+		WeaponControllComponent& wcc = team0_ships.get<WeaponControllComponent>(ship);
+		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(200, 200, 200);
+		ship_vicinity.clear();
+		m_Layer->m_Team1_Tree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
+
+		if (ship_vicinity.size() > 0)
+		{
+			if (wcc.missilleShotsRemaining > 0)
+			{
+				m_Layer->m_EntityManager.LaunchMissile(blueIdx, shipTrf, shipVel, ship_vicinity[0]);
+				wcc.missilleShotsRemaining--;
+			}
+		}
+	}
+
+	for (auto ship : team1_ships)
+	{
+		TransformComponent& shipTrf = team1_ships.get<TransformComponent>(ship);
+		DynamicPropertiesComponent& shipVel = team1_ships.get<DynamicPropertiesComponent>(ship);
+		WeaponControllComponent& wcc = team1_ships.get<WeaponControllComponent>(ship);
+		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(200, 200, 200);
+		ship_vicinity.clear();
+		m_Layer->m_Team0_Tree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
+
+		if (ship_vicinity.size() > 0)
+		{
+			if (wcc.missilleShotsRemaining > 0)
+			{
+				m_Layer->m_EntityManager.LaunchMissile(yellowIdx, shipTrf, shipVel, ship_vicinity[0]);
+				wcc.missilleShotsRemaining--;
+			}
+		}
+	}
 
 }
+
+void UnitController::UpdateWeaponControls(Timestep ts)
+{
+	auto weponEntities = m_Layer->m_Scene->m_Registry.view<WeaponControllComponent>();
+	for (auto entity : weponEntities)
+	{
+		WeaponControllComponent& wcc = weponEntities.get<WeaponControllComponent>(entity);
+
+		if (wcc.missilleShotsRemaining <= 0)
+			wcc.missilleShotTimerRemaining -= ts;
+
+		if (wcc.missilleShotTimerRemaining <= 0)
+		{
+			wcc.missilleShotTimerRemaining = wcc.missilleShotTimer;
+			wcc.missilleShotsRemaining = wcc.missilleShots;
+		}
+
+	}
+
+}
+
+
 
 
 entt::entity UnitController::GetClosestTargetFromTeam(const Vec3D& acquisitionLocation, const float acquisitionRange, const int teamNumber)

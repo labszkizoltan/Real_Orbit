@@ -542,6 +542,14 @@ namespace YAML {
 			v.missilleShotTimer = node[3].as<short int>();
 			v.antiMissilleShots = node[4].as<short int>();
 			v.antiMissilleShotTimer = node[5].as<short int>();
+
+			v.gunShotsRemaining = node[0].as<short int>();
+			v.gunShotTimerRemaining = node[1].as<short int>();
+			v.missilleShotsRemaining = node[2].as<short int>();
+			v.missilleShotTimerRemaining = node[3].as<short int>();
+			v.antiMissilleShotsRemaining = node[4].as<short int>();
+			v.antiMissilleShotTimerRemaining = node[5].as<short int>();
+
 			return true;
 		}
 

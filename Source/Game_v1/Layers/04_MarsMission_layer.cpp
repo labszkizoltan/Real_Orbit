@@ -700,6 +700,8 @@ void MarsMission_layer::UpdateScene(Timestep ts)
 	}
 
 	m_UnitController.MoveUnits(ts);
+	m_UnitController.FireControl(ts);
+	m_UnitController.UpdateWeaponControls(ts);
 
 	auto missiles = m_Scene->m_Registry.view<TargetComponent, TransformComponent, DynamicPropertiesComponent>();
 	for (auto missile : missiles)
@@ -835,7 +837,7 @@ void MarsMission_layer::UpdateScene(Timestep ts)
 		}
 	}
 
-	UpdateShips(ts);
+	// UpdateShips(ts);
 
 	auto anti_missilles = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, AntiMissilleComponent>();
 	for (auto antiMissille : anti_missilles)
@@ -1088,7 +1090,7 @@ void MarsMission_layer::SpawnShips(Timestep ts)
 	static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
 	static int bcIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battlecruiser"];
 
-	static float spawnTimer = 200.0f;
+	static float spawnTimer = 300.0f;
 	spawnTimer -= ts;
 	if (spawnTimer > 0.0f)
 		return;
@@ -1097,28 +1099,41 @@ void MarsMission_layer::SpawnShips(Timestep ts)
 	static int parity = 1;
 	parity *= -1;
 
-	Entity newEntity = m_Scene->CreateEntity("");
+	for (int i = 0; i < 5; i++)
+	{
+		Entity newEntity = m_Scene->CreateEntity("");
 
-	TransformComponent trf;
-	trf.location = Vec3D(parity * 550, 0, 0); // negative - supply ship, positive - Mars
+		float phi1 = RORNG::runif() * (2 * 3.1415926535f);
+		float phi2 = RORNG::runif() * (2 * 3.1415926535f);
+		TransformComponent trf;
+		trf.location = Vec3D(parity * 550, 2 * cos(phi2), 2 * sin(phi2)); // negative - supply ship, positive - Mars
 
-	MovementControllComponent mcc;
-	float phi1 = RORNG::runif() * (2 * 3.1415926535f);
-	float phi2 = RORNG::runif() * (2 * 3.1415926535f);
-	mcc.waypoints.push_back(Vec3D(-parity * 450, 50 * cos(phi1), 50 * sin(phi1)));
-	mcc.waypoints.push_back(Vec3D(parity * 500, 50 * cos(phi2), 50 * sin(phi2)));
+		MovementControllComponent mcc;
+		mcc.waypoints.push_back(Vec3D(-parity * 450, 50 * cos(phi1), 50 * sin(phi1)));
+		mcc.waypoints.push_back(Vec3D(parity * 500, 50 * cos(phi2), 50 * sin(phi2)));
 
-	newEntity.AddComponent<TransformComponent>(trf);
-	newEntity.AddComponent<DynamicPropertiesComponent>();
-	newEntity.AddComponent<MeshIndexComponent>(parity <0 ? bcIdx : battleshipIdx);
-	newEntity.AddComponent<HitPointComponent>(100.0f);
-	newEntity.AddComponent<ColliderComponent>(ColliderComponent());
-	newEntity.AddComponent<MarkerComponent>(MarkerComponent(-parity, parity, 0.0f, 1.0f));
-	newEntity.AddComponent<MovementControllComponent>(mcc);
-	if(parity < 0.0)
-		newEntity.AddComponent<TeamComponent_1>();
-	else
-		newEntity.AddComponent<TeamComponent_0>();
+		WeaponControllComponent wcc;
+		wcc.gunShots = 20; wcc.gunShotTimer = 1000;
+		wcc.missilleShots = 6; wcc.missilleShotTimer = 5000;
+		wcc.antiMissilleShots = 50; wcc.antiMissilleShotTimer = 200;
+		wcc.gunShotsRemaining = 20; wcc.gunShotTimerRemaining = 1000;
+		wcc.missilleShotsRemaining = 6; wcc.missilleShotTimerRemaining = 1000;
+		wcc.antiMissilleShotsRemaining = 50; wcc.antiMissilleShotTimerRemaining = 200;
+
+		newEntity.AddComponent<TransformComponent>(trf);
+		newEntity.AddComponent<DynamicPropertiesComponent>();
+		newEntity.AddComponent<MeshIndexComponent>(parity < 0 ? bcIdx : battleshipIdx);
+		newEntity.AddComponent<HitPointComponent>(100.0f);
+		newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+		newEntity.AddComponent<MarkerComponent>(MarkerComponent(-parity, parity, 0.0f, 1.0f));
+		newEntity.AddComponent<MovementControllComponent>(mcc);
+		newEntity.AddComponent<WeaponControllComponent>(wcc);
+		if (parity < 0.0)
+			newEntity.AddComponent<TeamComponent_1>();
+		else
+			newEntity.AddComponent<TeamComponent_0>();
+	}
+
 }
 
 void MarsMission_layer::OnTeam0ShipDestroyed()
@@ -1148,10 +1163,10 @@ void MarsMission_layer::EvaluateLossCondition()
 	if (m_Player.m_Health < 0.0f)
 		m_IsLost = true;
 
-	if (m_Team1_kill_counter > m_MaxKillCount)
+	if (m_Team1_kill_counter >= m_MaxKillCount)
 		m_IsLost = true;
 
-	if (m_Team0_kill_counter > m_MaxKillCount)
+	if (m_Team0_kill_counter >= m_MaxKillCount)
 		m_Victory = true;
 
 

@@ -108,11 +108,18 @@ struct MovementControllComponent
 struct WeaponControllComponent
 {
 	short int gunShots;
-	short int gunShotTimer; // in milli seconds
+	float gunShotTimer; // in milli seconds
 	short int missilleShots;
-	short int missilleShotTimer; // in milli seconds
+	float missilleShotTimer; // in milli seconds
 	short int antiMissilleShots;
-	short int antiMissilleShotTimer; // in milli seconds
+	float antiMissilleShotTimer; // in milli seconds
+
+	short int gunShotsRemaining;
+	float gunShotTimerRemaining; // in milli seconds
+	short int missilleShotsRemaining;
+	float missilleShotTimerRemaining; // in milli seconds
+	short int antiMissilleShotsRemaining;
+	float antiMissilleShotTimerRemaining; // in milli seconds
 
 //	bool hasGun = false;
 //	bool hasMissille = false;

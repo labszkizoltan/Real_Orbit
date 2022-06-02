@@ -26,6 +26,7 @@ public:
 	void FendOffMissille();
 	void MoveUnits(Timestep ts);
 	void FireControl(Timestep ts);
+	void UpdateWeaponControls(Timestep ts);
 
 	// void AvertMissille();
 
