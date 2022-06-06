@@ -202,13 +202,20 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			deserializedEntity.AddComponent<EnemyShipComponent>();
 		}
 
-		//----- ControllComponents -----//
-		auto controll_com = entity["ControllComponent"];
-		if (controll_com)
+		//----- WeaponControllComponent -----//
+		auto weapon_controll_com = entity["WeaponControllComponent"];
+		if (weapon_controll_com)
 		{
-			deserializedEntity.AddComponent<MovementControllComponent>();
-			WeaponControllComponent wcc = controll_com.as<WeaponControllComponent>();
+			WeaponControllComponent wcc = weapon_controll_com.as<WeaponControllComponent>();
 			deserializedEntity.AddComponent<WeaponControllComponent>(wcc);
+		}
+
+		//----- MovementControllComponent -----//
+		auto movement_controll_com = entity["MovementControllComponent"];
+		if (movement_controll_com)
+		{
+			MovementControllComponent mcc = movement_controll_com.as<MovementControllComponent>();
+			deserializedEntity.AddComponent<MovementControllComponent>(mcc);
 		}
 
 		//----- VictoryComponent -----//
@@ -549,6 +556,31 @@ namespace YAML {
 			v.missilleShotTimerRemaining = node[3].as<short int>();
 			v.antiMissilleShotsRemaining = node[4].as<short int>();
 			v.antiMissilleShotTimerRemaining = node[5].as<short int>();
+
+			return true;
+		}
+
+	};
+
+
+	template<>
+	struct convert<MovementControllComponent>
+	{
+		static Node encode(const MovementControllComponent v)
+		{
+			Node node;
+			for (int i = 0; i < v.waypoints.size(); i++)
+				node.push_back(v.waypoints[i]);
+			return node;
+		}
+
+		static bool decode(const Node& node, MovementControllComponent& v)
+		{
+			if (!node.IsSequence())
+				return false;
+
+			for (int i = node.size(); i > 0; i--)
+				v.waypoints.push_back(node[i-1].as<Vec3D>());
 
 			return true;
 		}

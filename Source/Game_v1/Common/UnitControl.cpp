@@ -81,8 +81,11 @@ void UnitController::FireControl(Timestep ts)
 	auto team0_ships = m_Layer->m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, WeaponControllComponent, TeamComponent_0>();
 	auto team1_ships = m_Layer->m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, WeaponControllComponent, TeamComponent_1>();
 
+	const float bulletSpeed = 0.2f;
+
 	static std::vector<entt::entity> ship_vicinity;
 
+	// team green fire missilles
 	for (auto ship : team0_ships)
 	{
 		TransformComponent& shipTrf = team0_ships.get<TransformComponent>(ship);
@@ -102,6 +105,7 @@ void UnitController::FireControl(Timestep ts)
 		}
 	}
 
+	// team red fire missilles
 	for (auto ship : team1_ships)
 	{
 		TransformComponent& shipTrf = team1_ships.get<TransformComponent>(ship);
@@ -121,6 +125,72 @@ void UnitController::FireControl(Timestep ts)
 		}
 	}
 
+	// team green fire bullets
+	for (auto ship : team0_ships)
+	{
+		TransformComponent& shipTrf = team0_ships.get<TransformComponent>(ship);
+		DynamicPropertiesComponent& shipVel = team0_ships.get<DynamicPropertiesComponent>(ship);
+		WeaponControllComponent& wcc = team0_ships.get<WeaponControllComponent>(ship);
+		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(100, 100, 100);
+		ship_vicinity.clear();
+		m_Layer->m_Team1_Tree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
+
+		if (ship_vicinity.size() > 0)
+		{
+			if (!m_Layer->m_Scene->m_Registry.valid(ship_vicinity[0]))
+				continue;
+
+			if (wcc.gunShotsRemaining > 0)
+			{
+				TransformComponent& targetTrf = team1_ships.get<TransformComponent>(ship_vicinity[0]);
+				DynamicPropertiesComponent& targetVel = team1_ships.get<DynamicPropertiesComponent>(ship_vicinity[0]);
+				float t0 = (targetTrf.location - shipTrf.location).length() / bulletSpeed;
+				Vec3D futureLoc = targetTrf.location + t0 * targetVel.velocity;
+				// I think this is not exact, because the firing ships velocity is not considered,
+				// but close enough when the bullet speed is well over the ships velocity
+				Vec3D bulletVel = futureLoc - shipTrf.location; bulletVel.normalize();
+
+				TransformComponent bulletStartLoc = TransformComponent();
+				bulletStartLoc.location = shipTrf.location + (bulletVel * 1.5f * shipTrf.scale);
+				m_Layer->m_EntityManager.ShootBullett(bulletStartLoc, bulletVel* bulletSpeed, false);
+				wcc.gunShotsRemaining--;
+			}
+		}
+	}
+
+	// team red fire bullets
+	for (auto ship : team1_ships)
+	{
+		TransformComponent& shipTrf = team1_ships.get<TransformComponent>(ship);
+		DynamicPropertiesComponent& shipVel = team1_ships.get<DynamicPropertiesComponent>(ship);
+		WeaponControllComponent& wcc = team1_ships.get<WeaponControllComponent>(ship);
+		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(100, 100, 100);
+		ship_vicinity.clear();
+		m_Layer->m_Team0_Tree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
+
+		if (ship_vicinity.size() > 0)
+		{
+			if (!m_Layer->m_Scene->m_Registry.valid(ship_vicinity[0]))
+				continue;
+
+			if (wcc.gunShotsRemaining > 0)
+			{
+				TransformComponent& targetTrf = team0_ships.get<TransformComponent>(ship_vicinity[0]);
+				DynamicPropertiesComponent& targetVel = team0_ships.get<DynamicPropertiesComponent>(ship_vicinity[0]);
+				float t0 = (targetTrf.location - shipTrf.location).length() / bulletSpeed;
+				Vec3D futureLoc = targetTrf.location + t0 * targetVel.velocity;
+				// I think this is not exact, because the firing ships velocity is not considered,
+				// but close enough when the bullet speed is well over the ships velocity
+				Vec3D bulletVel = futureLoc - shipTrf.location; bulletVel.normalize();
+
+				TransformComponent bulletStartLoc = TransformComponent();
+				bulletStartLoc.location = shipTrf.location + (bulletVel * 1.5f * shipTrf.scale);
+				m_Layer->m_EntityManager.ShootBullett(bulletStartLoc, bulletVel * bulletSpeed, false);
+				wcc.gunShotsRemaining--;
+			}
+		}
+	}
+
 }
 
 void UnitController::UpdateWeaponControls(Timestep ts)
@@ -130,6 +200,17 @@ void UnitController::UpdateWeaponControls(Timestep ts)
 	{
 		WeaponControllComponent& wcc = weponEntities.get<WeaponControllComponent>(entity);
 
+		// update bullets
+		if (wcc.gunShotsRemaining <= 0)
+			wcc.gunShotTimerRemaining -= ts;
+
+		if (wcc.gunShotTimerRemaining <= 0)
+		{
+			wcc.gunShotTimerRemaining = wcc.gunShotTimer;
+			wcc.gunShotsRemaining = wcc.gunShots;
+		}
+
+		// update missilles
 		if (wcc.missilleShotsRemaining <= 0)
 			wcc.missilleShotTimerRemaining -= ts;
 

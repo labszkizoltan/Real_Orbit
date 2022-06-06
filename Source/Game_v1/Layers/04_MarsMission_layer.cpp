@@ -74,14 +74,13 @@ void MarsMission_layer::OnAttach()
 	m_AudioManager.SetVolume(10.0f);
 	m_AudioManager.SetIntroSpeech("assets/audio/MoonMission_introSpeech.wav");
 
-	m_Player.m_Transform.location = Vec3D(550, 0, 0);
-	m_Player.m_Transform.orientation.f1 = Vec3D(1, 0, 0);
-	m_Player.m_Transform.orientation.f2 = Vec3D(0, 1, 0);
-	m_Player.m_Transform.orientation.f3 = Vec3D(0, 0, 1);
-
+	m_Player.m_Transform.location = Vec3D(504.0f, 6.5f, -2.5f);
+	m_Player.m_Transform.orientation.f1 = Vec3D(0, 1, 0);
+	m_Player.m_Transform.orientation.f2 = Vec3D(0, 0, -1);
+	m_Player.m_Transform.orientation.f3 = Vec3D(-1, 0, 0);
+	m_Player.m_BulletSpeed = 0.3f;
 
 }
-
 void MarsMission_layer::OnDetach()
 {
 	LOG_INFO("MarsMission_layer detached");
@@ -291,11 +290,11 @@ void MarsMission_layer::ResetLayer()
 	m_ZoomLevel = g_InitialZoomLevel;
 
 	m_Player = Player();
-	m_Player.m_Transform.location = Vec3D(0, 0, -50);
-
-	m_Player.m_Transform.orientation.f1 = Vec3D(1, 0, 0);
-	m_Player.m_Transform.orientation.f2 = Vec3D(0, 1, 0);
-	m_Player.m_Transform.orientation.f3 = Vec3D(0, 0, 1);
+	m_Player.m_Transform.location = Vec3D(504.0f, 6.5f, -2.5f);
+	m_Player.m_Transform.orientation.f1 = Vec3D(0, 1, 0);
+	m_Player.m_Transform.orientation.f2 = Vec3D(0, 0, -1);
+	m_Player.m_Transform.orientation.f3 = Vec3D(-1, 0, 0);
+	m_Player.m_BulletSpeed = 0.3f;
 
 	m_CameraContinuousRotation = false;
 
@@ -1066,6 +1065,7 @@ void MarsMission_layer::AddWaypoints()
 	auto controlledUnits = m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, MovementControllComponent>();
 	for (auto unit : controlledUnits)
 	{
+		/*
 		MovementControllComponent& wp = controlledUnits.get<MovementControllComponent>(unit);
 		if (m_Scene->m_Registry.all_of<TeamComponent_0>(unit))
 		{
@@ -1082,6 +1082,7 @@ void MarsMission_layer::AddWaypoints()
 			wp.waypoints.push_back(Vec3D(-350, -50, 0));
 			wp.waypoints.push_back(Vec3D(-450, -50, 0));
 		}
+		*/
 	}
 }
 
@@ -1107,6 +1108,9 @@ void MarsMission_layer::SpawnShips(Timestep ts)
 		float phi2 = RORNG::runif() * (2 * 3.1415926535f);
 		TransformComponent trf;
 		trf.location = Vec3D(parity * 550, 2 * cos(phi2), 2 * sin(phi2)); // negative - supply ship, positive - Mars
+		trf.orientation.f1 = Vec3D(0, 1, 0);
+		trf.orientation.f2 = Vec3D(0, 0, -1);
+		trf.orientation.f3 = Vec3D(parity, 0, 0);
 
 		MovementControllComponent mcc;
 		mcc.waypoints.push_back(Vec3D(-parity * 450, 50 * cos(phi1), 50 * sin(phi1)));
