@@ -560,11 +560,22 @@ void MarsMission_layer::HandleUserInput(Timestep ts)
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Add)) { cam_velocity *= 1.1f; }
 	if (Input::IsKeyPressed(sf::Keyboard::Key::Subtract)) { cam_velocity /= 1.1f; }
 
-
 	static int blueIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["BlueSphere"];
 	static int yellowIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["YellowSphere"];
 	static int explosionIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Explosion"];
+	static int tgtMarkerIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["TargetMarker"];
 	static int skip = 0;
+
+	entt::entity playersTarget = GetClosestTarget(m_Player.m_Transform.location, m_Player.m_Transform.orientation.f3);
+	if (m_Scene->m_Registry.valid(playersTarget) && !(m_IsLost || m_Victory))
+	{
+		TransformComponent& tgtTrf = m_Scene->m_Registry.get<TransformComponent>(playersTarget);
+		std::shared_ptr<Mesh> marker_mesh = m_Scene->m_MeshLibrary.m_Meshes[tgtMarkerIdx];
+		int markerColBufIdx = marker_mesh->GetColourInstances();
+		m_Scene->m_MeshLibrary.m_MeshTransforms[tgtMarkerIdx].push_back(tgtTrf);
+		m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(1,1,1,1));
+	}
+
 	if (Input::IsMouseButtonPressed(sf::Mouse::Left) && m_Player.m_BulletCount > 0)
 	{
 		float phi = RORNG::runif() * 2 * 3.1415926535, r = RORNG::runif();
@@ -576,7 +587,7 @@ void MarsMission_layer::HandleUserInput(Timestep ts)
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip % 2 == 0 && m_Player.m_MissilleCount > 0)
 	{
-		m_EntityManager.LaunchMissile(yellowIdx, m_Player.m_Transform, DynamicPropertiesComponent(), GetClosestTarget(m_Player.m_Transform.location, m_Player.m_Transform.orientation.f3));
+		m_EntityManager.LaunchMissile(yellowIdx, m_Player.m_Transform, DynamicPropertiesComponent(), playersTarget);
 		m_Player.m_MissilleCount--;
 		m_AudioManager.PlayShotSound();
 	}

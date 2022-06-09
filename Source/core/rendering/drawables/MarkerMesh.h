@@ -44,9 +44,13 @@ private:
 	static std::vector<Vec3D> s_DefaultMarkerVertices;
 	static std::vector<uint32_t> s_DefaultMarkerIndices;
 
+	static std::vector<Vec3D> s_DefaultTargetVertices;
+	static std::vector<uint32_t> s_DefaultTargetIndices;
+
+
+friend class SceneSerializer;
+
 };
-
-
 
 
 #endif // MARKER_MESH_H

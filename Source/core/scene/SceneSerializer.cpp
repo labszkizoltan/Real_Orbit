@@ -386,6 +386,20 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data, MeshLibrary& mesh_
 		// mesh_library.m_StaticColourBuffers.push_back(std::vector<ColourComponent>());
 	}
 
+	// also add the target marker mesh:
+	{
+		std::shared_ptr<MarkerMesh> temp_mesh_ptr = std::make_shared<MarkerMesh>(MarkerMesh::s_DefaultTargetVertices, MarkerMesh::s_DefaultTargetIndices);
+		temp_mesh_ptr->SetColourBufferIndex(mesh_library.m_ColourBuffers.size());
+		std::shared_ptr<Mesh> mesh_ptr = temp_mesh_ptr;
+
+		mesh_library.m_NameIndexLookup["TargetMarker"] = mesh_idx; mesh_idx++;
+		mesh_library.m_Meshes.push_back(mesh_ptr);
+		mesh_library.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+		mesh_library.m_ColourBuffers.push_back(std::vector<ColourComponent>());
+		// mesh_library.m_StaticMeshTransforms.push_back(std::vector<TransformComponent>());
+		// mesh_library.m_StaticColourBuffers.push_back(std::vector<ColourComponent>());
+	}
+
 }
 
 OGLBufferData SceneSerializer::ParseVertexFile(const std::string& filename)

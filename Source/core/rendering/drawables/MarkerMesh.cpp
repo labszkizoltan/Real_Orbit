@@ -12,6 +12,33 @@ BufferLayout MarkerMesh::s_VertexLayout = {
 std::vector<Vec3D> MarkerMesh::s_DefaultMarkerVertices = { {0.0f, -0.005f, 0.0f}, {-0.05f, -0.035f, 0.0f}, {0.05f, -0.035f, 0.0f} };
 std::vector<uint32_t> MarkerMesh::s_DefaultMarkerIndices = { 0,2,1 };
 
+std::vector<Vec3D> MarkerMesh::s_DefaultTargetVertices = {
+//std::vector<Vec3D> MarkerMesh::s_DefaultMarkerVertices = {
+	{0.095f, 0.10f, 0.0f}, {0.1f, 0.1f, 0.0f}, {0.1f, 0.075f, 0.0f},
+	{0.075f, 0.10f, 0.0f}, {0.1f, 0.1f, 0.0f}, {0.1f, 0.095f, 0.0f},
+
+	{0.095f, -0.10f, 0.0f}, {0.1f, -0.1f, 0.0f}, {0.1f, -0.075f, 0.0f},
+	{0.075f, -0.10f, 0.0f}, {0.1f, -0.1f, 0.0f}, {0.1f, -0.095f, 0.0f},
+
+	{-0.095f, 0.10f, 0.0f}, {-0.1f, 0.1f, 0.0f}, {-0.1f, 0.075f, 0.0f},
+	{-0.075f, 0.10f, 0.0f}, {-0.1f, 0.1f, 0.0f}, {-0.1f, 0.095f, 0.0f},
+
+	{-0.095f, -0.10f, 0.0f}, {-0.1f, -0.1f, 0.0f}, {-0.1f, -0.075f, 0.0f},
+	{-0.075f, -0.10f, 0.0f}, {-0.1f, -0.1f, 0.0f}, {-0.1f, -0.095f, 0.0f}
+};
+
+std::vector<uint32_t> MarkerMesh::s_DefaultTargetIndices = {
+//std::vector<uint32_t> MarkerMesh::s_DefaultMarkerIndices = {
+	0,2,1,
+	3,5,4,
+	6,8,7,
+	9,11,10,
+	12,14,13,
+	15,17,16,
+	18,20,19,
+	21,23,22
+};
+
 MarkerMesh::MarkerMesh()
 	: m_VertexArray(),
 	m_VertexBuffer((float*)&s_DefaultMarkerVertices[0], s_DefaultMarkerVertices.size() * sizeof(Vec3D)),
