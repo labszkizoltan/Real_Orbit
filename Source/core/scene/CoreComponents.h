@@ -32,6 +32,9 @@ struct TransformComponent
 
 	TransformComponent()
 		: location(Vec3D()), orientation(Identity(1.0f)), scale(1.0f) {}
+
+	TransformComponent(Vec3D _location, Mat_3D _orientation, float _scale)
+		: location(_location), orientation(_orientation), scale(_scale) {}
 };
 
 struct MeshComponent

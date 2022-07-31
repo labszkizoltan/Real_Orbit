@@ -2,19 +2,36 @@
 #ifndef SHADER_SOURCE_COLLECTION_H
 #define SHADER_SOURCE_COLLECTION_H
 
+
+// Non-Linear shaders
 // this is just the collection of all shader source headers
 #include <core/rendering/shader_source_files/basic_3D_shaders.h>
 #include <core/rendering/shader_source_files/textured_shaders.h>
 #include <core/rendering/shader_source_files/normal_shaders.h>
-#include <core/rendering/shader_source_files/skybox_shaders.h>
+// #include <core/rendering/shader_source_files/skybox_shaders.h>
 #include <core/rendering/shader_source_files/shadow_shaders.h>
 
 // shaders with instancing:
-#include <core/rendering/shader_source_files/instanced_colour_shader.h>
-#include <core/rendering/shader_source_files/instanced_bright_colour_shader.h>
-#include <core/rendering/shader_source_files/instanced_normal_shader.h>
-#include <core/rendering/shader_source_files/instanced_alpha_shader.h>
-#include <core/rendering/shader_source_files/instanced_marker_shader.h>
-#include <core/rendering/shader_source_files/instanced_letter_shader.h>
+// #include <core/rendering/shader_source_files/instanced_colour_shader.h>
+// #include <core/rendering/shader_source_files/instanced_bright_colour_shader.h>
+// #include <core/rendering/shader_source_files/instanced_normal_shader.h>
+// #include <core/rendering/shader_source_files/instanced_alpha_shader.h>
+// #include <core/rendering/shader_source_files/instanced_marker_shader.h>
+// #include <core/rendering/shader_source_files/instanced_letter_shader.h>
+
+// Linear shaders
+#include <core/rendering/shader_source_files/linear_shaders/instanced_colour_shader.h>
+#include <core/rendering/shader_source_files/linear_shaders/instanced_bright_colour_shader.h>
+#include <core/rendering/shader_source_files/linear_shaders/instanced_normal_shader.h>
+#include <core/rendering/shader_source_files/linear_shaders/instanced_alpha_shader.h>
+#include <core/rendering/shader_source_files/linear_shaders/instanced_marker_shader.h>
+#include <core/rendering/shader_source_files/linear_shaders/instanced_letter_shader.h>
+
+#include <core/rendering/shader_source_files/linear_shaders/skybox_shaders.h>
+// #include <core/rendering/shader_source_files/linear_shaders/shadow_shaders.h>
+
+
+
+
 
 #endif // SHADER_SOURCE_COLLECTION_H

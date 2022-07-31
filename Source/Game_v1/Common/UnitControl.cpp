@@ -3,6 +3,7 @@
 #include "Game_v1/Components/GameComponents.h"
 #include <Game_v1/Layers/04_MarsMission_layer.h>
 #include <Game_v1/Common/EntityManager.h>
+#include <utils/RandomGeneration.h>
 
 
 void UnitController::Update()
@@ -70,6 +71,11 @@ void UnitController::MoveUnits(Timestep ts)
 			vel.velocity += (accel * ts / dv.length()) * dv;
 			vel.velocity += -ts * accel * v_ortho;
 		}
+
+		// // turn the nuit into direction
+		// const float turn_rate = 0.01f;
+		// Vec3D rot_axis = CrossProduct(trf.orientation.f3, vel.velocity);
+		// trf.orientation = trf.orientation * Rotation(std::min(turn_rate * ts, Vec3D::angle(trf.orientation.f3, vel.velocity)), rot_axis);
 	}
 }
 
@@ -81,25 +87,31 @@ void UnitController::FireControl(Timestep ts)
 	auto team0_ships = m_Layer->m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, WeaponControllComponent, TeamComponent_0>();
 	auto team1_ships = m_Layer->m_Scene->m_Registry.view<TransformComponent, DynamicPropertiesComponent, WeaponControllComponent, TeamComponent_1>();
 
-	const float bulletSpeed = 0.2f;
+	const float bulletSpeed = 0.6f; // 0.2f
 
+	static std::vector<entt::entity> outer_vicinity;
 	static std::vector<entt::entity> ship_vicinity;
 
 	// team green fire missilles
+	const int missille_fire_range = 1500;
+	const int outer_missille_fire_range = 2000;
 	for (auto ship : team0_ships)
 	{
 		TransformComponent& shipTrf = team0_ships.get<TransformComponent>(ship);
 		DynamicPropertiesComponent& shipVel = team0_ships.get<DynamicPropertiesComponent>(ship);
 		WeaponControllComponent& wcc = team0_ships.get<WeaponControllComponent>(ship);
-		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(200, 200, 200);
-		ship_vicinity.clear();
+		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(missille_fire_range, missille_fire_range, missille_fire_range);
+		ship_vicinity.clear(); outer_vicinity.clear();
 		m_Layer->m_Team1_Tree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
+		box.radius = Vec3D(outer_missille_fire_range, outer_missille_fire_range, outer_missille_fire_range);
+		m_Layer->m_Team1_Tree->GetActiveTree()->QueryRange(box, outer_vicinity, 0);
 
 		if (ship_vicinity.size() > 0)
 		{
-			if (wcc.missilleShotsRemaining > 0)
+			int tgt_idx = std::rand() % outer_vicinity.size();
+			if(wcc.missilleShotsRemaining > 0) // && m_Layer->m_Scene->m_Registry.valid(ship_vicinity[tgt_idx]))
 			{
-				m_Layer->m_EntityManager.LaunchMissile(blueIdx, shipTrf, shipVel, ship_vicinity[0]);
+				m_Layer->m_EntityManager.LaunchMissile(blueIdx, shipTrf, shipVel, outer_vicinity[tgt_idx]);
 				wcc.missilleShotsRemaining--;
 			}
 		}
@@ -111,27 +123,31 @@ void UnitController::FireControl(Timestep ts)
 		TransformComponent& shipTrf = team1_ships.get<TransformComponent>(ship);
 		DynamicPropertiesComponent& shipVel = team1_ships.get<DynamicPropertiesComponent>(ship);
 		WeaponControllComponent& wcc = team1_ships.get<WeaponControllComponent>(ship);
-		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(200, 200, 200);
-		ship_vicinity.clear();
+		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(missille_fire_range, missille_fire_range, missille_fire_range);
+		ship_vicinity.clear(); outer_vicinity.clear();
 		m_Layer->m_Team0_Tree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
+		box.radius = Vec3D(outer_missille_fire_range, outer_missille_fire_range, outer_missille_fire_range);
+		m_Layer->m_Team0_Tree->GetActiveTree()->QueryRange(box, outer_vicinity, 0);
 
 		if (ship_vicinity.size() > 0)
 		{
-			if (wcc.missilleShotsRemaining > 0)
+			int tgt_idx = std::rand() % outer_vicinity.size();
+			if (wcc.missilleShotsRemaining > 0) // && m_Layer->m_Scene->m_Registry.valid(ship_vicinity[tgt_idx]))
 			{
-				m_Layer->m_EntityManager.LaunchMissile(yellowIdx, shipTrf, shipVel, ship_vicinity[0]);
+				m_Layer->m_EntityManager.LaunchMissile(yellowIdx, shipTrf, shipVel, outer_vicinity[tgt_idx]);
 				wcc.missilleShotsRemaining--;
 			}
 		}
 	}
 
 	// team green fire bullets
+	const int bullet_fire_range = 1000;
 	for (auto ship : team0_ships)
 	{
 		TransformComponent& shipTrf = team0_ships.get<TransformComponent>(ship);
 		DynamicPropertiesComponent& shipVel = team0_ships.get<DynamicPropertiesComponent>(ship);
 		WeaponControllComponent& wcc = team0_ships.get<WeaponControllComponent>(ship);
-		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(100, 100, 100);
+		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(bullet_fire_range, bullet_fire_range, bullet_fire_range);
 		ship_vicinity.clear();
 		m_Layer->m_Team1_Tree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
 
@@ -164,7 +180,7 @@ void UnitController::FireControl(Timestep ts)
 		TransformComponent& shipTrf = team1_ships.get<TransformComponent>(ship);
 		DynamicPropertiesComponent& shipVel = team1_ships.get<DynamicPropertiesComponent>(ship);
 		WeaponControllComponent& wcc = team1_ships.get<WeaponControllComponent>(ship);
-		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(100, 100, 100);
+		Box3D box; box.center = shipTrf.location; box.radius = Vec3D(bullet_fire_range, bullet_fire_range, bullet_fire_range);
 		ship_vicinity.clear();
 		m_Layer->m_Team0_Tree->GetActiveTree()->QueryRange(box, ship_vicinity, 0);
 
@@ -206,7 +222,7 @@ void UnitController::UpdateWeaponControls(Timestep ts)
 
 		if (wcc.gunShotTimerRemaining <= 0)
 		{
-			wcc.gunShotTimerRemaining = wcc.gunShotTimer;
+			wcc.gunShotTimerRemaining = wcc.gunShotTimer + RORNG::runif()*10.0f;
 			wcc.gunShotsRemaining = wcc.gunShots;
 		}
 

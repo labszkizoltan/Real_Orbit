@@ -15,11 +15,10 @@
 #include <Game_v1/Components/GameComponents.h>
 #include <Game_v1/Common/CollisionDetection.h>
 
-
-
 #include <utils/Vector_3D.h>
 #include <utils/RandomGeneration.h>
 #include <glad/glad.h>
+
 
 //#include "scene_descriptions.h"
 
@@ -48,7 +47,7 @@ void MarsMission_layer::OnAttach()
 
 	m_SceneRenderer.SetScene(m_Scene);
 
-	Box3D tmp_box; tmp_box.radius = Vec3D(10000, 10000, 10000);
+	Box3D tmp_box; tmp_box.radius = Vec3D(15000, 15000, 15000);
 	// m_AsteroidsOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_CollidersOctTree = std::make_shared<DualOctTree>(tmp_box);
 	m_MissillesOctTree = std::make_shared<DualOctTree>(tmp_box);
@@ -74,11 +73,16 @@ void MarsMission_layer::OnAttach()
 	m_AudioManager.SetVolume(10.0f);
 	m_AudioManager.SetIntroSpeech("assets/audio/MoonMission_introSpeech.wav");
 
-	m_Player.m_Transform.location = Vec3D(504.0f, 6.5f, -2.5f);
+	m_Player.m_Transform.location = Vec3D(5040.0f, 65.0f, -25.0f);
 	m_Player.m_Transform.orientation.f1 = Vec3D(0, 1, 0);
 	m_Player.m_Transform.orientation.f2 = Vec3D(0, 0, -1);
 	m_Player.m_Transform.orientation.f3 = Vec3D(-1, 0, 0);
-	m_Player.m_BulletSpeed = 0.3f;
+	m_Player.m_BulletCount = 1000;
+	m_Player.m_MaxBulletCount = 1000;
+	m_Player.m_MissilleCount = 200;
+	m_Player.m_MaxMissilleCount = 200;
+	m_Player.m_BulletSpeed = 0.9f;
+	m_Player.m_AutoTargeting = true;
 
 }
 void MarsMission_layer::OnDetach()
@@ -97,8 +101,11 @@ void MarsMission_layer::OnUpdate(Timestep ts)
 	light_trf.location = m_Player.m_Transform.location + Vec3D(-10, 0, 0);
 
 	HandleUserInput(ts);
-	if (m_Player.m_Transform.location.length() < 30.0f)
-		m_Player.FillReserves(m_SimulationSpeed * ts);
+
+	static float refill_timer = 10000.0f;
+	if (refill_timer < 0.0f)
+		m_Player.FillReserves(1000000);
+	refill_timer = refill_timer < 0.0f ? 10000.0f : refill_timer - m_SimulationSpeed * ts;
 
 	if (m_IsLost || m_Victory)
 	{
@@ -132,7 +139,11 @@ void MarsMission_layer::OnUpdate(Timestep ts)
 
 		GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 		GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth- 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
-		GameApplication::Game_DrawText("Team red vs green kills - " + std::to_string(m_Team1_kill_counter) + " / " + std::to_string(m_Team0_kill_counter),
+//		GameApplication::Game_DrawText("Team red vs green kills - " + std::to_string(m_Team1_kill_counter) + " / " + std::to_string(m_Team0_kill_counter),
+//			Vec3D(700, windowHeight - 70, 0),
+//			Vec3D(0.3f, 0.9f, 0.5f),
+//			1.0f);
+		GameApplication::Game_DrawText("Red vs Green blockades - " + std::to_string(m_Team0_blockade) + " / " + std::to_string(m_Team1_blockade),
 			Vec3D(700, windowHeight - 70, 0),
 			Vec3D(0.3f, 0.9f, 0.5f),
 			1.0f);
@@ -155,10 +166,15 @@ void MarsMission_layer::OnUpdate(Timestep ts)
 
 	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
 	GameApplication::Game_DrawText("Simulation Speed: " + std::to_string((int)(m_SimulationSpeed / 0.2f)), Vec3D(windowWidth - 230, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
-	GameApplication::Game_DrawText("Team red vs green kills - " + std::to_string(m_Team1_kill_counter) + " / " + std::to_string(m_Team0_kill_counter),
+//	GameApplication::Game_DrawText("Team red vs green kills - " + std::to_string(m_Team1_kill_counter) + " / " + std::to_string(m_Team0_kill_counter),
+//		Vec3D(700, windowHeight - 70, 0),
+//		Vec3D(0.3f, 0.9f, 0.5f),
+//		1.0f);
+	GameApplication::Game_DrawText("Red vs Green blockades - " + std::to_string(m_Team0_blockade) + " / " + std::to_string(m_Team1_blockade),
 		Vec3D(700, windowHeight - 70, 0),
 		Vec3D(0.3f, 0.9f, 0.5f),
 		1.0f);
+
 
 	m_Player.DrawStatsOnScreen();
 
@@ -184,6 +200,7 @@ void MarsMission_layer::Activate()
 	m_AudioManager.ContinueMusic();
 	//m_Music.play();
 	Renderer::SetZoomLevel(m_ZoomLevel);
+	Renderer::SetMinMaxRange(0.05f, 12000.0f);
 }
 
 void MarsMission_layer::DeActivate()
@@ -192,6 +209,7 @@ void MarsMission_layer::DeActivate()
 	((GameApplication*)(&app))->ActitivateLayer(GameLayers::MENU_LAYER);
 	m_AudioManager.PauseMusic();
 	m_AudioManager.StopIntroSpeech();
+	Renderer::SetMinMaxRange(0.05f, 1000.0f);
 	// m_Music.pause();
 	m_IsActive = false;
 }
@@ -294,7 +312,12 @@ void MarsMission_layer::ResetLayer()
 	m_Player.m_Transform.orientation.f1 = Vec3D(0, 1, 0);
 	m_Player.m_Transform.orientation.f2 = Vec3D(0, 0, -1);
 	m_Player.m_Transform.orientation.f3 = Vec3D(-1, 0, 0);
-	m_Player.m_BulletSpeed = 0.3f;
+	m_Player.m_BulletCount = 1000;
+	m_Player.m_MaxBulletCount = 1000;
+	m_Player.m_MissilleCount = 200;
+	m_Player.m_MaxMissilleCount = 200;
+	m_Player.m_BulletSpeed = 0.7f;
+	m_Player.m_AutoTargeting = true;
 
 	m_CameraContinuousRotation = false;
 
@@ -302,6 +325,8 @@ void MarsMission_layer::ResetLayer()
 
 	m_Team0_kill_counter = 0;
 	m_Team1_kill_counter = 0;
+	m_Team0_blockade = 0;
+	m_Team1_blockade = 0;
 	m_Victory = false;
 	m_IsLost = false;
 }
@@ -310,7 +335,7 @@ void MarsMission_layer::ResetLayer()
 entt::entity MarsMission_layer::GetClosestTarget(const Vec3D& acquisitionLocation, const Vec3D& acquisitionDirection)
 {
 	static int counter = 0;
-	int targeting_range = 500;
+	int targeting_range = 5000;
 	int queue_size = 15;
 	std::priority_queue<targeting_data<entt::entity>> targeting_queue;
 
@@ -394,6 +419,8 @@ bool MarsMission_layer::OnKeyPressed(Event& e)
 		static int center_y = Application::Get().GetWindow().GetHeight() / 2;
 		sf::Mouse::setPosition(sf::Vector2i(center_x, center_y), Application::Get().GetWindow().GetNativeWindow());
 	}
+	else if (event.key.code == sf::Keyboard::Key::Tab)
+		m_LockedTarget = m_PlayersTarget;
 
 	return false;
 }
@@ -418,6 +445,10 @@ bool MarsMission_layer::MouseWheelScrolled(Event& e)
 
 bool MarsMission_layer::OnMouseButtonPressed(Event& e)
 {
+	sf::Event& event = e.GetEvent();
+	if(event.mouseButton.button == sf::Mouse::Middle)
+		SpawnCapitalShips(0);
+
 	return false;
 }
 
@@ -566,28 +597,64 @@ void MarsMission_layer::HandleUserInput(Timestep ts)
 	static int tgtMarkerIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["TargetMarker"];
 	static int skip = 0;
 
-	entt::entity playersTarget = GetClosestTarget(m_Player.m_Transform.location, m_Player.m_Transform.orientation.f3);
-	if (m_Scene->m_Registry.valid(playersTarget) && !(m_IsLost || m_Victory))
+	m_PlayersTarget = GetClosestTarget(m_Player.m_Transform.location, m_Player.m_Transform.orientation.f3);
 	{
-		TransformComponent& tgtTrf = m_Scene->m_Registry.get<TransformComponent>(playersTarget);
 		std::shared_ptr<Mesh> marker_mesh = m_Scene->m_MeshLibrary.m_Meshes[tgtMarkerIdx];
 		int markerColBufIdx = marker_mesh->GetColourInstances();
-		m_Scene->m_MeshLibrary.m_MeshTransforms[tgtMarkerIdx].push_back(tgtTrf);
-		m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(1,1,1,1));
+		if (m_Scene->m_Registry.valid(m_PlayersTarget) && !(m_IsLost || m_Victory))
+		{
+			TransformComponent& tgtTrf = m_Scene->m_Registry.get<TransformComponent>(m_PlayersTarget);
+			m_Scene->m_MeshLibrary.m_MeshTransforms[tgtMarkerIdx].push_back(tgtTrf);
+			m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(1, 1, 1, 1));
+		}
+		if (m_Scene->m_Registry.valid(m_LockedTarget) && !(m_IsLost || m_Victory))
+		{
+			TransformComponent& tgtTrf = m_Scene->m_Registry.get<TransformComponent>(m_LockedTarget);
+			m_Scene->m_MeshLibrary.m_MeshTransforms[tgtMarkerIdx].push_back(tgtTrf);
+			m_Scene->m_MeshLibrary.m_ColourBuffers[markerColBufIdx].push_back(ColourComponent(1, 0, 0, 1));
+		}
 	}
+
+	
+
 
 	if (Input::IsMouseButtonPressed(sf::Mouse::Left) && m_Player.m_BulletCount > 0)
 	{
 		float phi = RORNG::runif() * 2 * 3.1415926535, r = RORNG::runif();
 		float x = cos(phi), y = sin(phi);
-		m_EntityManager.ShootBullett(m_Player.m_Transform,
-			m_Player.m_DynamicProps.velocity + (m_Player.m_Transform.orientation.f3 + 0.002f * r * (x * m_Player.m_Transform.orientation.f1 + y * m_Player.m_Transform.orientation.f2)) * m_Player.m_BulletSpeed);
+
+		if (!m_Player.m_AutoTargeting)
+		{
+			m_EntityManager.ShootBullett(m_Player.m_Transform,
+				m_Player.m_DynamicProps.velocity + (m_Player.m_Transform.orientation.f3 + 0.002f * r * (x * m_Player.m_Transform.orientation.f1 + y * m_Player.m_Transform.orientation.f2)) * m_Player.m_BulletSpeed);
+		}
+		else
+		{
+			TransformComponent& tgtTrf = m_Scene->m_Registry.get<TransformComponent>(m_PlayersTarget); // change to m_LockedTarget
+			DynamicPropertiesComponent& tgtVel = m_Scene->m_Registry.get<DynamicPropertiesComponent>(m_PlayersTarget); // change to m_LockedTarget
+			Vec3D dx = tgtTrf.location - m_Player.m_Transform.location;
+			Vec3D dv = tgtVel.velocity - m_Player.m_DynamicProps.velocity;
+
+			// float t0 = (tgtTrf.location - m_Player.m_Transform.location).length() / m_Player.m_BulletSpeed;
+			// Vec3D futureLoc = tgtTrf.location + t0 * tgtVel.velocity;
+			float t0 = dx.length() / (m_Player.m_BulletSpeed - dx*dv/dx.length());
+			Vec3D futureLoc = dx + t0 * dv;
+
+			// but close enough when the bullet speed is well over the ships velocity
+			Vec3D bulletVel = futureLoc; bulletVel.normalize();
+			TransformComponent bulletStartLoc = TransformComponent();
+			bulletStartLoc.location = m_Player.m_Transform.location; // +(bulletVel * 1.5f * m_Player.m_Transform.scale);
+
+			m_EntityManager.ShootBullett(bulletStartLoc,
+				m_Player.m_DynamicProps.velocity + (bulletVel + 0.002f * r * (x * m_Player.m_Transform.orientation.f1 + y * m_Player.m_Transform.orientation.f2)) * m_Player.m_BulletSpeed);
+		}
+
 		m_Player.m_BulletCount--;
 		m_AudioManager.PlayShotSound();
 	}
 	if (Input::IsMouseButtonPressed(sf::Mouse::Right) && skip % 2 == 0 && m_Player.m_MissilleCount > 0)
 	{
-		m_EntityManager.LaunchMissile(yellowIdx, m_Player.m_Transform, DynamicPropertiesComponent(), playersTarget);
+		m_EntityManager.LaunchMissile(yellowIdx, m_Player.m_Transform, DynamicPropertiesComponent(), m_PlayersTarget); // change to m_LockedTarget
 		m_Player.m_MissilleCount--;
 		m_AudioManager.PlayShotSound();
 	}
@@ -749,7 +816,7 @@ void MarsMission_layer::UpdateScene(Timestep ts)
 						targetHP.HP -= 10.0f;
 						missileTrf.scale /= 8;
 
-						for (int k = 0; k < 15; k++)
+						for (int k = 0; k < 7; k++)
 						{
 							m_EntityManager.SpawnDebris(hit_location, targetVelocity.velocity, 0.05, 0.0f);
 							m_EntityManager.SpawnDebris(hit_location, missileVelocity.velocity / 4, 0.1, 0.0f);
@@ -767,7 +834,7 @@ void MarsMission_layer::UpdateScene(Timestep ts)
 
 			float dt = sqrt(dx.lengthSquare() / dv.lengthSquare());
 			dx += dt * dv * 0.9f;
-			float accel = 0.0001f;
+			float accel = 0.0003f; // missille acceleration was 0.0001f originally
 
 			// This is the place where I can add repulsive forces, so the missilles avoid nearby objects and focus on reaching the target!!!
 			missileVelocity.velocity += accel * ts * dx / dx.length();
@@ -821,11 +888,11 @@ void MarsMission_layer::UpdateScene(Timestep ts)
 					TimerComponent& ttl = timed_entities.get<TimerComponent>(bullet);
 					ttl = 0.0f;
 					HitPointComponent& targetHP = m_Scene->m_Registry.get<HitPointComponent>(bullet_vicinity[i]);
-					targetHP.HP -= 1.0f;
+					targetHP.HP -= 2.0f; // bullet damage was 1 originally
 
 					bulletTrf.scale /= 8;
 					// m_EntityManager.SpawnExplosion(bulletTrf, targetVelocity);
-					for (int k = 0; k < 30; k++)
+					for (int k = 0; k < 10; k++)
 					{
 						m_EntityManager.SpawnDebris(bulletTrf.location + hit_location - dx, targetVelocity.velocity, 0.05, 0.0f);
 					}
@@ -835,17 +902,17 @@ void MarsMission_layer::UpdateScene(Timestep ts)
 		}
 	}
 
-	auto asteroids = m_Scene->m_Registry.view<TransformComponent, AsteroidComponent>();
-	for (auto asteroid : asteroids)
-	{
-		TransformComponent& asteroidTrf = asteroids.get<TransformComponent>(asteroid);
-		if (asteroidTrf.location.length() < 10.0f + asteroidTrf.scale) // 10.0f is the radius of the Moon
-		{
-			m_EntityManager.SpawnExplosion(asteroidTrf, DynamicPropertiesComponent(), ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
-			m_Scene->m_Registry.destroy(asteroid);
-			m_AudioManager.PlayExplosionSound();
-		}
-	}
+//	auto asteroids = m_Scene->m_Registry.view<TransformComponent, AsteroidComponent>();
+//	for (auto asteroid : asteroids)
+//	{
+//		TransformComponent& asteroidTrf = asteroids.get<TransformComponent>(asteroid);
+//		if (asteroidTrf.location.length() < 10.0f + asteroidTrf.scale) // 10.0f is the radius of the Moon
+//		{
+//			m_EntityManager.SpawnExplosion(asteroidTrf, DynamicPropertiesComponent(), ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
+//			m_Scene->m_Registry.destroy(asteroid);
+//			m_AudioManager.PlayExplosionSound();
+//		}
+//	}
 
 	// UpdateShips(ts);
 
@@ -911,7 +978,7 @@ void MarsMission_layer::UpdateScene(Timestep ts)
 	for (auto entity : view)
 	{
 		TransformComponent& entity_trf = view.get<TransformComponent>(entity);
-		if (entity_trf.location.lengthSquare() > 2000*2000)
+		if (entity_trf.location.lengthSquare() > 10000*10000)
 		{
 			m_Scene->m_Registry.destroy(entity);
 			continue;
@@ -959,7 +1026,17 @@ void MarsMission_layer::UpdateScene(Timestep ts)
 		TransformComponent& entity_trf = non_moving_view.get<TransformComponent>(entity);
 		MeshIndexComponent& idx = non_moving_view.get<MeshIndexComponent>(entity);
 		m_Scene->m_MeshLibrary.m_MeshTransforms[idx.idx].push_back(entity_trf);
+
+		std::shared_ptr<Mesh> tmp_mesh = m_Scene->m_MeshLibrary.m_Meshes[idx.idx];
+		int colBufIdx = tmp_mesh->GetColourInstances();
+		if (colBufIdx != -1)
+		{
+			ColourComponent& colour = m_Scene->m_Registry.get<ColourComponent>(entity);
+			m_Scene->m_MeshLibrary.m_ColourBuffers[colBufIdx].push_back(colour);
+		}
 	}
+
+	DrawCommandPoints();
 
 	// mark asteroids that are on collision course with the earth
 	/*static*/ int markerIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["DefaultMarker"];
@@ -1097,6 +1174,43 @@ void MarsMission_layer::AddWaypoints()
 	}
 }
 
+void MarsMission_layer::UpdateControlPoints(Timestep ts)
+{
+	static std::vector<entt::entity> cp_vicinity_0;
+	static std::vector<entt::entity> cp_vicinity_1;
+	static Box3D box0; box0.center = Vec3D(); box0.radius = Vec3D();
+	cp_vicinity_0.clear();
+	cp_vicinity_1.clear();
+
+	auto controlPoints = m_Scene->m_Registry.view<ControlPointComponent>();
+	for (auto cp : controlPoints)
+	{
+		ControlPointComponent& cp_comp = m_Scene->m_Registry.get<ControlPointComponent>(cp);
+
+		box0.center = cp_comp.location;
+		box0.radius = Vec3D(cp_comp.radius, cp_comp.radius, cp_comp.radius);
+		m_Team0_Tree->GetActiveTree()->QueryRange(box0, cp_vicinity_0, 0);
+		int team0_count = cp_vicinity_0.size();
+
+		m_Team1_Tree->GetActiveTree()->QueryRange(box0, cp_vicinity_1, 0);
+		int team1_count = cp_vicinity_1.size();
+
+		if (team0_count < team1_count)
+		{
+			cp_comp.colour.r = 1.0f;
+			cp_comp.colour.g = 0.0f;
+		}
+		else
+		{
+			cp_comp.colour.r = 0.0f;
+			cp_comp.colour.g = 1.0f;
+		}
+
+	}
+
+
+}
+
 void MarsMission_layer::SpawnShips(Timestep ts)
 {
 	static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
@@ -1107,38 +1221,41 @@ void MarsMission_layer::SpawnShips(Timestep ts)
 	if (spawnTimer > 0.0f)
 		return;
 
-	spawnTimer = spawnTimer < 0.0f ? 500.0f : spawnTimer;
+	spawnTimer = spawnTimer < 0.0f ? 1500.0f : spawnTimer;
 	static int parity = 1;
 	parity *= -1;
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 10; i++)
+//	for (int i = 0; i < 10 - parity * 2; i++)
+//	for (int i = 0; i < (1.5f-parity/2.0f)*5.0f; i++)
 	{
 		Entity newEntity = m_Scene->CreateEntity("");
 
 		float phi1 = RORNG::runif() * (2 * 3.1415926535f);
 		float phi2 = RORNG::runif() * (2 * 3.1415926535f);
 		TransformComponent trf;
-		trf.location = Vec3D(parity * 550, 2 * cos(phi2), 2 * sin(phi2)); // negative - supply ship, positive - Mars
+		trf.location = Vec3D(parity * 5500, 20 * cos(phi2), 20 * sin(phi2)); // negative - supply ship, positive - Mars
 		trf.orientation.f1 = Vec3D(0, 1, 0);
 		trf.orientation.f2 = Vec3D(0, 0, -1);
 		trf.orientation.f3 = Vec3D(parity, 0, 0);
 
 		MovementControllComponent mcc;
-		mcc.waypoints.push_back(Vec3D(-parity * 450, 50 * cos(phi1), 50 * sin(phi1)));
-		mcc.waypoints.push_back(Vec3D(parity * 500, 50 * cos(phi2), 50 * sin(phi2)));
+		mcc.waypoints.push_back(Vec3D(-parity * 4500, 500 * cos(phi1), 500 * sin(phi1)));
+		mcc.waypoints.push_back(Vec3D(parity * 5000, 500 * cos(phi2), 500 * sin(phi2)));
 
 		WeaponControllComponent wcc;
-		wcc.gunShots = 20; wcc.gunShotTimer = 1000;
+		// wcc.gunShots = 20; wcc.gunShotTimer = 1000;
+		wcc.gunShots = 1; wcc.gunShotTimer = 50;
 		wcc.missilleShots = 6; wcc.missilleShotTimer = 5000;
 		wcc.antiMissilleShots = 50; wcc.antiMissilleShotTimer = 200;
-		wcc.gunShotsRemaining = 20; wcc.gunShotTimerRemaining = 1000;
-		wcc.missilleShotsRemaining = 6; wcc.missilleShotTimerRemaining = 1000;
+		wcc.gunShotsRemaining = 1; wcc.gunShotTimerRemaining = 50;
+		wcc.missilleShotsRemaining = 6; wcc.missilleShotTimerRemaining = 5000;
 		wcc.antiMissilleShotsRemaining = 50; wcc.antiMissilleShotTimerRemaining = 200;
 
 		newEntity.AddComponent<TransformComponent>(trf);
 		newEntity.AddComponent<DynamicPropertiesComponent>();
 		newEntity.AddComponent<MeshIndexComponent>(parity < 0 ? bcIdx : battleshipIdx);
-		newEntity.AddComponent<HitPointComponent>(100.0f);
+		newEntity.AddComponent<HitPointComponent>(120.0f);
 		newEntity.AddComponent<ColliderComponent>(ColliderComponent());
 		newEntity.AddComponent<MarkerComponent>(MarkerComponent(-parity, parity, 0.0f, 1.0f));
 		newEntity.AddComponent<MovementControllComponent>(mcc);
@@ -1149,6 +1266,69 @@ void MarsMission_layer::SpawnShips(Timestep ts)
 			newEntity.AddComponent<TeamComponent_0>();
 	}
 
+	SpawnCapitalShips((int)((parity+1)/2));
+}
+
+void MarsMission_layer::SpawnCapitalShips(int team)
+{
+	static int heavyCruiserIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["heavy_cruiser"];
+	static int bcIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battlecruiser"];
+	float team_multiplier = team == 0 ? 1.0f : -1.0f;
+
+	Entity newEntity = m_Scene->CreateEntity("");
+
+	float phi1 = RORNG::runif() * (2 * 3.1415926535f);
+	TransformComponent trf;
+	trf.location = team_multiplier * Vec3D(5500, 20 * cos(phi1), 20 * sin(phi1)); // negative - supply ship, positive - Mars
+	trf.orientation.f1 = team_multiplier * Vec3D(0, 1, 0);
+	trf.orientation.f2 = team_multiplier * Vec3D(0, 0, -1);
+	trf.orientation.f3 = team_multiplier * Vec3D(2.0f, 0, 0);
+	trf.scale = 1.5f;
+
+	MovementControllComponent mcc;
+	mcc.waypoints.push_back(team_multiplier * Vec3D(0, 500 * cos(phi1), 500 * sin(phi1)));
+	mcc.waypoints.push_back(team_multiplier * Vec3D(5000, 500 * cos(phi1), 500 * sin(phi1)));
+
+	WeaponControllComponent wcc;
+	wcc.gunShots = 100; wcc.gunShotTimer = 400;
+	wcc.missilleShots = 60; wcc.missilleShotTimer = 5000;
+	wcc.antiMissilleShots = 500; wcc.antiMissilleShotTimer = 200;
+	wcc.gunShotsRemaining = 100; wcc.gunShotTimerRemaining = 400;
+	wcc.missilleShotsRemaining = 60; wcc.missilleShotTimerRemaining = 1000;
+	wcc.antiMissilleShotsRemaining = 500; wcc.antiMissilleShotTimerRemaining = 200;
+
+	newEntity.AddComponent<TransformComponent>(trf);
+	newEntity.AddComponent<DynamicPropertiesComponent>();
+	newEntity.AddComponent<HitPointComponent>(2000.0f);
+	newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+	newEntity.AddComponent<MarkerComponent>(MarkerComponent(-team_multiplier, team_multiplier, 0.0f, 1.0f));
+	newEntity.AddComponent<MovementControllComponent>(mcc);
+	newEntity.AddComponent<WeaponControllComponent>(wcc);
+	if (team == 0)
+	{
+		newEntity.AddComponent<MeshIndexComponent>(heavyCruiserIdx);
+		newEntity.AddComponent<TeamComponent_0>();
+	}
+	else if (team == 1)
+	{
+		newEntity.AddComponent<MeshIndexComponent>(bcIdx);
+		newEntity.AddComponent<TeamComponent_1>();
+	}
+}
+
+void MarsMission_layer::DrawCommandPoints()
+{
+	static int sphereIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Atmosphere"];
+	std::shared_ptr<Mesh> mesh = m_Scene->m_MeshLibrary.m_Meshes[sphereIdx];
+	int colBufIdx = mesh->GetColourInstances();
+
+	auto control_points = m_Scene->m_Registry.view<ControlPointComponent>();
+	for (auto control_point : control_points)
+	{
+		ControlPointComponent& cpc = m_Scene->m_Registry.get<ControlPointComponent>(control_point);
+		m_Scene->m_MeshLibrary.m_MeshTransforms[sphereIdx].push_back(TransformComponent(cpc.location, Identity(1.0f), cpc.radius));
+		m_Scene->m_MeshLibrary.m_ColourBuffers[colBufIdx].push_back(cpc.colour);
+	}
 }
 
 void MarsMission_layer::OnTeam0ShipDestroyed()
@@ -1178,10 +1358,26 @@ void MarsMission_layer::EvaluateLossCondition()
 	if (m_Player.m_Health < 0.0f)
 		m_IsLost = true;
 
-	if (m_Team1_kill_counter >= m_MaxKillCount)
+//	if (m_Team1_kill_counter >= m_MaxKillCount)
+//		m_IsLost = true;
+//
+//	if (m_Team0_kill_counter >= m_MaxKillCount)
+//		m_Victory = true;
+
+	const float blockade_range = 750.0f;
+	static std::vector<entt::entity> blockade_counter;
+	static Box3D box0; box0.center = Vec3D(5000.0, 0.0, 0.0); box0.radius = Vec3D(blockade_range, blockade_range, blockade_range);
+	blockade_counter.clear();
+	m_Team1_Tree->GetActiveTree()->QueryRange(box0, blockade_counter, 0);
+	m_Team1_blockade = blockade_counter.size();
+	if(blockade_counter.size() > m_MaxBlockadeCount)
 		m_IsLost = true;
 
-	if (m_Team0_kill_counter >= m_MaxKillCount)
+	static Box3D box1; box1.center = Vec3D(-5000.0, 0.0, 0.0); box1.radius = Vec3D(blockade_range, blockade_range, blockade_range);
+	blockade_counter.clear();
+	m_Team0_Tree->GetActiveTree()->QueryRange(box1, blockade_counter, 0);
+	m_Team0_blockade = blockade_counter.size();
+	if (blockade_counter.size() > m_MaxBlockadeCount)
 		m_Victory = true;
 
 

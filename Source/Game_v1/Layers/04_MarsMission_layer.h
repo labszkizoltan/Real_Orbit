@@ -73,8 +73,12 @@ private:
 
 	void UpdateShips(Timestep ts);
 	void AddWaypoints();
+	void UpdateControlPoints(Timestep ts);
 
 	void SpawnShips(Timestep ts);
+	void SpawnCapitalShips(int team);
+
+	void DrawCommandPoints();
 
 	void OnTeam0ShipDestroyed();
 	void OnTeam1ShipDestroyed();
@@ -114,7 +118,14 @@ private:
 
 	int m_Team0_kill_counter = 0;
 	int m_Team1_kill_counter = 0;
-	int m_MaxKillCount = 200;
+	int m_MaxKillCount = 500;
+
+	int m_Team0_blockade = 0;
+	int m_Team1_blockade = 0;
+	int m_MaxBlockadeCount = 100;
+
+	entt::entity m_PlayersTarget = entt::tombstone;
+	entt::entity m_LockedTarget = entt::tombstone;
 
 	bool m_Victory = false;
 	bool m_IsLost = false;

@@ -202,6 +202,19 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 			deserializedEntity.AddComponent<EnemyShipComponent>();
 		}
 
+
+		//----- ControlPointComponent -----//
+		auto control_point_com = entity["ControlPointComponent"];
+		if (control_point_com)
+		{
+			ControlPointComponent cpc;
+			cpc.radius = control_point_com["radius"].as<float>();
+			cpc.location = control_point_com["location"].as<Vec3D>();
+			cpc.colour = control_point_com["colour"].as<ColourComponent>();
+			deserializedEntity.AddComponent<ControlPointComponent>(cpc);
+		}
+
+
 		//----- WeaponControllComponent -----//
 		auto weapon_controll_com = entity["WeaponControllComponent"];
 		if (weapon_controll_com)
@@ -237,8 +250,9 @@ void SceneSerializer::DeSerialize_text(const std::string& scene_description)
 		auto player_com = entity["PlayerComponent"];
 		if (player_com)
 		{
-			PlayerComponent player_com;
-			deserializedEntity.AddComponent<PlayerComponent>(player_com);
+//			PlayerComponent player_com;
+//			deserializedEntity.AddComponent<PlayerComponent>(player_com);
+			deserializedEntity.AddComponent<PlayerComponent>();
 		}
 
 //		std::cout << "entity de-serialized\n";

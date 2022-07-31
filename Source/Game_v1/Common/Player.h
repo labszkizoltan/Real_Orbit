@@ -32,6 +32,7 @@ public:
 	int m_MissilleCount, m_MaxMissilleCount;
 	int m_SalvoCount;
 	float m_FillRate;
+	bool m_AutoTargeting = false;
 
 };
 

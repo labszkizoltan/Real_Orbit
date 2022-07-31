@@ -258,6 +258,13 @@
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_letter_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_marker_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\instanced_normal_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_alpha_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_bright_colour_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_colour_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_letter_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_marker_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_normal_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\skybox_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\normal_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\shadow_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\skybox_shaders.h" />
@@ -276,6 +283,7 @@
     <ClInclude Include="Source\Game_v1\Common\AudioManager.h" />
     <ClInclude Include="Source\Game_v1\Common\CollisionDetection.h" />
     <ClInclude Include="Source\Game_v1\Common\DualOctTree.h" />
+    <ClInclude Include="Source\Game_v1\Common\EntityBoundPlayer.h" />
     <ClInclude Include="Source\Game_v1\Common\EntityManager.h" />
     <ClInclude Include="Source\Game_v1\Common\MenuStateManager.h" />
     <ClInclude Include="Source\Game_v1\Common\Player.h" />
