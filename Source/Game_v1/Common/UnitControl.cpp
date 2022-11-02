@@ -161,7 +161,7 @@ void UnitController::FireControl(Timestep ts)
 				TransformComponent& targetTrf = team1_ships.get<TransformComponent>(ship_vicinity[0]);
 				DynamicPropertiesComponent& targetVel = team1_ships.get<DynamicPropertiesComponent>(ship_vicinity[0]);
 				float t0 = (targetTrf.location - shipTrf.location).length() / bulletSpeed;
-				Vec3D futureLoc = targetTrf.location + t0 * targetVel.velocity;
+				Vec3D futureLoc = targetTrf.location + t0 * targetVel.velocity * (1.0f-0.4f*(float)wcc.gunShotsRemaining/(float)wcc.gunShots);
 				// I think this is not exact, because the firing ships velocity is not considered,
 				// but close enough when the bullet speed is well over the ships velocity
 				Vec3D bulletVel = futureLoc - shipTrf.location; bulletVel.normalize();

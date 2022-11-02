@@ -89,6 +89,8 @@ struct EnemyShipComponent { float shotTimer = 0.0f; };
 struct ControlPointComponent 
 {
 	float capture_timer = 0.0f;
+	float spawn_frequency = 900.0f;
+	float spawn_timer = 900.0f;
 	float radius = 1.0f;
 	Vec3D location = Vec3D();
 	ColourComponent colour = ColourComponent();

@@ -75,8 +75,10 @@ private:
 	void AddWaypoints();
 	void UpdateControlPoints(Timestep ts);
 
-	void SpawnShips(Timestep ts);
+	void SpawnShips(int count, int team, Vec3D location, float range);
 	void SpawnCapitalShips(int team);
+	void SpawnShips_2(Timestep ts);
+	void SpawnCapitalShips_2(int team);
 
 	void DrawCommandPoints();
 

@@ -70,7 +70,7 @@ void MarsMission_layer::OnAttach()
 	m_ImgProcessor = std::make_unique<ImageProcessor>();
 	m_ImgProcessor->SetMipMapLevel(4);
 
-	m_AudioManager.SetVolume(10.0f);
+	m_AudioManager.SetVolume(1.0f); // 10.0f
 	m_AudioManager.SetIntroSpeech("assets/audio/MoonMission_introSpeech.wav");
 
 	m_Player.m_Transform.location = Vec3D(5040.0f, 65.0f, -25.0f);
@@ -518,7 +518,8 @@ void MarsMission_layer::PartialUpdate(Timestep ts)
 	else if (phaseCounter == 3)
 	{
 		// ControlUnits(ts);
-		SpawnShips(ts);
+		// SpawnShips(ts);
+		SpawnShips_2(ts);
 	}
 	else if (phaseCounter == 4)
 	{
@@ -538,6 +539,7 @@ void MarsMission_layer::PartialUpdate(Timestep ts)
 	}
 	else if (phaseCounter == 8)
 	{
+		UpdateControlPoints(ts);
 	}
 	else if (phaseCounter == 9)
 	{
@@ -1195,15 +1197,36 @@ void MarsMission_layer::UpdateControlPoints(Timestep ts)
 		m_Team1_Tree->GetActiveTree()->QueryRange(box0, cp_vicinity_1, 0);
 		int team1_count = cp_vicinity_1.size();
 
+		// set colour
 		if (team0_count < team1_count)
 		{
 			cp_comp.colour.r = 1.0f;
 			cp_comp.colour.g = 0.0f;
 		}
-		else
+		else if(team0_count > team1_count)
 		{
 			cp_comp.colour.r = 0.0f;
 			cp_comp.colour.g = 1.0f;
+		}
+		else
+		{
+			cp_comp.colour.r = 1.0f;
+			cp_comp.colour.g = 1.0f;
+		}
+
+		// advance the timer
+		if (cp_comp.colour.r == 0 || cp_comp.colour.g == 0)
+		{
+			cp_comp.spawn_timer -= ts;
+		}
+
+		// spawn ships
+		if (cp_comp.spawn_timer < 0.0f)
+		{
+			cp_comp.spawn_timer = cp_comp.spawn_frequency;
+			int parity = ((cp_comp.colour.r == 0.0f) && (cp_comp.colour.g == 1.0f)) ? 1 : 0;
+			parity = ((cp_comp.colour.r == 1.0f) && (cp_comp.colour.g == 0.0f)) ? -1 : parity;
+			SpawnShips(3, parity, cp_comp.location, cp_comp.radius);
 		}
 
 	}
@@ -1211,7 +1234,104 @@ void MarsMission_layer::UpdateControlPoints(Timestep ts)
 
 }
 
-void MarsMission_layer::SpawnShips(Timestep ts)
+void MarsMission_layer::SpawnShips(int count, int parity, Vec3D location, float range)
+{
+	static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
+	static int bcIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battlecruiser"];
+	if (parity == 0)
+		return;
+
+	for (int i = 0; i < count; i++)
+	{
+		Entity newEntity = m_Scene->CreateEntity("");
+
+		float phi1 = RORNG::runif() * (2 * 3.1415926535f);
+		float phi2 = RORNG::runif() * (2 * 3.1415926535f);
+		TransformComponent trf;
+		// trf.location = Vec3D(parity * 5500, 20 * cos(phi2), 20 * sin(phi2)); // negative - supply ship, positive - Mars
+		trf.location = location + range * Vec3D(RORNG::runif(), RORNG::runif(), RORNG::runif());
+		trf.orientation.f1 = Vec3D(0, 1, 0);
+		trf.orientation.f2 = Vec3D(0, 0, -1);
+		trf.orientation.f3 = Vec3D(parity, 0, 0);
+
+		// MovementControllComponent mcc;
+		// mcc.waypoints.push_back(Vec3D(-parity * 4500, 500 * cos(phi1), 500 * sin(phi1)));
+		// mcc.waypoints.push_back(Vec3D(parity * 5000, 500 * cos(phi2), 500 * sin(phi2)));
+
+		WeaponControllComponent wcc;
+		// wcc.gunShots = 20; wcc.gunShotTimer = 1000;
+		wcc.gunShots = 1; wcc.gunShotTimer = 50;
+		wcc.missilleShots = 6; wcc.missilleShotTimer = 5000;
+		wcc.antiMissilleShots = 50; wcc.antiMissilleShotTimer = 200;
+		wcc.gunShotsRemaining = 1; wcc.gunShotTimerRemaining = 50;
+		wcc.missilleShotsRemaining = 6; wcc.missilleShotTimerRemaining = 5000;
+		wcc.antiMissilleShotsRemaining = 50; wcc.antiMissilleShotTimerRemaining = 200;
+
+		newEntity.AddComponent<TransformComponent>(trf);
+		newEntity.AddComponent<DynamicPropertiesComponent>();
+		newEntity.AddComponent<MeshIndexComponent>(parity < 0 ? bcIdx : battleshipIdx);
+		newEntity.AddComponent<HitPointComponent>(120.0f);
+		newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+		newEntity.AddComponent<MarkerComponent>(MarkerComponent(-parity, parity, 0.0f, 1.0f));
+		// newEntity.AddComponent<MovementControllComponent>(mcc);
+		newEntity.AddComponent<WeaponControllComponent>(wcc);
+		if (parity < 0.0)
+			newEntity.AddComponent<TeamComponent_1>();
+		else
+			newEntity.AddComponent<TeamComponent_0>();
+	}
+
+	// SpawnCapitalShips((int)((parity+1)/2));
+}
+
+void MarsMission_layer::SpawnCapitalShips(int team)
+{
+	static int heavyCruiserIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["heavy_cruiser"];
+	static int bcIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battlecruiser"];
+	float team_multiplier = team == 0 ? 1.0f : -1.0f;
+
+	Entity newEntity = m_Scene->CreateEntity("");
+
+	float phi1 = RORNG::runif() * (2 * 3.1415926535f);
+	TransformComponent trf;
+	trf.location = team_multiplier * Vec3D(5500, 20 * cos(phi1), 20 * sin(phi1)); // negative - supply ship, positive - Mars
+	trf.orientation.f1 = team_multiplier * Vec3D(0, 1, 0);
+	trf.orientation.f2 = team_multiplier * Vec3D(0, 0, -1);
+	trf.orientation.f3 = team_multiplier * Vec3D(2.0f, 0, 0);
+	trf.scale = 1.5f;
+
+	MovementControllComponent mcc;
+	mcc.waypoints.push_back(team_multiplier * Vec3D(0, 500 * cos(phi1), 500 * sin(phi1)));
+	mcc.waypoints.push_back(team_multiplier * Vec3D(5000, 500 * cos(phi1), 500 * sin(phi1)));
+
+	WeaponControllComponent wcc;
+	wcc.gunShots = 100; wcc.gunShotTimer = 400;
+	wcc.missilleShots = 60; wcc.missilleShotTimer = 5000;
+	wcc.antiMissilleShots = 500; wcc.antiMissilleShotTimer = 200;
+	wcc.gunShotsRemaining = 100; wcc.gunShotTimerRemaining = 400;
+	wcc.missilleShotsRemaining = 60; wcc.missilleShotTimerRemaining = 1000;
+	wcc.antiMissilleShotsRemaining = 500; wcc.antiMissilleShotTimerRemaining = 200;
+
+	newEntity.AddComponent<TransformComponent>(trf);
+	newEntity.AddComponent<DynamicPropertiesComponent>();
+	newEntity.AddComponent<HitPointComponent>(2000.0f);
+	newEntity.AddComponent<ColliderComponent>(ColliderComponent());
+	newEntity.AddComponent<MarkerComponent>(MarkerComponent(-team_multiplier, team_multiplier, 0.0f, 1.0f));
+	newEntity.AddComponent<MovementControllComponent>(mcc);
+	newEntity.AddComponent<WeaponControllComponent>(wcc);
+	if (team == 0)
+	{
+		newEntity.AddComponent<MeshIndexComponent>(heavyCruiserIdx);
+		newEntity.AddComponent<TeamComponent_0>();
+	}
+	else if (team == 1)
+	{
+		newEntity.AddComponent<MeshIndexComponent>(bcIdx);
+		newEntity.AddComponent<TeamComponent_1>();
+	}
+}
+
+void MarsMission_layer::SpawnShips_2(Timestep ts)
 {
 	static int battleshipIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battleship"];
 	static int bcIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battlecruiser"];
@@ -1225,9 +1345,19 @@ void MarsMission_layer::SpawnShips(Timestep ts)
 	static int parity = 1;
 	parity *= -1;
 
+	auto CPGroup = m_Scene->m_Registry.view<ControlPointComponent>();
+	int destinationCPG_idx = RORNG::runif() * CPGroup.size();
+	// int destinationCPG_idx = rand() % 3;
+	int counter = 0;
+	entt::entity tgtCP = entt::tombstone;
+	for (auto controlPt : CPGroup)
+	{
+		if (counter == destinationCPG_idx) { tgtCP = controlPt; break; }
+		counter++;
+	}
+	ControlPointComponent& CPComponent = m_Scene->m_Registry.get<ControlPointComponent>(tgtCP);
+	
 	for (int i = 0; i < 10; i++)
-//	for (int i = 0; i < 10 - parity * 2; i++)
-//	for (int i = 0; i < (1.5f-parity/2.0f)*5.0f; i++)
 	{
 		Entity newEntity = m_Scene->CreateEntity("");
 
@@ -1239,9 +1369,11 @@ void MarsMission_layer::SpawnShips(Timestep ts)
 		trf.orientation.f2 = Vec3D(0, 0, -1);
 		trf.orientation.f3 = Vec3D(parity, 0, 0);
 
+		Vec3D startLoc = Vec3D(parity * 4500, 0, 0);
+		Vec3D offset = Vec3D(0, 500 * cos(phi1), 500 * sin(phi1));
 		MovementControllComponent mcc;
-		mcc.waypoints.push_back(Vec3D(-parity * 4500, 500 * cos(phi1), 500 * sin(phi1)));
-		mcc.waypoints.push_back(Vec3D(parity * 5000, 500 * cos(phi2), 500 * sin(phi2)));
+		// mcc.waypoints.push_back(startLoc+offset);
+		mcc.waypoints.push_back(CPComponent.location + offset/5);
 
 		WeaponControllComponent wcc;
 		// wcc.gunShots = 20; wcc.gunShotTimer = 1000;
@@ -1266,14 +1398,29 @@ void MarsMission_layer::SpawnShips(Timestep ts)
 			newEntity.AddComponent<TeamComponent_0>();
 	}
 
-	SpawnCapitalShips((int)((parity+1)/2));
+	SpawnCapitalShips_2((int)((parity + 1) / 2));
 }
 
-void MarsMission_layer::SpawnCapitalShips(int team)
+void MarsMission_layer::SpawnCapitalShips_2(int team)
 {
 	static int heavyCruiserIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["heavy_cruiser"];
 	static int bcIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["battlecruiser"];
 	float team_multiplier = team == 0 ? 1.0f : -1.0f;
+
+	auto CPGroup = m_Scene->m_Registry.view<ControlPointComponent>();
+	int destinationCPG_idx = RORNG::runif() * CPGroup.size();
+	int counter = 0;
+	Vec3D destination = Vec3D();
+	for (auto controlPt : CPGroup)
+	{
+		if (counter == destinationCPG_idx)
+		{
+			ControlPointComponent& CPComponent = m_Scene->m_Registry.get<ControlPointComponent>(controlPt);
+			destination = CPComponent.location;
+			break;
+		}
+		counter++;
+	}
 
 	Entity newEntity = m_Scene->CreateEntity("");
 
@@ -1286,8 +1433,7 @@ void MarsMission_layer::SpawnCapitalShips(int team)
 	trf.scale = 1.5f;
 
 	MovementControllComponent mcc;
-	mcc.waypoints.push_back(team_multiplier * Vec3D(0, 500 * cos(phi1), 500 * sin(phi1)));
-	mcc.waypoints.push_back(team_multiplier * Vec3D(5000, 500 * cos(phi1), 500 * sin(phi1)));
+	mcc.waypoints.push_back(destination);
 
 	WeaponControllComponent wcc;
 	wcc.gunShots = 100; wcc.gunShotTimer = 400;
