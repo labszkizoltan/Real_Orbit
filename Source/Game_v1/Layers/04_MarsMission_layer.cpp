@@ -1181,12 +1181,13 @@ void MarsMission_layer::UpdateControlPoints(Timestep ts)
 	static std::vector<entt::entity> cp_vicinity_0;
 	static std::vector<entt::entity> cp_vicinity_1;
 	static Box3D box0; box0.center = Vec3D(); box0.radius = Vec3D();
-	cp_vicinity_0.clear();
-	cp_vicinity_1.clear();
 
 	auto controlPoints = m_Scene->m_Registry.view<ControlPointComponent>();
 	for (auto cp : controlPoints)
 	{
+		cp_vicinity_0.clear();
+		cp_vicinity_1.clear();
+
 		ControlPointComponent& cp_comp = m_Scene->m_Registry.get<ControlPointComponent>(cp);
 
 		box0.center = cp_comp.location;
@@ -1196,6 +1197,30 @@ void MarsMission_layer::UpdateControlPoints(Timestep ts)
 
 		m_Team1_Tree->GetActiveTree()->QueryRange(box0, cp_vicinity_1, 0);
 		int team1_count = cp_vicinity_1.size();
+
+		const int launch_limit = 30;
+		if (team0_count > launch_limit && team1_count == 0)
+		{
+			for (auto& entity_handle : cp_vicinity_0)
+			{
+				Entity entity(entity_handle, m_Scene.get());
+				MovementControllComponent mcc;
+				mcc.waypoints.push_back(Vec3D(-4700, 0, 0)+100*Vec3D(RORNG::runif() - 0.5f, RORNG::runif() - 0.5f, RORNG::runif()-0.5f));
+				if(!entity.HasComponent<MovementControllComponent>()) { entity.AddComponent<MovementControllComponent>(mcc); }
+			}
+		}
+
+		if (team1_count > launch_limit && team0_count == 0)
+		{
+			for (auto& entity_handle : cp_vicinity_1)
+			{
+				Entity entity(entity_handle, m_Scene.get());
+				MovementControllComponent mcc;
+				mcc.waypoints.push_back(Vec3D(4700, 0, 0) + 100 * Vec3D(RORNG::runif() - 0.5f, RORNG::runif() - 0.5f, RORNG::runif() - 0.5f));
+				if (!entity.HasComponent<MovementControllComponent>()) { entity.AddComponent<MovementControllComponent>(mcc); }
+			}
+		}
+
 
 		// set colour
 		if (team0_count < team1_count)
@@ -1341,7 +1366,8 @@ void MarsMission_layer::SpawnShips_2(Timestep ts)
 	if (spawnTimer > 0.0f)
 		return;
 
-	spawnTimer = spawnTimer < 0.0f ? 1500.0f : spawnTimer;
+	// spawnTimer = spawnTimer < 0.0f ? 1500.0f : spawnTimer;
+	spawnTimer = spawnTimer < 0.0f ? (3000.0f + RORNG::runif() * 1000.0f) : spawnTimer;
 	static int parity = 1;
 	parity *= -1;
 
