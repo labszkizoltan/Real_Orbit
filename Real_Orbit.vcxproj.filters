@@ -297,6 +297,12 @@
     <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\skybox_shaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_rough_shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\core\rendering\drawables\RoughMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\core\Application.cpp">
@@ -486,6 +492,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Game_v1\Layers\04_MarsMission_layer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\core\rendering\drawables\RoughMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

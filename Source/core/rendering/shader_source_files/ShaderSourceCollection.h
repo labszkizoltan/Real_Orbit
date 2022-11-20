@@ -24,6 +24,7 @@
 #include <core/rendering/shader_source_files/linear_shaders/instanced_bright_colour_shader.h>
 #include <core/rendering/shader_source_files/linear_shaders/instanced_normal_shader.h>
 #include <core/rendering/shader_source_files/linear_shaders/instanced_alpha_shader.h>
+#include <core/rendering/shader_source_files/linear_shaders/instanced_rough_shader.h>
 #include <core/rendering/shader_source_files/linear_shaders/instanced_marker_shader.h>
 #include <core/rendering/shader_source_files/linear_shaders/instanced_letter_shader.h>
 

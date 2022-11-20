@@ -9,8 +9,11 @@ const int g_SkyboxMeshResolution = 11; // used in the SceneSerializer
 
 const size_t g_MaxInstanceCount = 100000; // 1000000; // this would be ~52Mb, so the GPU should be able to handle a few of these, but at that point the rendering time probably would take too long
 
+const float g_ExplosionLifespan = 300.0f; // milli seconds I guess
+
 // texture slot bindings:
 const int g_MeshTextureSlot = 0;
+const int g_MeshNormalMapSlot = 13;
 const int g_RendererShadowDepthSlot = 1;
 const int g_SkyboxTextureSlots[6] = { 2,3,4,5,6,7 };
 

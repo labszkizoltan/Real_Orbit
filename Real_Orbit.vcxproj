@@ -173,6 +173,7 @@
     <ClCompile Include="Source\core\rendering\drawables\Mesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\MeshLibrary.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\NormalMesh.cpp" />
+    <ClCompile Include="Source\core\rendering\drawables\RoughMesh.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\Skybox.cpp" />
     <ClCompile Include="Source\core\rendering\DoubleFramebuffer.cpp" />
     <ClCompile Include="Source\core\rendering\drawables\text_rendering\ROFont.cpp" />
@@ -241,6 +242,7 @@
     <ClInclude Include="Source\core\rendering\drawables\Mesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\MeshLibrary.h" />
     <ClInclude Include="Source\core\rendering\drawables\NormalMesh.h" />
+    <ClInclude Include="Source\core\rendering\drawables\RoughMesh.h" />
     <ClInclude Include="Source\core\rendering\drawables\Skybox.h" />
     <ClInclude Include="Source\core\rendering\DoubleFramebuffer.h" />
     <ClInclude Include="Source\core\rendering\drawables\text_rendering\ROFont.h" />
@@ -264,6 +266,7 @@
     <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_letter_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_marker_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_normal_shader.h" />
+    <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\instanced_rough_shader.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\linear_shaders\skybox_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\normal_shaders.h" />
     <ClInclude Include="Source\core\rendering\shader_source_files\shadow_shaders.h" />

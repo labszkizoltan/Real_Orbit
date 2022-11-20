@@ -229,6 +229,10 @@ void InGame_layer::Activate()
 	m_AudioManager.ContinueMusic();
 	//m_Music.play();
 	Renderer::SetZoomLevel(m_ZoomLevel);
+
+	int center_x = Application::Get().GetWindow().GetWidth() / 2;
+	int center_y = Application::Get().GetWindow().GetHeight() / 2;
+	sf::Mouse::setPosition(sf::Vector2i(center_x, center_y), Application::Get().GetWindow().GetNativeWindow());
 }
 
 void InGame_layer::DeActivate()

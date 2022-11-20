@@ -71,7 +71,7 @@ void MarsMission_layer::OnAttach()
 	m_ImgProcessor->SetMipMapLevel(4);
 
 	m_AudioManager.SetVolume(1.0f); // 10.0f
-	m_AudioManager.SetIntroSpeech("assets/audio/MoonMission_introSpeech.wav");
+	m_AudioManager.SetIntroSpeech("assets/audio/silence.wav");
 
 	m_Player.m_Transform.location = Vec3D(5040.0f, 65.0f, -25.0f);
 	m_Player.m_Transform.orientation.f1 = Vec3D(0, 1, 0);
@@ -201,6 +201,10 @@ void MarsMission_layer::Activate()
 	//m_Music.play();
 	Renderer::SetZoomLevel(m_ZoomLevel);
 	Renderer::SetMinMaxRange(0.05f, 12000.0f);
+
+	int center_x = Application::Get().GetWindow().GetWidth() / 2;
+	int center_y = Application::Get().GetWindow().GetHeight() / 2;
+	sf::Mouse::setPosition(sf::Vector2i(center_x, center_y), Application::Get().GetWindow().GetNativeWindow());
 }
 
 void MarsMission_layer::DeActivate()
@@ -308,7 +312,7 @@ void MarsMission_layer::ResetLayer()
 	m_ZoomLevel = g_InitialZoomLevel;
 
 	m_Player = Player();
-	m_Player.m_Transform.location = Vec3D(504.0f, 6.5f, -2.5f);
+	m_Player.m_Transform.location = Vec3D(5040.0f, 65.0f, -25.0f);
 	m_Player.m_Transform.orientation.f1 = Vec3D(0, 1, 0);
 	m_Player.m_Transform.orientation.f2 = Vec3D(0, 0, -1);
 	m_Player.m_Transform.orientation.f3 = Vec3D(-1, 0, 0);
@@ -316,7 +320,7 @@ void MarsMission_layer::ResetLayer()
 	m_Player.m_MaxBulletCount = 1000;
 	m_Player.m_MissilleCount = 200;
 	m_Player.m_MaxMissilleCount = 200;
-	m_Player.m_BulletSpeed = 0.7f;
+	m_Player.m_BulletSpeed = 0.9f;
 	m_Player.m_AutoTargeting = true;
 
 	m_CameraContinuousRotation = false;
@@ -772,10 +776,13 @@ void MarsMission_layer::UpdateScene(Timestep ts)
 	auto explosions = m_Scene->m_Registry.view<ExplosionComponent>();
 	for (auto explosion : explosions)
 	{
+		ExplosionComponent& start_scale = m_Scene->m_Registry.get<ExplosionComponent>(explosion);
+		TimerComponent& timer = m_Scene->m_Registry.get<TimerComponent>(explosion);
 		TransformComponent& trf = m_Scene->m_Registry.get<TransformComponent>(explosion);
-		trf.scale += ts / 100.0f;
+		trf.scale = 15 * start_scale.starting_scale * (1.0f - timer.timeToLive / g_ExplosionLifespan) + start_scale.starting_scale;
 		ColourComponent& col = m_Scene->m_Registry.get<ColourComponent>(explosion);
-		col.a = 1.0f / (trf.scale * trf.scale * trf.scale);
+		// col.a = 1.0f / (trf.scale * trf.scale * trf.scale);
+		col.a = timer.timeToLive / g_ExplosionLifespan;
 	}
 
 	m_UnitController.MoveUnits(ts);
@@ -1233,11 +1240,11 @@ void MarsMission_layer::UpdateControlPoints(Timestep ts)
 			cp_comp.colour.r = 0.0f;
 			cp_comp.colour.g = 1.0f;
 		}
-		else
-		{
-			cp_comp.colour.r = 1.0f;
-			cp_comp.colour.g = 1.0f;
-		}
+		// else
+		// {
+		// 	cp_comp.colour.r = 1.0f;
+		// 	cp_comp.colour.g = 1.0f;
+		// }
 
 		// advance the timer
 		if (cp_comp.colour.r == 0 || cp_comp.colour.g == 0)
@@ -1383,7 +1390,7 @@ void MarsMission_layer::SpawnShips_2(Timestep ts)
 	}
 	ControlPointComponent& CPComponent = m_Scene->m_Registry.get<ControlPointComponent>(tgtCP);
 	
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 15- 5*parity; i++)
 	{
 		Entity newEntity = m_Scene->CreateEntity("");
 

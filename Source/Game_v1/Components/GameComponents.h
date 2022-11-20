@@ -74,7 +74,7 @@ struct TeamComponent_default { char something = 0; };
 
 struct PlayerComponent { char something = 0; };
 
-struct ExplosionComponent { char something = 0; };
+struct ExplosionComponent { float starting_scale = 1.0f; };
 
 struct AsteroidComponent { char something = 0; };
 

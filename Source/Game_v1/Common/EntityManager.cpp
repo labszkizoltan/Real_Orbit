@@ -1,6 +1,7 @@
 
 #include "EntityManager.h"
 #include <utils/RandomGeneration.h>
+#include <core/GlobalConstants.h>
 
 EntityManager::EntityManager(Scene* scene)
 	: m_Scene(scene) {}
@@ -235,14 +236,16 @@ void EntityManager::SpawnExplosion(TransformComponent trf, DynamicPropertiesComp
 {
 	static int explosionIdx = m_Scene->GetMeshLibrary().m_NameIndexLookup["Explosion"];
 
+	trf.orientation = Identity(1.0f);
 	Entity newEntity = m_Scene->CreateEntity("");
 	newEntity.AddComponent<TransformComponent>(trf);
 	newEntity.AddComponent<MeshIndexComponent>(explosionIdx);
 //	newEntity.AddComponent<ColourComponent>(ColourComponent(0.8, 0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f));
 	newEntity.AddComponent<ColourComponent>(col);
 	newEntity.AddComponent<DynamicPropertiesComponent>(dyn);
-	newEntity.AddComponent<TimerComponent>(TimerComponent(2000.0f));
-	newEntity.AddComponent<ExplosionComponent>(ExplosionComponent());
+	newEntity.AddComponent<TimerComponent>(TimerComponent(g_ExplosionLifespan));
+//	newEntity.AddComponent<ExplosionComponent>(ExplosionComponent());
+	newEntity.AddComponent<ExplosionComponent>(trf.scale);
 }
 
 void EntityManager::CreateStars()

@@ -214,6 +214,12 @@ int Renderer::InitShaderLibrary()
 		std::string(instanced_alpha_shader_fragmentSrc)
 	);
 
+	// MeshType::ROUGH_MESH
+	s_ShaderLibrary.AddShader(
+		std::string(instanced_rough_shader_vertexSrc),
+		std::string(instanced_rough_shader_fragmentSrc)
+	);
+
 	// MeshType::MARKER_MESH
 	s_ShaderLibrary.AddShader(
 		std::string(instanced_marker_shader_vertexSrc),

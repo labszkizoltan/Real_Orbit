@@ -16,6 +16,7 @@
 #include <core/rendering/drawables/ColouredMesh.h>
 #include <core/rendering/drawables/BrightColouredMesh.h>
 #include <core/rendering/drawables/NormalMesh.h>
+#include <core/rendering/drawables/RoughMesh.h>
 #include <core/rendering/drawables/AlphaMesh.h>
 #include <core/rendering/drawables/MarkerMesh.h>
 #include <core/rendering/drawables/LetterMesh.h>
@@ -328,6 +329,19 @@ void SceneSerializer::InitMeshLibrary(const YAML::Node& data, MeshLibrary& mesh_
 			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
 			std::string texturePath = mesh["texture_file"].as<std::string>();
 			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<NormalMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath);
+
+			mesh_library.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
+			mesh_library.m_Meshes.push_back(mesh_ptr);
+			mesh_library.m_MeshTransforms.push_back(std::vector<TransformComponent>());
+			// mesh_library.m_StaticMeshTransforms.push_back(std::vector<TransformComponent>());
+		}
+		else if (type == MeshType::ROUGH_MESH)
+		{
+			std::string vertex_file = mesh["vertex_file"].as<std::string>();
+			OGLBufferData buffer_data = ParseVertexFile(vertex_file);
+			std::string texturePath = mesh["texture_file"].as<std::string>();
+			std::string normalMapPath = mesh["normal_map_file"].as<std::string>();
+			std::shared_ptr<Mesh> mesh_ptr = std::make_shared<RoughMesh>(buffer_data.vertex_data, buffer_data.index_data, texturePath, normalMapPath);
 
 			mesh_library.m_NameIndexLookup[mesh_name] = mesh_idx; mesh_idx++;
 			mesh_library.m_Meshes.push_back(mesh_ptr);
