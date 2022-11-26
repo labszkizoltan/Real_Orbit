@@ -31,7 +31,11 @@ const char* instanced_rough_shader_vertexSrc =
 
 "out vec2 texCoord; \n"
 "out vec3 lightCoordinates; \n"
-"out float light_normal_dot; \n"
+"out vec3 lightDirection; \n"
+
+"out vec3 normalSpace_x; \n"
+"out vec3 normalSpace_y; \n"
+"out vec3 normalSpace_z; \n"
 
 "void main()\n"
 "{\n"
@@ -48,7 +52,6 @@ const char* instanced_rough_shader_vertexSrc =
 
 "	float r = length(position_tmp); \n"
 "	float scaler = zoom_level / (sign(position_tmp[2]) * position_tmp[2]);\n"
-// "	float scaler = zoom_level / position_tmp[2];\n"
 
 "	gl_Position = vec4(\n"
 "		scaler * position_tmp.x / aspect_ratio, \n"
@@ -64,17 +67,21 @@ const char* instanced_rough_shader_vertexSrc =
 
 "	lightCoordinates = vec3(\n"
 "		atan(light_position_tmp.y, light_position_tmp.x)/(3.1415926535), \n" // this atan returns values between -pi and pi
-//"		2*theta/(3.1415926535)-1, \n"
 "		light_position_tmp.z/light_r, \n"
 "		2.0 * (light_r - r_min) / r_max - 1 \n"
-//"		atan(r)/(3.1415926535/2) \n" // this atan returns values between -pi/2 and pi/2
 "); \n"
 
 // lighting calculation
-"	vec3 lightDirection = light_location-position_abs; \n"
+"	lightDirection = light_location-position_abs; \n"
 "	lightDirection = lightDirection / length(lightDirection); \n"
-"	vec3 surfaceDirection = aSurfaceNormal[0] * aInstanceOrientation_1 + aSurfaceNormal[1] * aInstanceOrientation_2 + aSurfaceNormal[2] * aInstanceOrientation_3; \n"
-"	light_normal_dot = dot(lightDirection, surfaceDirection / length(surfaceDirection)); \n"
+"	normalSpace_x = cross(aInstanceOrientation_3, aSurfaceNormal); \n"
+"	normalSpace_x = normalSpace_x / length(normalSpace_x); \n"
+"	normalSpace_y = cross(aSurfaceNormal, normalSpace_x); \n"
+"	normalSpace_z = aSurfaceNormal; \n"
+
+"	normalSpace_x = normalSpace_x[0] * aInstanceOrientation_1 + normalSpace_x[1] * aInstanceOrientation_2 + normalSpace_x[2] * aInstanceOrientation_3; \n"
+"	normalSpace_y = normalSpace_y[0] * aInstanceOrientation_1 + normalSpace_y[1] * aInstanceOrientation_2 + normalSpace_y[2] * aInstanceOrientation_3; \n"
+"	normalSpace_z = normalSpace_z[0] * aInstanceOrientation_1 + normalSpace_z[1] * aInstanceOrientation_2 + normalSpace_z[2] * aInstanceOrientation_3; \n"
 
 "	texCoord = aTexCoord; \n"
 "}\0";
@@ -86,24 +93,32 @@ const char* instanced_rough_shader_fragmentSrc =
 "layout(location = 0) out vec4 FragColor; \n"
 "layout(location = 1) out vec4 BrightColor; \n"
 "in vec2 texCoord; \n"
+
 "in vec3 lightCoordinates; \n"
-"in float light_normal_dot; \n"
+"in vec3 lightDirection; \n"
+
+"in vec3 normalSpace_x; \n"
+"in vec3 normalSpace_y; \n"
+"in vec3 normalSpace_z; \n"
+
 "uniform sampler2D u_Textures[32]; \n"
 "uniform float alpha; \n"
 "void main()\n"
 "{\n"
 "	vec3 color = texture(u_Textures[0], texCoord).rgb; \n"
-"	vec3 normal_map_color = texture(u_Textures[13], texCoord).rgb - 0*vec3(128, 128, 128); \n"
+"	vec3 normal_map_color = (texture(u_Textures[13], texCoord).rgb - 0*vec3(128, 128, 128))/128; \n"
+"	vec3 surfaceNormal = 2*normal_map_color.x*normalSpace_x+2*normal_map_color.y*normalSpace_y+normal_map_color.z*normalSpace_z; \n"
+
+"	float light_normal_dot = dot(lightDirection, surfaceNormal / length(surfaceNormal)); \n"
+
 "	vec3 depthSample = texture(u_Textures[1], (lightCoordinates.xy+1)/2).rgb; \n"
 "	float closestDepth = depthSample.r; \n"
 "	float currentDepth = (lightCoordinates.z+1)/2; \n"
 "	float bias = 0.001; \n"
 "	float shadow = (currentDepth - bias) > closestDepth ? 1.0 : 0.0; \n"
+
 "	FragColor = light_normal_dot < 0.0 ? vec4(color/2, 1.0) : vec4(color*min((1-shadow/2),(1+light_normal_dot)/2), 1.0); \n"
-"	FragColor.rgb = FragColor.rgb * normal_map_color; \n"
-//"	FragColor = vec4(normal_map_color, 1.0); \n"
 "	BrightColor = vec4(0,0,0,0); \n"
-//"	BrightColor = vec4(texCoord,0,0); \n"
 "}\0";
 
 

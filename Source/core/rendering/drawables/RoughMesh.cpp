@@ -13,6 +13,20 @@ BufferLayout RoughMesh::s_VertexLayout = {
 		{ShaderDataType::Float2, "aTexCoord"}
 };
 
+// BufferLayout RoughMesh::s_VertexLayout = {
+// 		{ShaderDataType::Float3, "aPos"},
+// 		{ShaderDataType::Float3, "aSurfaceNormal_x"},
+// 		{ShaderDataType::Float3, "aSurfaceNormal_y"},
+// 		{ShaderDataType::Float3, "aSurfaceNormal_z"},
+// 		{ShaderDataType::Float2, "aTexCoord"}
+// };
+
+// BufferLayout RoughMesh::s_VertexLayout = {
+// 		{ShaderDataType::Float3, "aPos"},
+// 		{ShaderDataType::Mat3, "aSurfaceNormal"},
+// 		{ShaderDataType::Float2, "aTexCoord"}
+// };
+
 RoughMesh::RoughMesh()
 {
 }
