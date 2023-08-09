@@ -12,6 +12,8 @@ float Renderer::s_AspectRatio = 1.0f;
 std::shared_ptr<Framebuffer> Renderer::s_FrameBuffer = nullptr;
 std::shared_ptr<Framebuffer> Renderer::s_BlurBuffer = nullptr;
 std::shared_ptr<Framebuffer> Renderer::s_DepthBuffer = nullptr;
+std::shared_ptr<Framebuffer> Renderer::s_SpareBuffer1 = nullptr;
+std::shared_ptr<Framebuffer> Renderer::s_SpareBuffer2 = nullptr;
 ShaderLibrary Renderer::s_ShaderLibrary;
 
 Renderer::~Renderer()
@@ -43,6 +45,7 @@ int Renderer::Init()
 	float w = Application::Get().GetWindow().GetWidth();
 	float h = Application::Get().GetWindow().GetHeight();
 	SetAspectRatio(w / h);
+	SetWindowSize(w, h);
 
 	TransformComponent camera_trf;
 	camera_trf.location = Vec3D({ 0,0,-1 });
@@ -53,10 +56,15 @@ int Renderer::Init()
 	SetMinMaxRange(0.05f, 1000.0f);
 	s_ShaderLibrary.SetTextureSlots();
 
-	glViewport(0, 0, Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
-	Renderer::SetAspectRatio((float)Application::Get().GetWindow().GetWidth() / (float)Application::Get().GetWindow().GetHeight());
+	// glViewport(0, 0, Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight()); // wtf? w,h already exists
+	// Renderer::SetAspectRatio((float)Application::Get().GetWindow().GetWidth() / (float)Application::Get().GetWindow().GetHeight());
+	glViewport(0, 0, (int)w, (int)h);
+	Renderer::SetAspectRatio((float)w / (float)h);
 
 	glEnable(GL_DEPTH_TEST);
+	// glEnable(GL_CULL_FACE);
+	// glCullFace(GL_BACK);
+	// glFrontFace(GL_CCW);
 
 //	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -69,6 +77,11 @@ void Renderer::SetAspectRatio(float aspect_ratio)
 {
 	s_AspectRatio = aspect_ratio;
 	s_ShaderLibrary.SetAspectRatio(aspect_ratio);
+}
+
+void Renderer::SetWindowSize(float width, float height)
+{
+	s_ShaderLibrary.SetWindowSize(width, height);
 }
 
 void Renderer::SetCamera(TransformComponent camera_transform)
@@ -111,7 +124,32 @@ void Renderer::Refresh()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	s_BlurBuffer->Unbind();
 
+	/*
+	s_SpareBuffer1->Bind();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	s_SpareBuffer1->Unbind();
+
+	s_SpareBuffer2->Bind();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	s_SpareBuffer2->Unbind();
+	*/
 }
+
+void Renderer::RefreshOther()
+{
+	s_SpareBuffer1->Bind();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	s_SpareBuffer1->Unbind();
+
+	s_SpareBuffer2->Bind();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	s_SpareBuffer2->Unbind();
+}
+
 
 std::shared_ptr<Shader> Renderer::BindShader(MeshType meshType)
 {
@@ -139,6 +177,17 @@ std::shared_ptr<Texture> Renderer::GetBlurredAttachment()
 //	return nullptr;
 	return s_BlurBuffer->GetColorAttachment();
 }
+
+std::shared_ptr<Texture> Renderer::GetSpare1Attachment()
+{
+	return s_SpareBuffer1->GetColorAttachment();
+}
+
+std::shared_ptr<Texture> Renderer::GetSpare2Attachment()
+{
+	return s_SpareBuffer2->GetColorAttachment();
+}
+
 
 int Renderer::InitFramebuffers()
 {
@@ -177,6 +226,32 @@ int Renderer::InitFramebuffers()
 	s_BlurBuffer->GetDepthAttachment()->SetSlot(g_RendererBlurDepthSlot);
 	s_BlurBuffer->Unbind();
 
+	// Create the first spare framebuffer
+	FrameBufferSpecification spareSpec1;
+	spareSpec1.Width = Application::Get().GetWindow().GetWidth();
+	spareSpec1.Height = Application::Get().GetWindow().GetHeight();
+	spareSpec1.Samples = 1;
+	spareSpec1.HasDepthBuffer = true;
+	spareSpec1.ColourAttachmentCount = 1;
+	s_SpareBuffer1 = std::make_shared<Framebuffer>(spareSpec1); // the constructor automatically binds the framebuffer
+	s_SpareBuffer1->GetColorAttachment(0)->SetSlot(g_RendererSpareBufferSlot1);
+	// s_SpareBuffer1->GetColorAttachment(1)->SetSlot(g_RendererSpareBrightColAttchSlot1);
+	s_SpareBuffer1->GetDepthAttachment()->SetSlot(g_RendererSpareDepthBufferSlot1);
+	s_SpareBuffer1->Unbind();
+
+	// Create the second spare framebuffer
+	FrameBufferSpecification spareSpec2;
+	spareSpec2.Width = Application::Get().GetWindow().GetWidth();
+	spareSpec2.Height = Application::Get().GetWindow().GetHeight();
+	spareSpec2.Samples = 1;
+	spareSpec2.HasDepthBuffer = true;
+	spareSpec2.ColourAttachmentCount = 1;
+	s_SpareBuffer2 = std::make_shared<Framebuffer>(spareSpec2); // the constructor automatically binds the framebuffer
+	s_SpareBuffer2->GetColorAttachment(0)->SetSlot(g_RendererSpareBufferSlot2);
+	s_SpareBuffer2->GetDepthAttachment()->SetSlot(g_RendererSpareDepthBufferSlot2);
+	s_SpareBuffer2->Unbind();
+
+
 	// frame/depth buffer construction somehow invalidates the texture binding,
 	// so Im doing it after both framebuffers are done
 	s_DepthBuffer->GetDepthAttachment()->Bind();
@@ -185,6 +260,12 @@ int Renderer::InitFramebuffers()
 	s_FrameBuffer->GetDepthAttachment()->Bind();
 	s_BlurBuffer->GetColorAttachment(0)->Bind();
 	s_BlurBuffer->GetDepthAttachment()->Bind();
+
+	s_SpareBuffer1->GetColorAttachment(0)->Bind();
+	// s_SpareBuffer1->GetColorAttachment(1)->Bind();
+	s_SpareBuffer1->GetDepthAttachment()->Bind();
+	s_SpareBuffer2->GetColorAttachment(0)->Bind();
+	s_SpareBuffer2->GetDepthAttachment()->Bind();
 
 	return 1;
 }

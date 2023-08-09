@@ -2,7 +2,6 @@
 #ifndef INSTANCED_NORMAL_SHADER_H
 #define INSTANCED_NORMAL_SHADER_H
 
-
 // vertex shader:
 const char* instanced_normal_shader_vertexSrc =
 "#version 460 core\n"
@@ -32,6 +31,7 @@ const char* instanced_normal_shader_vertexSrc =
 "out vec2 texCoord; \n"
 "out vec3 lightCoordinates; \n"
 "out float light_normal_dot; \n"
+"out float specular; \n"
 
 "void main()\n"
 "{\n"
@@ -40,11 +40,13 @@ const char* instanced_normal_shader_vertexSrc =
 
 // point coordinate in the observers coordinate system
 "	vec3 position_tmp = position_abs - camera_location; \n"
+"	vec3 viewDir = normalize(position_tmp); \n"
 "	position_tmp = vec3(\n"
 "		dot(position_tmp, camera_orientation[0]), \n"
 "		dot(position_tmp, camera_orientation[1]), \n"
 "		dot(position_tmp, camera_orientation[2])\n"
 "	); \n"
+
 
 "	float r = length(position_tmp); \n"
 "	float scaler = zoom_level / (sign(position_tmp[2]) * position_tmp[2]);\n"
@@ -72,9 +74,16 @@ const char* instanced_normal_shader_vertexSrc =
 
 // lighting calculation
 "	vec3 lightDirection = light_location-position_abs; \n"
+//"	vec3 lightDirection = vec3(0, 1, 0); \n"
 "	lightDirection = lightDirection / length(lightDirection); \n"
 "	vec3 surfaceDirection = aSurfaceNormal[0] * aInstanceOrientation_1 + aSurfaceNormal[1] * aInstanceOrientation_2 + aSurfaceNormal[2] * aInstanceOrientation_3; \n"
 "	light_normal_dot = dot(lightDirection, surfaceDirection / length(surfaceDirection)); \n"
+
+"	vec3 lightDir = normalize(position_abs-lightCoordinates); \n"
+//"	vec3 lightDir = vec3(0, 1, 0); \n"
+"	vec3 reflectionDir = reflect(lightDir, surfaceDirection); \n"
+"	specular = pow(max(dot(viewDir, reflectionDir), 0.0), 8.4); \n"
+//"	specular = pow(abs(dot(viewDir, reflectionDir)), 1.8); \n"
 
 "	texCoord = aTexCoord; \n"
 "}\0";
@@ -88,8 +97,12 @@ const char* instanced_normal_shader_fragmentSrc =
 "in vec2 texCoord; \n"
 "in vec3 lightCoordinates; \n"
 "in float light_normal_dot; \n"
+"in float specular; \n"
 "uniform sampler2D u_Textures[32]; \n"
 "uniform float alpha; \n"
+"uniform float screenPixelW; \n"
+"uniform float screenPixelH; \n"
+
 "void main()\n"
 "{\n"
 "	vec3 color = texture(u_Textures[0], texCoord).rgb; \n"
@@ -99,6 +112,11 @@ const char* instanced_normal_shader_fragmentSrc =
 "	float bias = 0.001; \n"
 "	float shadow = (currentDepth - bias) > closestDepth ? 1.0 : 0.0; \n"
 "	FragColor = light_normal_dot < 0.0 ? vec4(color/2, 1.0) : vec4(color*min((1-shadow/2),(1+light_normal_dot)/2), 1.0); \n"
+"	FragColor = FragColor*(0.8*specular+0.2); \n"
+
+//"	vec3 otherColor = texture(u_Textures[14], vec2(gl_FragCoord.x/screenPixelW, gl_FragCoord.y/screenPixelH)).rgb; \n"
+//"	FragColor = vec4(otherColor.x, otherColor.y, otherColor.z, 1); \n"
+
 "	BrightColor = vec4(0,0,0,0); \n"
 //"	BrightColor = vec4(texCoord,0,0); \n"
 "}\0";

@@ -107,7 +107,7 @@ const char* instanced_rough_shader_fragmentSrc =
 "{\n"
 "	vec3 color = texture(u_Textures[0], texCoord).rgb; \n"
 "	vec3 normal_map_color = (texture(u_Textures[13], texCoord).rgb - 0*vec3(128, 128, 128))/128; \n"
-"	vec3 surfaceNormal = 2*normal_map_color.x*normalSpace_x+2*normal_map_color.y*normalSpace_y+normal_map_color.z*normalSpace_z; \n"
+"	vec3 surfaceNormal = 4*normal_map_color.x*normalSpace_x+4*normal_map_color.y*normalSpace_y+normal_map_color.z*normalSpace_z; \n"
 
 "	float light_normal_dot = dot(lightDirection, surfaceNormal / length(surfaceNormal)); \n"
 
@@ -120,15 +120,6 @@ const char* instanced_rough_shader_fragmentSrc =
 "	FragColor = light_normal_dot < 0.0 ? vec4(color/2, 1.0) : vec4(color*min((1-shadow/2),(1+light_normal_dot)/2), 1.0); \n"
 "	BrightColor = vec4(0,0,0,0); \n"
 "}\0";
-
-
-
-
-
-
-
-
-
 
 
 #endif // INSTANCED_ROUGH_SHADER_H

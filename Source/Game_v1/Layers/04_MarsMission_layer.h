@@ -97,7 +97,11 @@ private:
 
 	std::shared_ptr<Scene> m_Scene = nullptr;
 	SceneRenderer m_SceneRenderer;
+	std::shared_ptr<Scene> m_OtherScene = nullptr;
+	SceneRenderer m_OtherSceneRenderer;
 	bool m_InFocus = true;
+
+	int m_DisplayedSlot = 0;
 
 	Player m_Player;
 	EntityManager m_EntityManager;

@@ -17,6 +17,7 @@ public:
 	void AddShader(const std::string& vertexSrc, const std::string& fragmentSrc);
 
 	void SetAspectRatio(float aspectRatio);
+	void SetWindowSize(float width, float height);
 	void SetCamera(TransformComponent camera_transform);
 	void SetZoomLevel(float zoom_level);
 	void SetLightPosition(Vec3D light_pos);

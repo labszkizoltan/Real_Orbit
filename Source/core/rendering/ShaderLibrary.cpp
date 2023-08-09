@@ -35,6 +35,17 @@ void ShaderLibrary::SetAspectRatio(float aspectRatio)
 	m_LastBoundShader = m_Shaders[m_Shaders.size() - 1];
 }
 
+void ShaderLibrary::SetWindowSize(float width, float height)
+{
+	for (int i = 0; i < m_Shaders.size(); i++)
+	{
+		m_Shaders[i]->Bind();
+		m_Shaders[i]->UploadUniformFloat("screenPixelW", width);
+		m_Shaders[i]->UploadUniformFloat("screenPixelH", height);
+	}
+	m_LastBoundShader = m_Shaders[m_Shaders.size() - 1];
+}
+
 void ShaderLibrary::SetCamera(TransformComponent camera_transform)
 {
 	for (int i = 0; i < m_Shaders.size(); i++)

@@ -22,6 +22,12 @@ const int g_RendererBrightColAttchSlot = 9;
 const int g_RendererDepthAttchSlot = 10;
 const int g_RendererBlurredSlot = 11;
 const int g_RendererBlurDepthSlot = 12; // this in not used, but the framebuffer class has a depth buffer
+const int g_RendererSpareBufferSlot1 = 14;
+const int g_RendererSpareDepthBufferSlot1 = 15;
+const int g_RendererSpareBrightColAttchSlot1 = 16;
+
+const int g_RendererSpareBufferSlot2 = 17;
+const int g_RendererSpareDepthBufferSlot2 = 18;
 
 
 #endif // GLOBAL_CONSTANTS_H

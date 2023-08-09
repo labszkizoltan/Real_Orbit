@@ -14,6 +14,11 @@ namespace RORNG
         return 0.0f;
     }
 
+    Vec3D rvec3()
+    {
+        return 2.0f * Vec3D(runif(), runif(), runif()) - Vec3D(1, 1, 1);
+    }
+
 }
 
 

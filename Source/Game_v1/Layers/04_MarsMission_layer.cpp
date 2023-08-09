@@ -43,6 +43,11 @@ void MarsMission_layer::OnAttach()
 	serializer.DeSerialize_file("assets/scenes/04_MarsMissionLayer2.yaml");
 	AddWaypoints();
 
+	m_OtherScene = std::make_shared<Scene>();
+	SceneSerializer otherSerializer(m_OtherScene);
+	otherSerializer.DeSerialize_file("assets/scenes/05_SimpleScene.yaml");
+	m_OtherSceneRenderer.SetScene(m_OtherScene);
+
 	m_EntityManager.SetScene(m_Scene.get());
 
 	m_SceneRenderer.SetScene(m_Scene);
@@ -64,8 +69,9 @@ void MarsMission_layer::OnAttach()
 	m_Scene->m_Registry.on_destroy<LoosingComponent>().connect<&MarsMission_layer::OnLoosingComponentDestroyed>(this);
 
 	
-	//	m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
-	m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
+	// m_FbDisplay.SetTexture(Renderer::GetColorAttachment());
+	// m_FbDisplay.SetTexture(Renderer::GetBlurredAttachment());
+	m_FbDisplay.SetTexture(Renderer::GetSpare1Attachment());
 
 	m_ImgProcessor = std::make_unique<ImageProcessor>();
 	m_ImgProcessor->SetMipMapLevel(4);
@@ -153,6 +159,17 @@ void MarsMission_layer::OnUpdate(Timestep ts)
 		return;
 	}
 
+	// draw the other scene:
+	Renderer::RefreshOther();
+	m_OtherSceneRenderer.RenderScene();
+	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
+	Renderer::s_SpareBuffer1->Bind();
+	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
+	Renderer::s_SpareBuffer1->Unbind();
+	
+	// m_FbDisplay.SetDisplayedSlot(g_RendererSpareBufferSlot1);
+	// m_FbDisplay.SetDisplayedSlot(m_DisplayedSlot);
+	// m_FbDisplay.Draw();
 
 	// if the update-render order is swapped, something is un-initialized and the program fails at alpha mesh rendering
 	PartialUpdate(m_SimulationSpeed * ts);
@@ -161,7 +178,7 @@ void MarsMission_layer::OnUpdate(Timestep ts)
 
 	m_ImgProcessor->Blur(g_RendererBrightColAttchSlot, Renderer::s_BlurBuffer);
 
-	//	m_FbDisplay.Draw();
+	// m_FbDisplay.Draw();
 	m_FbDisplay.DrawCombined(g_RendererColorAttchSlot, g_RendererBlurredSlot);
 
 	GameApplication::Game_DrawText("Elapsed Game Time - " + std::to_string((int)(m_ElapsedTime / 1000.0f)), Vec3D(10, windowHeight - 70, 0), Vec3D(0.3f, 0.9f, 0.5f), 0.5f);
@@ -425,6 +442,8 @@ bool MarsMission_layer::OnKeyPressed(Event& e)
 	}
 	else if (event.key.code == sf::Keyboard::Key::Tab)
 		m_LockedTarget = m_PlayersTarget;
+	else if (event.key.code == sf::Keyboard::Key::N)
+		m_DisplayedSlot = (m_DisplayedSlot + 1) % 17;
 
 	return false;
 }
@@ -472,6 +491,7 @@ bool MarsMission_layer::OnMouseMoved(Event& e)
 	if (m_InFocus)
 	{
 		TransformComponent& cam_trf = m_Scene->GetCamera();
+		TransformComponent& other_cam_trf = m_OtherScene->GetCamera();
 		static const float r_min_square = 50.0f * 50.0f;
 
 		int dx = event.mouseMove.x - center_x;
@@ -483,6 +503,7 @@ bool MarsMission_layer::OnMouseMoved(Event& e)
 		Mat_3D rotationMatrix = Rotation(0.005f * moveLength / m_ZoomLevel, rotationAxis);
 
 		cam_trf.orientation = rotationMatrix * cam_trf.orientation;
+		other_cam_trf.orientation = rotationMatrix * other_cam_trf.orientation;
 
 		// re-center mouse
 		static int center_x = Application::Get().GetWindow().GetWidth() / 2;
@@ -555,11 +576,13 @@ void MarsMission_layer::PartialUpdate(Timestep ts)
 void MarsMission_layer::HandleUserInput(Timestep ts)
 {
 	TransformComponent& cam_trf = m_Scene->GetCamera();
+	TransformComponent& other_cam_trf = m_OtherScene->GetCamera();
 	//	static TransformComponent cam_trf = TransformComponent();
 	//	TransformComponent& cam_trf = m_Camera;
 
 	// m_Player.m_Transform = cam_trf;
 	cam_trf = m_Player.m_Transform;
+	other_cam_trf = m_Player.m_Transform;
 
 	// static float player_acceleration = 0.000003f;
 	float player_acceleration = 0.000003f;
@@ -825,6 +848,13 @@ void MarsMission_layer::UpdateScene(Timestep ts)
 						targetHP.HP -= 10.0f;
 						missileTrf.scale /= 8;
 
+						if (RORNG::runif() < 0.1f)
+						{
+							TransformComponent trf_tmp = targetLoc;
+							trf_tmp.location = (hit_location + targetLoc.location) / 2.0f;
+							trf_tmp.scale = 0.1f; // 50 * missileTrf.scale;
+							m_EntityManager.SpawnExplosion(trf_tmp, targetVelocity, ColourComponent(0.1f + float(rand() % 1000) / 5000.0f, 0.1f + float(rand() % 1000) / 5000.0f, 0.8f, 0.6f));
+						}
 						for (int k = 0; k < 7; k++)
 						{
 							m_EntityManager.SpawnDebris(hit_location, targetVelocity.velocity, 0.05, 0.0f);
@@ -1187,15 +1217,26 @@ void MarsMission_layer::UpdateControlPoints(Timestep ts)
 {
 	static std::vector<entt::entity> cp_vicinity_0;
 	static std::vector<entt::entity> cp_vicinity_1;
+	static std::vector<entt::entity> team_g_cps; team_g_cps.clear();
+	static std::vector<entt::entity> team_r_cps; team_r_cps.clear();
 	static Box3D box0; box0.center = Vec3D(); box0.radius = Vec3D();
 
 	auto controlPoints = m_Scene->m_Registry.view<ControlPointComponent>();
+	for (auto cp : controlPoints)
+	{
+		ControlPointComponent& cp_comp = m_Scene->m_Registry.get<ControlPointComponent>(cp);
+		if (cp_comp.colour.g == 1.0f) { team_g_cps.push_back(cp); }
+		else if (cp_comp.colour.r == 1.0f) { team_r_cps.push_back(cp); }
+	}
 	for (auto cp : controlPoints)
 	{
 		cp_vicinity_0.clear();
 		cp_vicinity_1.clear();
 
 		ControlPointComponent& cp_comp = m_Scene->m_Registry.get<ControlPointComponent>(cp);
+		char team_indicator = 'o';
+		if (cp_comp.colour.g == 1.0f) { team_indicator = 'g'; }
+		else if (cp_comp.colour.r == 1.0f) { team_indicator = 'r'; }
 
 		box0.center = cp_comp.location;
 		box0.radius = Vec3D(cp_comp.radius, cp_comp.radius, cp_comp.radius);
@@ -1205,14 +1246,20 @@ void MarsMission_layer::UpdateControlPoints(Timestep ts)
 		m_Team1_Tree->GetActiveTree()->QueryRange(box0, cp_vicinity_1, 0);
 		int team1_count = cp_vicinity_1.size();
 
+		// Send ships to another cp
+		// Currently not simmetric behaviour, green will go to random red command posts, while red goes to a default
+		// hardcoded location. Both teams should have a default location when there are no mode enemy cp-s left.
 		const int launch_limit = 30;
-		if (team0_count > launch_limit && team1_count == 0)
+		if (team0_count > launch_limit && team1_count == 0 && team_r_cps.size() > 0)
 		{
+			int destination_idx = rand() % team_r_cps.size();
+			ControlPointComponent& destination = m_Scene->m_Registry.get<ControlPointComponent>(team_r_cps[destination_idx]);
 			for (auto& entity_handle : cp_vicinity_0)
 			{
 				Entity entity(entity_handle, m_Scene.get());
 				MovementControllComponent mcc;
-				mcc.waypoints.push_back(Vec3D(-4700, 0, 0)+100*Vec3D(RORNG::runif() - 0.5f, RORNG::runif() - 0.5f, RORNG::runif()-0.5f));
+				// mcc.waypoints.push_back(Vec3D(-4700, 0, 0) + 100 * Vec3D(RORNG::runif() - 0.5f, RORNG::runif() - 0.5f, RORNG::runif() - 0.5f));
+				mcc.waypoints.push_back(destination.location + (destination.radius/2) * RORNG::rvec3());
 				if(!entity.HasComponent<MovementControllComponent>()) { entity.AddComponent<MovementControllComponent>(mcc); }
 			}
 		}
@@ -1228,8 +1275,7 @@ void MarsMission_layer::UpdateControlPoints(Timestep ts)
 			}
 		}
 
-
-		// set colour
+		// set colour: team0 - green, team1 - red
 		if (team0_count < team1_count)
 		{
 			cp_comp.colour.r = 1.0f;

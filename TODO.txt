@@ -116,4 +116,11 @@ the two oct trees can be swapped and the building procedure can be started again
 - Redesign DualOctTree update procedure and make the private members private again
 
 
+New ideas and possible things to implement in 2023:
+- Implement beam weapons
+- Various weapon components (e.g. add railgun, that shoots a bigger and faster bullet than the regular gun)
+
+
+
+
 
